@@ -1,108 +1,244 @@
-import React from "react";
+"use client";
+
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import assets from "../assets/assets";
 
 const Navbar = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
+  const [isExploreOpen, setIsExploreOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isSidebarOpen ? "hidden" : "";
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [isSidebarOpen]);
+
   return (
-    <nav className="h-[70px] relative w-full px-6 md:px-16 lg:px-24 xl:px-32 flex items-center justify-between z-20 bg-white text-gray-700 shadow-[0px_4px_25px_0px_#0000000D] transition-all">
-      <a href="https://prebuiltui.com" className="text-indigo-600">
-        <svg
-          width="157"
-          height="40"
-          viewBox="0 0 157 40"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M47.904 28.28q-1.54 0-2.744-.644a5.1 5.1 0 0 1-1.904-1.82q-.672-1.148-.672-2.604v-3.864q0-1.456.7-2.604a4.9 4.9 0 0 1 1.904-1.792q1.204-.672 2.716-.672 1.82 0 3.276.952a6.44 6.44 0 0 1 2.324 2.52q.868 1.567.868 3.556 0 1.96-.868 3.556a6.5 6.5 0 0 1-2.324 2.492q-1.456.924-3.276.924m-7.196 5.32V14.56h3.08v3.612l-.532 3.276.532 3.248V33.6zm6.692-8.232q1.12 0 1.96-.504a3.6 3.6 0 0 0 1.344-1.456q.504-.924.504-2.128t-.504-2.128a3.43 3.43 0 0 0-1.344-1.428q-.84-.532-1.96-.532t-1.988.532a3.43 3.43 0 0 0-1.344 1.428q-.476.924-.476 2.128t.476 2.128a3.6 3.6 0 0 0 1.344 1.456q.868.504 1.988.504M56.95 28V14.56h3.08V28zm3.08-7.476-1.064-.532q0-2.548 1.12-4.116 1.148-1.596 3.444-1.596 1.008 0 1.82.364.812.365 1.512 1.176l-2.016 2.072a2.1 2.1 0 0 0-.812-.56 3 3 0 0 0-1.036-.168q-1.287 0-2.128.812-.84.811-.84 2.548m14.156 7.756q-2.016 0-3.64-.896a7 7 0 0 1-2.548-2.52q-.924-1.596-.924-3.584t.924-3.556a6.87 6.87 0 0 1 2.492-2.52q1.596-.924 3.528-.924 1.876 0 3.304.868a6.05 6.05 0 0 1 2.268 2.38q.84 1.512.84 3.444 0 .336-.056.7a7 7 0 0 1-.112.756H69.23v-2.52h9.436l-1.148 1.008q-.056-1.232-.476-2.072a3 3 0 0 0-1.204-1.288q-.756-.448-1.876-.448-1.176 0-2.044.504a3.43 3.43 0 0 0-1.344 1.428q-.476.896-.476 2.156t.504 2.212 1.428 1.484q.924.504 2.128.504 1.037 0 1.904-.364a4 4 0 0 0 1.512-1.064l1.96 1.988a6.3 6.3 0 0 1-2.38 1.736 7.6 7.6 0 0 1-2.968.588m15.91 0q-1.54 0-2.745-.644a5.1 5.1 0 0 1-1.904-1.82q-.672-1.148-.672-2.604v-3.864q0-1.456.7-2.604a4.9 4.9 0 0 1 1.904-1.792q1.204-.672 2.716-.672 1.821 0 3.276.952a6.44 6.44 0 0 1 2.324 2.52q.869 1.567.868 3.556 0 1.96-.868 3.556a6.5 6.5 0 0 1-2.324 2.492q-1.455.924-3.276.924M82.898 28V7.84h3.08v10.024l-.532 3.248.532 3.276V28zm6.692-2.632q1.12 0 1.96-.504a3.6 3.6 0 0 0 1.344-1.456q.504-.924.504-2.128t-.504-2.128a3.43 3.43 0 0 0-1.344-1.428q-.84-.532-1.96-.532t-1.988.532a3.43 3.43 0 0 0-1.344 1.428q-.476.924-.476 2.128.001 1.204.476 2.128a3.6 3.6 0 0 0 1.344 1.456q.87.504 1.988.504m15.067 2.912q-1.708 0-3.052-.756a5.5 5.5 0 0 1-2.072-2.072q-.728-1.344-.728-3.08V14.56h3.08v7.672q0 .98.308 1.68.336.672.952 1.036.644.364 1.512.364 1.344 0 2.044-.784.728-.812.728-2.296V14.56h3.08v7.812q0 1.764-.756 3.108a5.3 5.3 0 0 1-2.044 2.072q-1.317.728-3.052.728m8.976-.28V14.56h3.08V28zm1.54-15.904q-.783 0-1.316-.532-.504-.532-.504-1.316t.504-1.316a1.8 1.8 0 0 1 1.316-.532q.813 0 1.316.532t.504 1.316q0 .784-.504 1.316t-1.316.532M120.169 28V7.84h3.08V28zm8.552 0V8.96h3.08V28zm-3.22-10.64v-2.8h9.52v2.8zm17.274 10.92q-1.708 0-3.052-.756a5.5 5.5 0 0 1-2.072-2.072q-.728-1.344-.728-3.08V14.56h3.08v7.672q0 .98.308 1.68.336.672.952 1.036.643.364 1.512.364 1.344 0 2.044-.784.728-.812.728-2.296V14.56h3.08v7.812q0 1.764-.756 3.108a5.3 5.3 0 0 1-2.044 2.072q-1.317.728-3.052.728m8.977-.28V14.56h3.08V28zm1.54-15.904q-.785 0-1.316-.532-.504-.532-.504-1.316t.504-1.316a1.8 1.8 0 0 1 1.316-.532q.812 0 1.316.532t.504 1.316-.504 1.316-1.316.532"
-            fill="currentColor"
-          />
-          <path
-            d="m8.75 11.3 6.75 3.884 6.75-3.885M8.75 34.58v-7.755L2 22.939m27 0-6.75 3.885v7.754M2.405 15.408 15.5 22.954l13.095-7.546M15.5 38V22.939M29 28.915V16.962a2.98 2.98 0 0 0-1.5-2.585L17 8.4a3.01 3.01 0 0 0-3 0L3.5 14.377A3 3 0 0 0 2 16.962v11.953A2.98 2.98 0 0 0 3.5 31.5L14 37.477a3.01 3.01 0 0 0 3 0L27.5 31.5a3 3 0 0 0 1.5-2.585"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </a>
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D]">
+      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-gray-700">
+        <Image
+          src={assets.logo2}
+          alt="MyTutor logo"
+          className="w-[132px] sm:w-[160px] md:w-[180px] h-auto"
+          priority
+        />
 
-      <ul className="md:flex hidden items-center gap-10">
-        <li>
-          <a className="hover:text-gray-500/80 transition" href="#">
-            Home
-          </a>
-        </li>
-        <li>
-          <a className="hover:text-gray-500/80 transition" href="#">
-            Services
-          </a>
-        </li>
-        <li>
-          <a className="hover:text-gray-500/80 transition" href="#">
-            Portfolio
-          </a>
-        </li>
-        <li>
-          <a className="hover:text-gray-500/80 transition" href="#">
-            Pricing
-          </a>
-        </li>
-      </ul>
-
-      <button
-        type="button"
-        className="bg-white text-gray-600 border border-gray-300 md:inline hidden text-sm hover:bg-gray-50 active:scale-95 transition-all w-40 h-11 rounded-full"
-      >
-        Get started
-      </button>
-
-      <button
-        aria-label="menu-btn"
-        type="button"
-        className="menu-btn inline-block md:hidden active:scale-90 transition"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
-          viewBox="0 0 30 30"
-          fill="#000"
-        >
-          <path d="M 3 7 A 1.0001 1.0001 0 1 0 3 9 L 27 9 A 1.0001 1.0001 0 1 0 27 7 L 3 7 z M 3 14 A 1.0001 1.0001 0 1 0 3 16 L 27 16 A 1.0001 1.0001 0 1 0 27 14 L 3 14 z M 3 21 A 1.0001 1.0001 0 1 0 3 23 L 27 23 A 1.0001 1.0001 0 1 0 27 21 L 3 21 z"></path>
-        </svg>
-      </button>
-
-      <div className="mobile-menu absolute top-[70px] left-0 w-full bg-white p-6 hidden md:hidden">
-        <ul className="flex flex-col space-y-4 text-lg">
+        <ul className="hidden md:flex items-center gap-6 lg:gap-10 text-[15px]">
           <li>
-            <a href="#" className="text-sm">
-              Home
+            <a
+              href="#"
+              className="flex items-center gap-2 hover:text-cyan-700 transition-colors"
+            >
+              <Image src={assets.home} alt="Home" className="w-5 h-5" />
+              <span>Home</span>
             </a>
           </li>
           <li>
-            <a href="#" className="text-sm">
-              Services
+            <a
+              href="#"
+              className="flex items-center gap-2 text-cyan-700 border-b-2 border-cyan-500 pb-1 font-semibold"
+            >
+              <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
+              <span>Tutor</span>
             </a>
           </li>
           <li>
-            <a href="#" className="text-sm">
-              Portfolio
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm">
-              Pricing
+            <a
+              href="#"
+              className="flex items-center gap-2 hover:text-cyan-700 transition-colors"
+            >
+              <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
+              <span>Bookings</span>
             </a>
           </li>
         </ul>
 
+        <div className="hidden md:flex items-center gap-4">
+          <button
+            type="button"
+            aria-label="Open profile sidebar"
+            onClick={() => setIsSidebarOpen(true)}
+            className="rounded-full active:scale-95 transition"
+          >
+            <Image
+              src={assets.mehehe}
+              alt="Foto profil"
+              className="w-11 h-11 rounded-full object-cover border-2 border-cyan-600"
+            />
+          </button>
+        </div>
+
         <button
+          aria-label="Open menu"
           type="button"
-          className="bg-white text-gray-600 border border-gray-300 mt-6 text-sm hover:bg-gray-50 active:scale-95 transition-all w-40 h-11 rounded-full"
+          onClick={() => setIsSidebarOpen(true)}
+          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-700 active:scale-95 transition"
         >
-          Get started
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
         </button>
-      </div>
-    </nav>
+      </nav>
+
+      <div
+        className={`fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 ${
+          isSidebarOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-[84%] max-w-[340px] bg-white border-r border-gray-200 shadow-2xl transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="h-[72px] px-4 flex items-center justify-between border-b border-gray-100">
+          <Image
+            src={assets.logo2}
+            alt="MyTutor logo"
+            className="w-[130px] h-auto"
+          />
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setIsSidebarOpen(false)}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full text-gray-500 hover:text-gray-800"
+          >
+            x
+          </button>
+        </div>
+
+        <div className="p-5">
+          <div className="flex items-center gap-3 pb-5 border-b border-gray-100">
+            <Image
+              src={assets.mehehe}
+              alt="Foto profil"
+              className="w-14 h-14 rounded-full object-cover border-2 border-cyan-600"
+            />
+            <div>
+              <p className="text-sm text-gray-500">Sudah login</p>
+              <p className="text-base font-bold text-cyan-700">Mwehehehe</p>
+            </div>
+          </div>
+
+          <ul className="mt-5 space-y-1 text-[16px]">
+            <li>
+              <a
+                href="#"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-cyan-50 text-cyan-700 font-semibold"
+              >
+                <Image src={assets.home} alt="Home" className="w-5 h-5" />
+                <span>Home</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
+                <span>Tutor</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
+                <span>Status Booking</span>
+              </a>
+            </li>
+            <li>
+              <button
+                type="button"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50"
+                onClick={() => setIsBrowseOpen((prev) => !prev)}
+              >
+                <span>Browse categories</span>
+                <span>{isBrowseOpen ? "-" : "+"}</span>
+              </button>
+              {isBrowseOpen && (
+                <div className="pl-6 pr-3 pb-2 text-sm text-gray-600 space-y-1">
+                  <a href="#" className="block py-1">
+                    Mathematics
+                  </a>
+                  <a href="#" className="block py-1">
+                    Science
+                  </a>
+                  <a href="#" className="block py-1">
+                    Language
+                  </a>
+                </div>
+              )}
+            </li>
+            <li>
+              <button
+                type="button"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50"
+                onClick={() => setIsExploreOpen((prev) => !prev)}
+              >
+                <span>Explore</span>
+                <span>{isExploreOpen ? "-" : "+"}</span>
+              </button>
+              {isExploreOpen && (
+                <div className="pl-6 pr-3 pb-2 text-sm text-gray-600 space-y-1">
+                  <a href="#" className="block py-1">
+                    Promo
+                  </a>
+                  <a href="#" className="block py-1">
+                    Top tutor
+                  </a>
+                </div>
+              )}
+            </li>
+            <li>
+              <a
+                href="#"
+                className="w-full block px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                Daftar sebagai tutor
+              </a>
+            </li>
+            <li>
+              <button
+                type="button"
+                className="w-full text-left px-3 py-2 rounded-lg text-red-500 font-semibold hover:bg-red-50"
+              >
+                Sign out
+              </button>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </header>
   );
 };
 
