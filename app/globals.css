@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --ungugelap : #5D5A88;
-  --putih : #FFFFFF;
-  --gelap : #242731;
-  --ijo1 : #71c065;
-  --ijo2 : #b6f5af;
+  /* Warna utama dari gambar */
+  --gelap: #242731;     /* Hitam/Abu gelap */
+  --putih: #FFFFFF;     /* Putih bersih */
+  --biru: #008AB4;      /* Biru (Primary/Brand) */
+  --merah: #FC2428;     /* Merah (Error/Danger) */
+  --ijo1: #71C065;      /* Hijau (Success/Verified) */
+  --kuning: #E4C813;    /* Kuning (Warning/Rating) */
 }
 
 html {

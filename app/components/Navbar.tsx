@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import assets from "../assets/assets";
+import { assets } from "../assets/assets";
 
 const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,8 +27,8 @@ const Navbar = () => {
   }, [isSidebarOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D]">
-      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-gray-700">
+    <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D]">
+      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]">
         <Image
           src={assets.logo2}
           alt="MyTutor logo"
@@ -40,7 +40,7 @@ const Navbar = () => {
           <li>
             <a
               href="#"
-              className="flex items-center gap-2 hover:text-cyan-700 transition-colors"
+              className="flex items-center gap-2 hover:text-[var(--biru)] transition-colors"
             >
               <Image src={assets.home} alt="Home" className="w-5 h-5" />
               <span>Home</span>
@@ -49,7 +49,7 @@ const Navbar = () => {
           <li>
             <a
               href="#"
-              className="flex items-center gap-2 text-cyan-700 border-b-2 border-cyan-500 pb-1 font-semibold"
+              className="flex items-center gap-2 text-[var(--biru)] border-b-2 border-[var(--biru)] pb-1 font-semibold"
             >
               <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
               <span>Tutor</span>
@@ -58,7 +58,7 @@ const Navbar = () => {
           <li>
             <a
               href="#"
-              className="flex items-center gap-2 hover:text-cyan-700 transition-colors"
+              className="flex items-center gap-2 hover:text-[var(--biru)] transition-colors"
             >
               <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
               <span>Bookings</span>
@@ -76,7 +76,7 @@ const Navbar = () => {
             <Image
               src={assets.mehehe}
               alt="Foto profil"
-              className="w-11 h-11 rounded-full object-cover border-2 border-cyan-600"
+              className="w-11 h-11 rounded-full object-cover border-2 border-[var(--biru)]"
             />
           </button>
         </div>
@@ -85,7 +85,7 @@ const Navbar = () => {
           aria-label="Open menu"
           type="button"
           onClick={() => setIsSidebarOpen(true)}
-          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-700 active:scale-95 transition"
+          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-[var(--gelap)]/20 text-[var(--gelap)] active:scale-95 transition"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@ const Navbar = () => {
       </nav>
 
       <div
-        className={`fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 bg-[var(--gelap)]/30 transition-opacity duration-300 ${
           isSidebarOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -115,11 +115,11 @@ const Navbar = () => {
       />
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-screen w-[84%] max-w-[340px] bg-white border-r border-gray-200 shadow-2xl transition-transform duration-300 ${
+        className={`fixed top-0 left-0 z-50 h-screen w-[84%] max-w-[340px] bg-[var(--putih)] border-r border-[var(--gelap)]/15 shadow-2xl transition-transform duration-300 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-[72px] px-4 flex items-center justify-between border-b border-gray-100">
+        <div className="h-[72px] px-4 flex items-center justify-between border-b border-[var(--gelap)]/10">
           <Image
             src={assets.logo2}
             alt="MyTutor logo"
@@ -129,22 +129,24 @@ const Navbar = () => {
             type="button"
             aria-label="Close menu"
             onClick={() => setIsSidebarOpen(false)}
-            className="w-9 h-9 inline-flex items-center justify-center rounded-full text-gray-500 hover:text-gray-800"
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full text-[var(--gelap)]/65 hover:text-[var(--gelap)]"
           >
             x
           </button>
         </div>
 
         <div className="p-5">
-          <div className="flex items-center gap-3 pb-5 border-b border-gray-100">
+          <div className="flex items-center gap-3 pb-5 border-b border-[var(--gelap)]/10">
             <Image
               src={assets.mehehe}
               alt="Foto profil"
-              className="w-14 h-14 rounded-full object-cover border-2 border-cyan-600"
+              className="w-14 h-14 rounded-full object-cover border-2 border-[var(--biru)]"
             />
             <div>
-              <p className="text-sm text-gray-500">Sudah login</p>
-              <p className="text-base font-bold text-cyan-700">Mwehehehe</p>
+              <p className="text-sm text-[var(--gelap)]/60">Sudah login</p>
+              <p className="text-base font-bold text-[var(--biru)]">
+                Mwehehehe
+              </p>
             </div>
           </div>
 
@@ -152,7 +154,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#"
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-cyan-50 text-cyan-700 font-semibold"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
               >
                 <Image src={assets.home} alt="Home" className="w-5 h-5" />
                 <span>Home</span>
@@ -161,7 +163,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#"
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
               >
                 <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
                 <span>Tutor</span>
@@ -170,7 +172,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#"
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
               >
                 <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
                 <span>Status Booking</span>
@@ -179,14 +181,14 @@ const Navbar = () => {
             <li>
               <button
                 type="button"
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
                 onClick={() => setIsBrowseOpen((prev) => !prev)}
               >
                 <span>Browse categories</span>
                 <span>{isBrowseOpen ? "-" : "+"}</span>
               </button>
               {isBrowseOpen && (
-                <div className="pl-6 pr-3 pb-2 text-sm text-gray-600 space-y-1">
+                <div className="pl-6 pr-3 pb-2 text-sm text-[var(--gelap)]/75 space-y-1">
                   <a href="#" className="block py-1">
                     Mathematics
                   </a>
@@ -202,14 +204,14 @@ const Navbar = () => {
             <li>
               <button
                 type="button"
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
                 onClick={() => setIsExploreOpen((prev) => !prev)}
               >
                 <span>Explore</span>
                 <span>{isExploreOpen ? "-" : "+"}</span>
               </button>
               {isExploreOpen && (
-                <div className="pl-6 pr-3 pb-2 text-sm text-gray-600 space-y-1">
+                <div className="pl-6 pr-3 pb-2 text-sm text-[var(--gelap)]/75 space-y-1">
                   <a href="#" className="block py-1">
                     Promo
                   </a>
@@ -222,7 +224,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#"
-                className="w-full block px-3 py-2 rounded-lg hover:bg-gray-50"
+                className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
               >
                 Daftar sebagai tutor
               </a>
@@ -230,7 +232,7 @@ const Navbar = () => {
             <li>
               <button
                 type="button"
-                className="w-full text-left px-3 py-2 rounded-lg text-red-500 font-semibold hover:bg-red-50"
+                className="w-full text-left px-3 py-2 rounded-lg text-[var(--merah)] font-semibold hover:bg-[var(--merah)]/10"
               >
                 Sign out
               </button>
