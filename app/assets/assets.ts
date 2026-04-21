@@ -6,6 +6,8 @@ import bgimg from "./bgimg.jpg";
 import bgimage from "./bgimg.jpg";
 import logohd from "./logohd.png";
 import star from "./star.svg";
+import filter from "./filter.svg";
+import search from "./search.svg";
 
 import lightbulb from "./lightbulb.svg";
 import home from "./home.svg";
@@ -28,6 +30,8 @@ const assets = {
   bgimage,
   logohd,
   star,
+  filter,
+  search,
 };
 
 const social = {
