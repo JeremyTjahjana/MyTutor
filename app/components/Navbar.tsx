@@ -39,7 +39,7 @@ const Navbar = () => {
         <ul className="hidden md:flex items-center gap-6 lg:gap-10 text-[15px]">
           <li>
             <a
-              href="#"
+              href="/"
               className="flex items-center gap-2 hover:text-[var(--biru)] transition-colors"
             >
               <Image src={assets.home} alt="Home" className="w-5 h-5" />
@@ -48,7 +48,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              href="#"
+              href="/"
               className="flex items-center gap-2 hover:text-[var(--biru)] transition-color"
             >
               <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
@@ -57,7 +57,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              href="#"
+              href="/bookinglist"
               className="flex items-center gap-2 hover:text-[var(--biru)] transition-colors"
             >
               <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
