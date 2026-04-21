@@ -1,9 +1,9 @@
 import React from "react";
-import TutorCard from "./TutorCard";
+import TutorCard from "../Home/TutorCard";
 import { assets } from "../../assets/assets";
 
-const testimonials = [
-{
+const Dummy = [
+  {
     profile: assets.mehehe,
     name: "John Carter",
     role: "MK1, MK2, MK3",
@@ -21,15 +21,13 @@ const testimonials = [
   },
 ];
 
-const Testimonies = () => {
+const ListTutor = () => {
   return (
     <section className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-12 sm:py-16 bg-[var(--putih)] text-[var(--gelap)]">
-      <h2 className="text-center text-3xl sm:text-5xl font-semibold text-[var(--biru)]">
-        Testimonies
-      </h2>
+      
 
-      <div className="mt-8 flex gap-4 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center sm:overflow-visible sm:gap-5 lg:max-w-[760px] lg:mx-auto">
-        {testimonials.map((item, index) => (
+      <div className="mt-8 flex gap-4 overflow-x-auto pb-2 flex-col items-center sm:justify-center sm:overflow-visible sm:gap-5 lg:max-w-[760px] lg:mx-auto">
+        {Dummy.map((item, index) => (
           <TutorCard
             key={`${item.name}-${index}`}
             profile={item.profile}
@@ -44,4 +42,4 @@ const Testimonies = () => {
   );
 };
 
-export default Testimonies;
+export default ListTutor;
