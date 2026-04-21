@@ -23,7 +23,7 @@ const Testimonies = () => {
         Testimonies
       </h2>
 
-      <div className="mt-8 flex gap-4 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center sm:overflow-visible sm:gap-5 lg:max-w-[760px] lg:mx-auto">
+      <div className="mt-8 flex gap-4 overflow-x-auto pb-2 sm:justify-center sm:overflow-visible sm:gap-2 lg:max-w-[760px] lg:mx-auto">
         {testimonials.map((item, index) => (
           <TutorCard
             key={`${item.name}-${index}`}
