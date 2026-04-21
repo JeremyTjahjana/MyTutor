@@ -1,5 +1,5 @@
 import React from "react";
-import TestiCard from "./TestiCard";
+import TutorCard from "./TutorCard";
 
 const testimonials = [
   {
@@ -23,9 +23,9 @@ const Testimonies = () => {
         Testimonies
       </h2>
 
-      <div className="mt-8 flex flex-wrap justify-center gap-5 lg:max-w-[760px] lg:mx-auto">
+      <div className="mt-8 flex gap-4 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center sm:overflow-visible sm:gap-5 lg:max-w-[760px] lg:mx-auto">
         {testimonials.map((item, index) => (
-          <TestiCard
+          <TutorCard
             key={`${item.name}-${index}`}
             name={item.name}
             role={item.role}
