@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const Find = () => {
   return (
@@ -7,13 +8,13 @@ const Find = () => {
         Find the right Tutor for you !
       </h3>
 
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-center gap-4 sm:gap-6">
-        <button
-          type="button"
-          className="w-full sm:w-auto min-w-[160px] rounded-full border-2 border-[var(--biru)] px-7 py-4 text-lg font-semibold text-[var(--biru)] transition-transform duration-200 ease-out hover:scale-105 hover:bg-[var(--biru)]/5 active:scale-95"
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-center gap-4 sm:gap-6 px-20 sm:px-0">
+        <Link
+          href="/tutor"
+          className="inline-flex w-full sm:w-auto min-w-[160px] items-center justify-center rounded-full border-2 border-[var(--biru)] px-7 py-4 text-lg font-semibold text-[var(--biru)] transition-transform duration-200 ease-out hover:scale-105 hover:bg-[var(--biru)]/5 active:scale-95"
         >
           Find Tutor
-        </button>
+        </Link>
 
         <button
           type="button"

@@ -2,13 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 
 const Navbar = () => {
+  const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isBrowseOpen, setIsBrowseOpen] = useState(false);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
+
+  const isActiveRoute = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   useEffect(() => {
     document.body.style.overflow = isSidebarOpen ? "hidden" : "";
@@ -41,31 +51,43 @@ const Navbar = () => {
 
         <ul className="hidden md:flex items-center gap-6 lg:gap-10 text-[15px]">
           <li>
-            <a
+            <Link
               href="/"
-              className="flex items-center gap-2 hover:text-[var(--biru)] transition-colors"
+              className={`flex items-center gap-2 pb-1 transition-colors ${
+                isActiveRoute("/")
+                  ? "text-[var(--biru)] border-b-2 border-[var(--biru)] font-semibold"
+                  : "hover:text-[var(--biru)] border-b-2 border-transparent"
+              }`}
             >
               <Image src={assets.home} alt="Home" className="w-5 h-5" />
               <span>Home</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
+            <Link
               href="/tutor"
-              className="flex items-center gap-2 hover:text-[var(--biru)] transition-color"
+              className={`flex items-center gap-2 pb-1 transition-colors ${
+                isActiveRoute("/tutor")
+                  ? "text-[var(--biru)] border-b-2 border-[var(--biru)] font-semibold"
+                  : "hover:text-[var(--biru)] border-b-2 border-transparent"
+              }`}
             >
               <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
               <span>Tutor</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
+            <Link
               href="/bookinglist"
-              className="flex items-center gap-2 hover:text-[var(--biru)] transition-colors"
+              className={`flex items-center gap-2 pb-1 transition-colors ${
+                isActiveRoute("/bookinglist")
+                  ? "text-[var(--biru)] border-b-2 border-[var(--biru)] font-semibold"
+                  : "hover:text-[var(--biru)] border-b-2 border-transparent"
+              }`}
             >
               <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
               <span>Bookings</span>
-            </a>
+            </Link>
           </li>
         </ul>
 
@@ -148,7 +170,6 @@ const Navbar = () => {
               className="w-14 h-14 rounded-full object-cover border-2 border-[var(--biru)]"
             />
             <div>
-              <p className="text-sm text-[var(--gelap)]/60">Sudah login</p>
               <p className="text-base font-bold text-[var(--biru)]">
                 Mwehehehe
               </p>
@@ -157,31 +178,43 @@ const Navbar = () => {
 
           <ul className="mt-5 space-y-1 text-[16px]">
             <li>
-              <a
+              <Link
                 href="/"
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActiveRoute("/")
+                    ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
+                    : "hover:bg-[var(--gelap)]/5"
+                }`}
               >
                 <Image src={assets.home} alt="Home" className="w-5 h-5" />
                 <span>Home</span>
-              </a>
+              </Link>
             </li>
             <li>
-              <a
+              <Link
                 href="/tutor"
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActiveRoute("/tutor")
+                    ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
+                    : "hover:bg-[var(--gelap)]/5"
+                }`}
               >
                 <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
                 <span>Tutor</span>
-              </a>
+              </Link>
             </li>
             <li>
-              <a
+              <Link
                 href="/bookinglist"
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActiveRoute("/bookinglist")
+                    ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
+                    : "hover:bg-[var(--gelap)]/5"
+                }`}
               >
                 <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
                 <span>Status Booking</span>
-              </a>
+              </Link>
             </li>
             <li>
               <button
