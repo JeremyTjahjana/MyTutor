@@ -49,7 +49,7 @@ const Navbar = () => {
           <li>
             <a
               href="#"
-              className="flex items-center gap-2 text-[var(--biru)] border-b-2 border-[var(--biru)] pb-1 font-semibold"
+              className="flex items-center gap-2 hover:text-[var(--biru)] transition-color"
             >
               <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
               <span>Tutor</span>
