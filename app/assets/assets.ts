@@ -4,6 +4,8 @@ import logo3 from "./logo3.png";
 import mehehe from "./mehehe.png";
 import bgimg from "./bgimg.jpg";
 import bgimage from "./bgimg.jpg";
+import logohd from "./logohd.png";
+import star from "./star.svg";
 
 import lightbulb from "./lightbulb.svg";
 import home from "./home.svg";
@@ -24,6 +26,8 @@ const assets = {
   book,
   bgimg,
   bgimage,
+  logohd,
+  star,
 };
 
 const social = {
