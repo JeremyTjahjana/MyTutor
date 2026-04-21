@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 
@@ -29,12 +30,14 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D]">
       <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]">
-        <Image
-          src={assets.logo2}
-          alt="MyTutor logo"
-          className="w-[132px] sm:w-[160px] md:w-[180px] h-auto"
-          priority
-        />
+        <Link href="/" aria-label="Go to home page" className="inline-flex">
+          <Image
+            src={assets.logo2}
+            alt="MyTutor logo"
+            className="w-[132px] sm:w-[160px] md:w-[180px] h-auto hover:cursor-pointer"
+            priority
+          />
+        </Link>
 
         <ul className="hidden md:flex items-center gap-6 lg:gap-10 text-[15px]">
           <li>
@@ -48,7 +51,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              href="/"
+              href="/tutor"
               className="flex items-center gap-2 hover:text-[var(--biru)] transition-color"
             >
               <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
@@ -120,11 +123,13 @@ const Navbar = () => {
         }`}
       >
         <div className="h-[72px] px-4 flex items-center justify-between border-b border-[var(--gelap)]/10">
-          <Image
-            src={assets.logo2}
-            alt="MyTutor logo"
-            className="w-[130px] h-auto"
-          />
+          <Link href="/" aria-label="Go to home page" className="inline-flex">
+            <Image
+              src={assets.logo2}
+              alt="MyTutor logo"
+              className="w-[130px] h-auto"
+            />
+          </Link>
           <button
             type="button"
             aria-label="Close menu"
@@ -153,7 +158,7 @@ const Navbar = () => {
           <ul className="mt-5 space-y-1 text-[16px]">
             <li>
               <a
-                href="#"
+                href="/"
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
               >
                 <Image src={assets.home} alt="Home" className="w-5 h-5" />
@@ -162,7 +167,7 @@ const Navbar = () => {
             </li>
             <li>
               <a
-                href="#"
+                href="/tutor"
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
               >
                 <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
@@ -171,7 +176,7 @@ const Navbar = () => {
             </li>
             <li>
               <a
-                href="#"
+                href="/bookinglist"
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
               >
                 <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
