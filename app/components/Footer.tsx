@@ -13,8 +13,10 @@ const Footer = () => {
         />
 
         <p className="mt-6 max-w-[360px] text-sm sm:text-base leading-7 text-[var(--putih)]/95 font-semibold">
-          Lorem Ipsum has been the industry&apos;s standard dummy text ever
-          since the 1500s, when an unknown printer took a galley.
+          MyTutor adalah platform tutor sebaya untuk mahasiswa IPB University.
+          Kami menghubungkan mahasiswa yang ingin belajar dengan tutor yang
+          kompeten untuk meningkatkan pemahaman akademik dan pengembangan
+          soft-skills.
         </p>
 
         <div className="mt-6 flex items-center gap-5">

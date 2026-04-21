@@ -34,7 +34,7 @@ const Hero = () => {
             priority
           />
 
-          <p className="mt-5 text-lg sm:text-2xl md:text-3xl font-medium text-[var(--biru)] text-shadow-lg">
+          <p className="mt-5 text-lg sm:text-2xl md:text-3xl font-semibold text-[var(--biru)] text-shadow-lg">
             Tempat terbaik berbagi Ilmu!
           </p>
         </div>
