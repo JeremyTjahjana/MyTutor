@@ -38,7 +38,7 @@ const Navbar = () => {
   }, [isSidebarOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D]">
+    <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D] shadow-[0px_2px_16px_0px_#0000000D]">
       <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]">
         <Link href="/" aria-label="Go to home page" className="inline-flex">
           <Image
@@ -180,39 +180,39 @@ const Navbar = () => {
             <li>
               <Link
                 href="/"
+                onClick={() => setIsSidebarOpen(false)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   isActiveRoute("/")
                     ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
                     : "hover:bg-[var(--gelap)]/5"
                 }`}
               >
-                <Image src={assets.home} alt="Home" className="w-5 h-5" />
                 <span>Home</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/tutor"
+                onClick={() => setIsSidebarOpen(false)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   isActiveRoute("/tutor")
                     ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
                     : "hover:bg-[var(--gelap)]/5"
                 }`}
               >
-                <Image src={assets.lightbulb} alt="Tutor" className="w-5 h-5" />
                 <span>Tutor</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/bookinglist"
+                onClick={() => setIsSidebarOpen(false)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   isActiveRoute("/bookinglist")
                     ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
                     : "hover:bg-[var(--gelap)]/5"
                 }`}
               >
-                <Image src={assets.book} alt="Bookings" className="w-5 h-5" />
                 <span>Status Booking</span>
               </Link>
             </li>

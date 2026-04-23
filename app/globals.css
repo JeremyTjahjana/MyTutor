@@ -29,4 +29,18 @@ body {
   font-style: normal;
 }
 
+.fade-up {
+  opacity: 0;
+  transform: translateY(var(--fade-up-distance, 16px));
+  transition:
+    opacity var(--fade-up-duration, 700ms) ease-out,
+    transform var(--fade-up-duration, 700ms) ease-out;
+  transition-delay: var(--fade-up-delay, 0ms);
+}
+
+.fade-up-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 

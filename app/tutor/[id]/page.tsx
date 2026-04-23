@@ -32,15 +32,15 @@ export default async function Page({ params }: PageProps) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[420px] px-4 py-4 sm:max-w-[520px] sm:px-6 md:max-w-[620px] lg:max-w-[720px]">
-      <div className="rounded-[26px] bg-[var(--putih)] px-5 py-4 shadow-[0px_2px_16px_rgba(0,0,0,0.06)] sm:px-7 sm:py-6">
+    <main className="min-h-screen bg-[#F7F8FC] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-5xl rounded-[32px] bg-white p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] sm:p-8 lg:p-10">
         <section className="mt-6 flex items-start gap-3 sm:gap-4">
           <Image
             src={tutor.profile}
             alt={`${tutor.name} profile`}
             width={48}
             height={48}
-            className="mt-1 h-11 w-11 rounded-full object-cover border border-[var(--gelap)]/15 sm:h-12 sm:w-12"
+            className="mt-1 h-11 w-11 lg:w-20 lg:h-20 rounded-full object-cover border border-[var(--gelap)]/15 sm:h-12 sm:w-12"
           />
 
           <div className="min-w-0 flex-1">

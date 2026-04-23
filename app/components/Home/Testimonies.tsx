@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TutorCard from "./TutorCard";
 import { assets } from "../../assets/assets";
 
@@ -49,7 +49,32 @@ const testimonials = [
 
 const Testimonies = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
+  const sectionRef = React.useRef<HTMLElement | null>(null);
   const total = testimonials.length;
+
+  useEffect(() => {
+    const target = sectionRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setHasAnimatedIn(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.25 },
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const prevIndex = (activeIndex - 1 + total) % total;
   const nextIndex = (activeIndex + 1) % total;
@@ -69,8 +94,13 @@ const Testimonies = () => {
   };
 
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-12 sm:py-16 bg-[var(--putih)] text-[var(--gelap)]">
-      <h2 className="text-center text-3xl sm:text-5xl font-semibold text-[var(--biru)]">
+    <section
+      ref={sectionRef}
+      className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-12 sm:py-16 bg-[var(--putih)] text-[var(--gelap)]"
+    >
+      <h2
+        className={`fade-up text-center text-3xl sm:text-5xl font-semibold text-[var(--biru)] ${hasAnimatedIn ? "fade-up-visible" : ""}`}
+      >
         Testimonies
       </h2>
 
@@ -79,11 +109,12 @@ const Testimonies = () => {
           {visibleSlides.map((slide) => {
             const item = testimonials[slide.index];
             const isActive = slide.offset === 0;
+            const staggerDelay = (slide.offset + 1) * 110 + 150;
 
             return (
               <div
                 key={`${item.name}-${slide.index}`}
-                className="absolute left-1/2 top-0 w-[250px] sm:w-[320px] transition-all duration-300"
+                className="absolute left-1/2 top-0 w-[250px] sm:w-[320px] transition-all duration-500 ease-out"
                 style={{
                   transform: `translateX(calc(-50% + ${slide.offset * 58}%)) translateY(${isActive ? "0px" : "12px"}) scale(${isActive ? 1 : 0.92})`,
                   opacity: isActive ? 1 : 0.72,
@@ -91,13 +122,22 @@ const Testimonies = () => {
                 }}
                 onClick={() => setActiveIndex(slide.index)}
               >
-                <TutorCard
-                  profile={item.profile}
-                  name={item.name}
-                  role={item.role}
-                  description={item.description}
-                  rating={item.rating}
-                />
+                <div
+                  className={`fade-up ${hasAnimatedIn ? "fade-up-visible" : ""}`}
+                  style={
+                    {
+                      "--fade-up-delay": `${staggerDelay}ms`,
+                    } as React.CSSProperties
+                  }
+                >
+                  <TutorCard
+                    profile={item.profile}
+                    name={item.name}
+                    role={item.role}
+                    description={item.description}
+                    rating={item.rating}
+                  />
+                </div>
               </div>
             );
           })}
