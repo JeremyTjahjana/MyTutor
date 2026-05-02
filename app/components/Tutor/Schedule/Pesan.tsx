@@ -16,10 +16,10 @@ const Pesan = ({ disabled = false, label = "Pesan Sekarang", onClick, className 
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className={`w-full max-w-[420px] py-3 px-6 rounded-full text-white font-semibold transition-colors duration-200 shadow-md focus:outline-none ${
+        className={`w-full max-w-[420px] py-3 px-6 rounded-full text-white font-semibold transition-all duration-300 shadow-md focus:outline-none ${
           disabled
             ? "bg-[#9fc6cc] cursor-not-allowed"
-            : "bg-[var(--biru)] hover:bg-[#00758a] active:scale-[0.995]"
+            : "bg-[var(--biru)] hover:bg-[#00758a] hover:shadow-lg hover:scale-[1.02] active:scale-[0.97]"
         }`}
       >
         {label}

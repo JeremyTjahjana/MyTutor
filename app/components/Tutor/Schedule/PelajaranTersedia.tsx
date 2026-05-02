@@ -100,12 +100,12 @@ const PelajaranTersedia = () => {
 
   return (
     <section className="w-full bg-[var(--putih)] text-[var(--gelap)]">
-      <div className="w-full sm:px-10 md:px-20 flex flex-col gap-4 p-6">
-        <h2 className="text-2xl font-bold text-[var(--biru)]">
+      <div className="w-full flex flex-col gap-4 mt-6">
+        <h2 className="text-[18px] font-bold text-[var(--biru)]">
           Pelajaran Tersedia
         </h2>
 
-        <div className="relative bg-[#F5F6FB] rounded-3xl p-3 flex items-center overflow-hidden">
+        <div className="relative bg-[#F5F6FB] rounded-3xl p-3 overflow-hidden group">
           <div
             ref={scrollRef}
             onScroll={checkScroll}
@@ -121,13 +121,73 @@ const PelajaranTersedia = () => {
                 className={`px-6 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors shrink-0 ${
                   index === activeIndex
                     ? "bg-white border-2 border-[var(--biru)] text-[var(--biru)]"
-                    : "bg-white border-2 border-[var(--biru)]/30 text-[var(--biru)]/70"
+                    : "bg-white border-2 border-[var(--biru)]/30 text-[var(--biru)]/70 hover:bg-[#E6F3F5]"
                 }`}
               >
                 {item}
               </button>
             ))}
           </div>
+
+          {canScrollLeft && (
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white via-white to-transparent pointer-events-none z-5" />
+          )}
+
+          {canScrollRight && (
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white via-white to-transparent pointer-events-none z-5" />
+          )}
+
+          {canScrollLeft && (
+            <button
+              onClick={() => {
+                if (activeIndex > 0) {
+                  centerItem(activeIndex - 1);
+                } else {
+                  centerItem(activeIndex);
+                }
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full flex items-center justify-center text-[var(--biru)] hover:text-[var(--biru)]/80 transition-colors"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+          )}
+
+          {canScrollRight && (
+            <button
+              onClick={() => {
+                if (activeIndex < pelajaran.length - 1) {
+                  centerItem(activeIndex + 1);
+                } else {
+                  centerItem(activeIndex);
+                }
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full flex items-center justify-center text-[var(--biru)] hover:text-[var(--biru)]/80 transition-colors"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          )}
         </div>
 
         <div className="mt-4">
