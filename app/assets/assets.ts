@@ -135,6 +135,54 @@ const dummyTutor: DummyTutor[] = [
         jamSelesai: "09:30",
         tanggal: "2026-05-01",
       },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
+      {
+        hari: "Jumat",
+        jamMulai: "08:00",
+        jamSelesai: "09:30",
+        tanggal: "2026-05-01",
+      },
     ],
     testimonies: [
       {
