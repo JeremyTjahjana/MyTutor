@@ -39,8 +39,8 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D] shadow-[0px_2px_16px_0px_#0000000D]">
-      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]">
-        <Link href="/" aria-label="Go to home page" className="inline-flex">
+      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-center text-[var(--gelap)] relative">
+        <Link href="/" aria-label="Go to home page" className="inline-flex absolute left-4 sm:left-6 md:left-10 lg:left-16 xl:left-24">
           <Image
             src={assets.logo2}
             alt="MyTutor logo"
@@ -91,7 +91,7 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4 absolute right-4 sm:right-6 md:right-10 lg:right-16 xl:right-24">
           <button
             type="button"
             aria-label="Open profile sidebar"
