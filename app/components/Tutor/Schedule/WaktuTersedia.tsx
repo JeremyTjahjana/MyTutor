@@ -144,7 +144,7 @@ const WaktuTersedia = ({
                 itemRefs.current[i] = el;
               }}
               onClick={() => handleClick(i)}
-              className={`px-5 py-3 rounded-2xl text-sm font-medium transition-all border-2 whitespace-nowrap shrink-0 ${
+              className={`p-2 rounded-l text-sm font-medium transition-all border-2 whitespace-nowrap shrink-0 ${
                 selected === i
                   ? "bg-white text-[var(--biru)] border-[var(--biru)] shadow-sm"
                   : "bg-[var(--putih)] text-[var(--biru)]/90 border-[var(--biru)]/20 hover:bg-[#E6F3F5]"
