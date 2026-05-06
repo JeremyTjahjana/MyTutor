@@ -39,12 +39,8 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D] shadow-[0px_2px_16px_0px_#0000000D]">
-      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-center text-[var(--gelap)] relative">
-        <Link
-          href="/"
-          aria-label="Go to home page"
-          className="inline-flex absolute left-4 sm:left-6 md:left-10 lg:left-16 xl:left-24"
-        >
+      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]">
+        <Link href="/" aria-label="Go to home page" className="inline-flex">
           <Image
             src={assets.logo2}
             alt="MyTutor logo"
@@ -59,7 +55,7 @@ const Navbar = () => {
               href="/"
               className={`flex items-center gap-2 pb-1 transition-colors ${
                 isActiveRoute("/")
-                  ? "text-[var(--biru)] border-b-2 border-[var(--biru)] font-semibold"
+                  ? "text-[var(--biru)] font-semibold border-b-2 border-[var(--biru)]"
                   : "hover:text-[var(--biru)] border-b-2 border-transparent"
               }`}
             >
@@ -95,7 +91,7 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <div className="hidden md:flex items-center gap-4 absolute right-4 sm:right-6 md:right-10 lg:right-16 xl:right-24">
+        <div className="hidden md:flex items-center gap-4">
           <button
             type="button"
             aria-label="Open profile sidebar"
@@ -105,7 +101,7 @@ const Navbar = () => {
             <Image
               src={assets.mehehe}
               alt="Foto profil"
-              className="w-11 h-11 rounded-full object-cover drop-shadow-sm"
+              className="w-11 h-11 rounded-full object-cover hover:cursor-pointer  hover:scale-105 transition-transform"
             />
           </button>
         </div>
@@ -220,8 +216,8 @@ const Navbar = () => {
                 <span>Status Booking</span>
               </Link>
             </li>
-            <li>
-              {/* <button
+            {/* <li>
+              <button
                 type="button"
                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
                 onClick={() => setIsBrowseOpen((prev) => !prev)}
@@ -262,8 +258,8 @@ const Navbar = () => {
                   </a>
                 </div>
               )}
-            </li>
-            <li> */}
+            </li> */}
+            <li>
               <a
                 href="#"
                 className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
