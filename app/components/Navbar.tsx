@@ -3,12 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { assets } from "../assets/assets";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement | null>(null);
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
@@ -27,11 +28,28 @@ const Navbar = () => {
       }
     };
 
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (!isSidebarOpen) return;
+
+      const target = event.target as Node | null;
+      if (
+        sidebarRef.current &&
+        target &&
+        !sidebarRef.current.contains(target)
+      ) {
+        setIsSidebarOpen(false);
+      }
+    };
+
     window.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
 
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
     };
   }, [isSidebarOpen]);
 
@@ -138,6 +156,7 @@ const Navbar = () => {
       />
 
       <aside
+        ref={sidebarRef}
         className={`fixed top-0 left-0 z-50 h-screen w-[84%] max-w-[340px] bg-[var(--putih)] border-r border-[var(--gelap)]/15 shadow-2xl transition-transform duration-300 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -259,7 +278,7 @@ const Navbar = () => {
             </li> */}
             <li>
               <a
-                href="#"
+                href="/register-tutor"
                 className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
               >
                 Daftar sebagai tutor
