@@ -2,9 +2,16 @@
 
 import React from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { assets, social } from "../assets/assets";
 
 const Footer = () => {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/tutor-dashboard")) {
+    return null;
+  }
+
   return (
     <footer className="mt-10 w-full bg-[var(--biru)] text-[var(--putih)]">
       <div className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-6 sm:py-8 md:py-7">
@@ -18,9 +25,9 @@ const Footer = () => {
 
             <p className="mt-4 max-w-[360px] text-[12px] leading-6 font-medium text-[var(--putih)]/95 sm:text-sm">
               MyTutor adalah platform tutor sebaya untuk mahasiswa IPB
-              University. Kami menghubungkan mahasiswa yang ingin belajar
-              dengan tutor yang kompeten untuk meningkatkan pemahaman akademik
-              dan pengembangan soft-skills.
+              University. Kami menghubungkan mahasiswa yang ingin belajar dengan
+              tutor yang kompeten untuk meningkatkan pemahaman akademik dan
+              pengembangan soft-skills.
             </p>
 
             <div className="mt-4 flex items-center gap-4 sm:gap-5">
@@ -31,7 +38,11 @@ const Footer = () => {
                 onClick={(e) => e.preventDefault()}
                 className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
-                <Image src={social.facebook} alt="Facebook" className="h-6 w-6" />
+                <Image
+                  src={social.facebook}
+                  alt="Facebook"
+                  className="h-6 w-6"
+                />
               </a>
               <a
                 href="#"
@@ -40,7 +51,11 @@ const Footer = () => {
                 onClick={(e) => e.preventDefault()}
                 className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
-                <Image src={social.instagram} alt="Instagram" className="h-6 w-6" />
+                <Image
+                  src={social.instagram}
+                  alt="Instagram"
+                  className="h-6 w-6"
+                />
               </a>
               <a
                 href="#"
@@ -49,7 +64,11 @@ const Footer = () => {
                 onClick={(e) => e.preventDefault()}
                 className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
-                <Image src={social.linkedin} alt="LinkedIn" className="h-6 w-6" />
+                <Image
+                  src={social.linkedin}
+                  alt="LinkedIn"
+                  className="h-6 w-6"
+                />
               </a>
               <a
                 href="#"
@@ -58,7 +77,11 @@ const Footer = () => {
                 onClick={(e) => e.preventDefault()}
                 className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
-                <Image src={social.whatsapp} alt="WhatsApp" className="h-6 w-6" />
+                <Image
+                  src={social.whatsapp}
+                  alt="WhatsApp"
+                  className="h-6 w-6"
+                />
               </a>
             </div>
           </div>

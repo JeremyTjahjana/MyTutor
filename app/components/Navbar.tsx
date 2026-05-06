@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { assets } from "../assets/assets";
+import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
+  const { isApprovedTutor } = useAuth();
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
@@ -105,6 +107,20 @@ const Navbar = () => {
               <span>Bookings</span>
             </Link>
           </li>
+          {isApprovedTutor && (
+            <li>
+              <Link
+                href="/tutor-dashboard"
+                className={`flex items-center gap-2 pb-1 transition-colors ${
+                  isActiveRoute("/tutor-dashboard")
+                    ? "text-[var(--biru)] border-b-2 border-[var(--biru)] font-semibold"
+                    : "hover:text-[var(--biru)] border-b-2 border-transparent"
+                }`}
+              >
+                <span>Tutor Dashboard</span>
+              </Link>
+            </li>
+          )}
         </ul>
 
         <div className="hidden md:flex items-center gap-4">
@@ -233,6 +249,21 @@ const Navbar = () => {
                 <span>Status Booking</span>
               </Link>
             </li>
+            {isApprovedTutor && (
+              <li>
+                <Link
+                  href="/tutor-dashboard"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    isActiveRoute("/tutor-dashboard")
+                      ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
+                      : "hover:bg-[var(--gelap)]/5"
+                  }`}
+                >
+                  <span>Tutor Dashboard</span>
+                </Link>
+              </li>
+            )}
             {/* <li>
               <button
                 type="button"
