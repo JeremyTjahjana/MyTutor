@@ -101,7 +101,7 @@ const Navbar = () => {
             <Image
               src={assets.mehehe}
               alt="Foto profil"
-              className="w-11 h-11 rounded-full object-cover border-2 border-[var(--biru)]"
+              className="w-11 h-11 rounded-full object-cover drop-shadow-sm"
             />
           </button>
         </div>
@@ -167,7 +167,7 @@ const Navbar = () => {
             <Image
               src={assets.mehehe}
               alt="Foto profil"
-              className="w-14 h-14 rounded-full object-cover border-2 border-[var(--biru)]"
+              className="w-14 h-14 rounded-full object-cover"
             />
             <div>
               <p className="text-base font-bold text-[var(--biru)]">
@@ -217,7 +217,7 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <button
+              {/* <button
                 type="button"
                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
                 onClick={() => setIsBrowseOpen((prev) => !prev)}
@@ -259,7 +259,7 @@ const Navbar = () => {
                 </div>
               )}
             </li>
-            <li>
+            <li> */}
               <a
                 href="#"
                 className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
