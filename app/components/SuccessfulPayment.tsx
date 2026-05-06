@@ -25,7 +25,7 @@ const formatRupiah = (amount = 0) =>
     minimumFractionDigits: 0,
   }).format(amount);
 
-export default function SuccessfullPayment({
+export default function SuccessfulPayment({
   bookingNumber = "#BK-2026-0001",
   tutorName = "Tutor",
   subjects = "-",
@@ -140,7 +140,7 @@ export default function SuccessfullPayment({
         <button
           type="button"
           onClick={handleView}
-          className="inline-flex w-full items-center justify-center rounded-full bg-[var(--biru)] px-6 py-3 text-white font-semibold"
+          className="btn-primary w-full"
         >
           Lihat Bookings
         </button>
@@ -148,7 +148,7 @@ export default function SuccessfullPayment({
         <button
           type="button"
           onClick={handleBack}
-          className="inline-flex w-full items-center justify-center rounded-full border-2 border-[var(--biru)] px-6 py-3 text-[var(--biru)] font-semibold bg-white"
+          className="btn-secondary w-full"
         >
           Kembali ke Beranda
         </button>

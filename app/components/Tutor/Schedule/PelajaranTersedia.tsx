@@ -118,11 +118,11 @@ const PelajaranTersedia = () => {
                   itemRefs.current[index] = el;
                 }}
                 onClick={() => centerItem(index)}
-                className={`px-6 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors shrink-0 ${
+                className={`btn-chip ${
                   index === activeIndex
-                    ? "bg-white border-2 border-[var(--biru)] text-[var(--biru)]"
-                    : "bg-white border-2 border-[var(--biru)]/30 text-[var(--biru)]/70 hover:bg-[#E6F3F5]"
-                }`}
+                    ? "btn-chip-active"
+                    : "btn-chip-inactive"
+                } shrink-0 px-6 py-2`}
               >
                 {item}
               </button>
@@ -146,7 +146,7 @@ const PelajaranTersedia = () => {
                   centerItem(activeIndex);
                 }
               }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full flex items-center justify-center text-[var(--biru)] hover:text-[var(--biru)]/80 transition-colors"
+              className="btn-icon absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-[var(--biru)]"
             >
               <svg
                 width="20"
@@ -172,7 +172,7 @@ const PelajaranTersedia = () => {
                   centerItem(activeIndex);
                 }
               }}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full flex items-center justify-center text-[var(--biru)] hover:text-[var(--biru)]/80 transition-colors"
+              className="btn-icon absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-[var(--biru)]"
             >
               <svg
                 width="20"

@@ -91,7 +91,7 @@ export default function PaymentPage() {
                 q.set("paid", "true");
                 router.push(`/tutor/${tutorId}/confirmation?${q.toString()}`);
               }}
-              className="w-full rounded-full bg-[var(--biru)] px-4 py-3 text-white font-semibold"
+              className="btn-primary w-full"
             >
               Selesai Bayar
             </button>
@@ -99,7 +99,7 @@ export default function PaymentPage() {
             <button
               type="button"
               onClick={() => router.push(confirmationHref)}
-              className="w-full rounded-full border-2 border-[var(--biru)] px-4 py-3 text-[var(--biru)] font-semibold bg-white"
+              className="btn-secondary w-full"
             >
               Kembali ke Konfirmasi
             </button>

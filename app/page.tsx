@@ -3,7 +3,7 @@ import Hero from "./components/Home/Hero";
 import Testimonies from "./components/Home/Testimonies";
 import Find from "./components/Home/Find";
 
-const page = () => {
+const HomePage = () => {
   return (
     <>
       <Hero />
@@ -13,4 +13,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default HomePage;

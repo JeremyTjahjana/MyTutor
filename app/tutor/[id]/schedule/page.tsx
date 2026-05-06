@@ -46,14 +46,14 @@ export default function SchedulePage() {
               mobilePage={mobilePage}
               onMobilePageChange={setMobilePage}
             />{" "}
-            <ActionsSection
-              tutorId={tutorId}
-              confirmationHref={confirmationHref}
-            />{" "}
           </div>{" "}
           {/* ── Right: profile photo (40%), desktop only ── */}{" "}
           <TutorProfileCard tutor={tutor} />{" "}
         </div>{" "}
+        <ActionsSection
+          tutorId={tutorId}
+          confirmationHref={confirmationHref}
+        />{" "}
       </div>{" "}
     </main>
   );

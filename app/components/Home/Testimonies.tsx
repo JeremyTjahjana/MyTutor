@@ -1,47 +1,47 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import TutorCard from "./TutorCard";
+import TestimonyCard from "./TestimonyCard";
 import { assets } from "../../assets/assets";
 
 const testimonials = [
   {
     profile: assets.mehehe,
-    name: "John Carter",
-    role: "MK1, MK2, MK3",
-    description:
+    studentName: "John Carter",
+    subjects: "MK1, MK2, MK3",
+    message:
       "Lorem ipsum dolor sit amet consectetur adipisicing elit amet hendrerit pretium nulla sed enim iaculis mi.",
     rating: 4,
   },
   {
     profile: assets.mehehe,
-    name: "Dina Putri",
-    role: "Kalkulus, Statistika",
-    description:
+    studentName: "Dina Putri",
+    subjects: "Kalkulus, Statistika",
+    message:
       "Penjelasannya runtut dan mudah dipahami, jadi saya lebih percaya diri saat ujian.",
     rating: 5,
   },
   {
     profile: assets.mehehe,
-    name: "Rafi Maulana",
-    role: "Fisika Dasar, Mekanika",
-    description:
+    studentName: "Rafi Maulana",
+    subjects: "Fisika Dasar, Mekanika",
+    message:
       "Sesi belajar interaktif dan fleksibel. Progress belajar saya terasa jauh lebih cepat.",
     rating: 5,
   },
   {
     profile: assets.mehehe,
-    name: "Keisya Ananda",
-    role: "Kimia Organik",
-    description:
+    studentName: "Keisya Ananda",
+    subjects: "Kimia Organik",
+    message:
       "Tutor sangat sabar membimbing. Materi yang rumit jadi terasa lebih sederhana.",
     rating: 4,
   },
   {
     profile: assets.mehehe,
-    name: "Bagas Pratama",
-    role: "Bahasa Inggris Akademik",
-    description:
+    studentName: "Bagas Pratama",
+    subjects: "Bahasa Inggris Akademik",
+    message:
       "Latihan dan feedback-nya detail. Nilai tugas saya meningkat setelah beberapa sesi.",
     rating: 5,
   },
@@ -105,7 +105,7 @@ const Testimonies = () => {
       </h2>
 
       <div className="mt-8 mx-auto w-full max-w-[840px]">
-        <div className="relative h-[270px] sm:h-[320px]">
+        <div className="relative h-[250px] sm:h-[340px]">
           {visibleSlides.map((slide) => {
             const item = testimonials[slide.index];
             const isActive = slide.offset === 0;
@@ -113,8 +113,8 @@ const Testimonies = () => {
 
             return (
               <div
-                key={`${item.name}-${slide.index}`}
-                className="absolute left-1/2 top-0 w-[250px] sm:w-[320px] transition-all duration-500 ease-out"
+                key={`${item.studentName}-${slide.index}`}
+                className="absolute left-1/2 top-0 w-[200px] sm:w-[320px] transition-all duration-500 ease-out"
                 style={{
                   transform: `translateX(calc(-50% + ${slide.offset * 58}%)) translateY(${isActive ? "0px" : "12px"}) scale(${isActive ? 1 : 0.92})`,
                   opacity: isActive ? 1 : 0.72,
@@ -130,11 +130,11 @@ const Testimonies = () => {
                     } as React.CSSProperties
                   }
                 >
-                  <TutorCard
+                  <TestimonyCard
                     profile={item.profile}
-                    name={item.name}
-                    role={item.role}
-                    description={item.description}
+                    studentName={item.studentName}
+                    subjects={item.subjects}
+                    message={item.message}
                     rating={item.rating}
                   />
                 </div>
@@ -147,7 +147,7 @@ const Testimonies = () => {
           <button
             type="button"
             onClick={handlePrev}
-            className="h-9 w-9 rounded-full border border-[var(--biru)]/35 text-[var(--biru)] transition hover:bg-[var(--biru)]/10"
+            className="btn-icon h-9 w-9 border border-[var(--biru)]/35 text-[var(--biru)]"
             aria-label="Previous testimony"
           >
             &lt;
@@ -172,7 +172,7 @@ const Testimonies = () => {
           <button
             type="button"
             onClick={handleNext}
-            className="h-9 w-9 rounded-full border border-[var(--biru)]/35 text-[var(--biru)] transition hover:bg-[var(--biru)]/10"
+            className="btn-icon h-9 w-9 border border-[var(--biru)]/35 text-[var(--biru)]"
             aria-label="Next testimony"
           >
             &gt;

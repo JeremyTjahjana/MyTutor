@@ -22,11 +22,9 @@ export function SubjectsSection({
             key={m + i}
             onClick={() => onMatkul(i)}
             type="button"
-            className={`hover:bg-[var(--biru)]/10 cursor-pointer shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-              i === activeMatkul
-                ? "border-[var(--biru)] text-[var(--biru)] bg-white"
-                : "border-[var(--biru)]/30 text-[var(--biru)]/80 bg-white"
-            }`}
+            className={`btn-chip ${
+              i === activeMatkul ? "btn-chip-active" : "btn-chip-inactive"
+            } shrink-0 px-4 py-2`}
           >
             {m}
           </button>

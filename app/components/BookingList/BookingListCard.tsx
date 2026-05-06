@@ -46,10 +46,7 @@ const BookingListCard = ({
         </p>
       </div>
 
-      <button
-        type="button"
-        className="mt-6 w-full rounded-full bg-[var(--biru)] py-2.5 text-l leading-none font-semibold text-[var(--putih)] transition hover:opacity-90 sm:text-[15px] hover:bg-[var(--biru)]/70"
-      >
+      <button type="button" className="btn-primary mt-6 w-full">
         Kontak tutor
       </button>
     </article>

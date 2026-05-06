@@ -2,7 +2,6 @@ import logo1 from "./logo1.png";
 import logo2 from "./logo2.png";
 import logo3 from "./logo3.png";
 import mehehe from "./mehehe.jpg";
-import bgimg from "./bgimg.jpg";
 import bgimage from "./bgimg.jpg";
 import logohd from "./logohd.png";
 import star from "./star.svg";
@@ -12,6 +11,7 @@ import search from "./search.svg";
 import lightbulb from "./lightbulb.svg";
 import home from "./home.svg";
 import book from "./book.svg";
+import close from "./close.svg";
 
 import porto1 from "./porto1.jpg";
 import porto2 from "./porto2.jpg";
@@ -21,9 +21,14 @@ import instagram from "./ig.svg";
 import facebook from "./fb.svg";
 import linkedin from "./linkedin.svg";
 import whatsapp from "./wa.svg";
-import { StaticImageData } from "next/image";
 
+import type { Tutor } from "@/app/types/tutor";
+
+// logo1: small square variant (unused currently — reserved for future use)
+// logo2: horizontal color variant used in Navbar / sidebar
+// logo3: white variant used in Footer
 const assets = {
+  close,
   logo1,
   logo2,
   logo3,
@@ -31,7 +36,6 @@ const assets = {
   home,
   lightbulb,
   book,
-  bgimg,
   bgimage,
   logohd,
   star,
@@ -49,33 +53,7 @@ const social = {
   whatsapp,
 };
 
-type TutorSchedule = {
-  hari: string;
-  jamMulai: string;
-  jamSelesai: string;
-  tanggal: string;
-};
-
-type TutorTestimony = {
-  studentName: string;
-  message: string;
-  rating: number;
-  createdAt: string;
-};
-
-type DummyTutor = {
-  id: number;
-  profile: StaticImageData;
-  name: string;
-  description: string;
-  rating: number;
-  matkuls: string[];
-  waktu: TutorSchedule[];
-  testimonies: TutorTestimony[];
-  portofolio: StaticImageData[];
-};
-
-const dummyTutor: DummyTutor[] = [
+const dummyTutor: Tutor[] = [
   {
     id: 1,
     profile: assets.mehehe,
@@ -130,10 +108,16 @@ const dummyTutor: DummyTutor[] = [
         tanggal: "2026-04-28",
       },
       {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
+        hari: "Rabu",
+        jamMulai: "10:00",
+        jamSelesai: "11:30",
+        tanggal: "2026-04-29",
+      },
+      {
+        hari: "Kamis",
+        jamMulai: "13:00",
+        jamSelesai: "14:30",
+        tanggal: "2026-04-30",
       },
       {
         hari: "Jumat",
@@ -142,46 +126,10 @@ const dummyTutor: DummyTutor[] = [
         tanggal: "2026-05-01",
       },
       {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
-      },
-      {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
-      },
-      {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
-      },
-      {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
-      },
-      {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
-      },
-      {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
-      },
-      {
-        hari: "Jumat",
-        jamMulai: "08:00",
-        jamSelesai: "09:30",
-        tanggal: "2026-05-01",
+        hari: "Sabtu",
+        jamMulai: "14:00",
+        jamSelesai: "15:30",
+        tanggal: "2026-05-02",
       },
     ],
     testimonies: [

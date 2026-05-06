@@ -144,11 +144,9 @@ const WaktuTersedia = ({
                 itemRefs.current[i] = el;
               }}
               onClick={() => handleClick(i)}
-              className={`p-2 rounded-l text-sm font-medium transition-all border-2 whitespace-nowrap shrink-0 ${
-                selected === i
-                  ? "bg-white text-[var(--biru)] border-[var(--biru)] shadow-sm"
-                  : "bg-[var(--putih)] text-[var(--biru)]/90 border-[var(--biru)]/20 hover:bg-[#E6F3F5]"
-              }`}
+              className={`btn-chip ${
+                selected === i ? "btn-chip-active" : "btn-chip-inactive"
+              } shrink-0 p-2`}
             >
               {item.label}
             </button>
@@ -172,7 +170,7 @@ const WaktuTersedia = ({
                 centerItem(selected);
               }
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full flex items-center justify-center text-[var(--biru)] hover:text-[var(--biru)]/80 transition-colors"
+            className="btn-icon absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-[var(--biru)]"
           >
             <svg
               width="20"
@@ -198,7 +196,7 @@ const WaktuTersedia = ({
                 centerItem(selected);
               }
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full flex items-center justify-center text-[var(--biru)] hover:text-[var(--biru)]/80 transition-colors"
+            className="btn-icon absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-[var(--biru)]"
           >
             <svg
               width="20"

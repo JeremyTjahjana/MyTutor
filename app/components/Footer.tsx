@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { assets, social } from "../assets/assets";
@@ -25,28 +27,36 @@ const Footer = () => {
               <a
                 href="#"
                 aria-label="Facebook"
-                className="inline-flex transition-opacity hover:opacity-85"
+                title="Facebook (coming soon)"
+                onClick={(e) => e.preventDefault()}
+                className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
                 <Image src={social.facebook} alt="Facebook" className="h-6 w-6" />
               </a>
               <a
                 href="#"
                 aria-label="Instagram"
-                className="inline-flex transition-opacity hover:opacity-85"
+                title="Instagram (coming soon)"
+                onClick={(e) => e.preventDefault()}
+                className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
                 <Image src={social.instagram} alt="Instagram" className="h-6 w-6" />
               </a>
               <a
                 href="#"
                 aria-label="LinkedIn"
-                className="inline-flex transition-opacity hover:opacity-85"
+                title="LinkedIn (coming soon)"
+                onClick={(e) => e.preventDefault()}
+                className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
                 <Image src={social.linkedin} alt="LinkedIn" className="h-6 w-6" />
               </a>
               <a
                 href="#"
                 aria-label="WhatsApp"
-                className="inline-flex transition-opacity hover:opacity-85"
+                title="WhatsApp (coming soon)"
+                onClick={(e) => e.preventDefault()}
+                className="inline-flex transition-opacity hover:opacity-85 cursor-not-allowed"
               >
                 <Image src={social.whatsapp} alt="WhatsApp" className="h-6 w-6" />
               </a>

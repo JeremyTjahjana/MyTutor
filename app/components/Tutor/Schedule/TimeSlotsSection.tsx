@@ -70,8 +70,7 @@ export function TimeSlotsSection({
             <button
               onClick={() => onMobilePageChange(Math.max(0, mobilePage - 1))}
               disabled={mobilePage === 0}
-              className="rounded-full p-2 border transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                border-[var(--biru)] text-[var(--biru)] hover:bg-[var(--biru)]/10 disabled:hover:bg-transparent"
+              className="btn-icon h-10 w-10 border border-[var(--biru)] text-[var(--biru)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path
@@ -91,8 +90,7 @@ export function TimeSlotsSection({
                 onMobilePageChange(Math.min(totalPages - 1, mobilePage + 1))
               }
               disabled={mobilePage === totalPages - 1}
-              className="rounded-full p-2 border transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                border-[var(--biru)] text-[var(--biru)] hover:bg-[var(--biru)]/10 disabled:hover:bg-transparent"
+              className="btn-icon h-10 w-10 border border-[var(--biru)] text-[var(--biru)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path

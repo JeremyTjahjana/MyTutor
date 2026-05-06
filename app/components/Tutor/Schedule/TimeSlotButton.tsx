@@ -29,13 +29,9 @@ export function TimeSlotButton({
     <button
       type="button"
       onClick={onClick}
-      className={`text-left px-3 py-4 rounded-xl border text-sm transition-colors cursor-pointer hover:bg-[var(--biru)]/10${
-        isMobile ? "w-full" : "shrink-0"
-      } ${
-        active
-          ? "w-full bg-white border-[var(--biru)] text-[var(--biru)]"
-          : "w-full bg-white border-[var(--biru)]/30 text-[var(--biru)]/80"
-      }`}
+      className={`btn-card ${
+        active ? "btn-card-active" : "btn-card-inactive"
+      } ${isMobile ? "w-full" : "shrink-0"}`}
     >
       {label}
     </button>

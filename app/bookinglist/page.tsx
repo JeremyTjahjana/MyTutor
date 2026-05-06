@@ -1,34 +1,8 @@
 import React from "react";
 import BookingListCard from "../components/BookingList/BookingListCard";
+import { bookingDummy } from "../lib/data";
 
-const bookingDummy = [
-  {
-    id: 1,
-    matkul: "Matkul",
-    namatutor: "NAMA TUTOR",
-    jam: "12:00-13:00",
-    tanggal: "Jumat, 6 Maret 2026",
-    status: "Selesai",
-  },
-  {
-    id: 2,
-    matkul: "Fisika",
-    namatutor: "BUDI SANTOSO",
-    jam: "14:00-15:00",
-    tanggal: "Sabtu, 7 Maret 2026",
-    status: "Selesai",
-  },
-  {
-    id: 3,
-    matkul: "Kimia",
-    namatutor: "SINTA MAHARANI",
-    jam: "16:00-17:00",
-    tanggal: "Minggu, 8 Maret 2026",
-    status: "Selesai",
-  },
-];
-
-const page = () => {
+const BookingListPage = () => {
   return (
     <main className="mx-auto flex w-full max-w-[1280px] min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-10 md:px-8 lg:px-10">
       <h1 className="text-center text-3xl font-semibold text-[var(--biru)] sm:text-4xl">
@@ -51,4 +25,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default BookingListPage;

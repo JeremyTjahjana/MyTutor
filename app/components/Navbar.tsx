@@ -9,8 +9,6 @@ import { assets } from "../assets/assets";
 const Navbar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
-  const [isExploreOpen, setIsExploreOpen] = useState(false);
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
@@ -91,12 +89,12 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <div className="hidden md:flex items-center gap-4 margin-left-20px">
+        <div className="hidden md:flex items-center gap-4">
           <button
             type="button"
             aria-label="Open profile sidebar"
             onClick={() => setIsSidebarOpen(true)}
-            className="rounded-full active:scale-95 transition"
+            className="btn-icon border-transparent bg-transparent p-0"
           >
             <Image
               src={assets.mehehe}
@@ -110,7 +108,7 @@ const Navbar = () => {
           aria-label="Open menu"
           type="button"
           onClick={() => setIsSidebarOpen(true)}
-          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-[var(--gelap)]/20 text-[var(--gelap)] active:scale-95 transition"
+          className="btn-icon md:hidden h-10 w-10 border border-[var(--gelap)]/20 text-[var(--gelap)]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -156,9 +154,9 @@ const Navbar = () => {
             type="button"
             aria-label="Close menu"
             onClick={() => setIsSidebarOpen(false)}
-            className="w-9 h-9 inline-flex items-center justify-center rounded-full text-[var(--gelap)]/65 hover:text-[var(--gelap)]"
+            className="btn-icon h-9 w-9 text-[var(--gelap)]/65 hover:text-[var(--gelap)]"
           >
-            x
+            <Image src={assets.close} alt="Close" className="w-5 h-5" />
           </button>
         </div>
 

@@ -11,16 +11,17 @@ export function ActionsSection({
 }: ActionsSectionProps) {
   return (
     <div className="mt-8 flex flex-col gap-4 justify-center align-center lg:justify-start px-10">
-      <Link
-        href={confirmationHref ?? "#"}
-        className="inline-flex w-full justify-center rounded-full bg-[var(--biru)] px-6 py-3 text-white font-semibold"
-      >
-        Pesan Sekarang
-      </Link>
-      <Link
-        href={`/tutor/${tutorId}`}
-        className="inline-flex w-full justify-center rounded-full border-2 border-[var(--biru)] px-6 py-3 text-[var(--biru)] font-semibold bg-white"
-      >
+      {confirmationHref ? (
+        <Link href={confirmationHref} className="btn-primary w-full">
+          Pesan Sekarang
+        </Link>
+      ) : (
+        <button disabled className="btn-primary w-full">
+          Pesan Sekarang
+        </button>
+      )}
+
+      <Link href={`/tutor/${tutorId}`} className="btn-secondary w-full">
         Kembali
       </Link>
     </div>

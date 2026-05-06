@@ -15,15 +15,11 @@ export function ChevronButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className={`
-        shrink-0 rounded-full p-2 border transition-colors duration-150
-        focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/30 active:scale-95
-        ${
-          disabled
-            ? "border-[var(--biru)]/30 text-[var(--biru)]/30 opacity-50 cursor-not-allowed"
-            : "border-[var(--biru)] text-[var(--biru)] hover:bg-[var(--biru)]/10"
-        }
-      `}
+      className={`btn-icon shrink-0 h-9 w-9 border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/30 ${
+        disabled
+          ? "border-[var(--biru)]/30 text-[var(--biru)]/30 opacity-50 cursor-not-allowed"
+          : "border-[var(--biru)] text-[var(--biru)]"
+      }`}
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
         <path

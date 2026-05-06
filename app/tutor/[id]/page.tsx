@@ -25,8 +25,8 @@ export default async function Page({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F8FC] px-4 py-8 sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-5xl p-6 sm:p-8 lg:p-10">
+    <main className="min-h-screen bg-[#F7F8FC] px-4 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-5xl px-6 sm:px-8 lg:px-10">
         <TutorHeader tutor={tutor} />
         <TutorDescription description={tutor.description} />
         <PortfolioSection

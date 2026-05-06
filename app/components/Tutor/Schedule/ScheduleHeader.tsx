@@ -1,14 +1,13 @@
-interface TutorInfo {
-  name: string;
-  profile?: { src: string };
-  matkuls: string[];
-}
+import type { Tutor } from "@/app/types/tutor";
 
 interface ScheduleHeaderProps {
-  tutor: TutorInfo;
+  tutor: Tutor;
 }
 
 export function ScheduleHeader({ tutor }: ScheduleHeaderProps) {
+  const profileSrc =
+    typeof tutor.profile === "string" ? tutor.profile : tutor.profile.src;
+
   return (
     <div className="pt-2 lg:pt-6">
       <div className="flex items-center gap-4">
@@ -16,7 +15,7 @@ export function ScheduleHeader({ tutor }: ScheduleHeaderProps) {
         <div className="block lg:hidden shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={tutor.profile?.src ?? "/"}
+            src={profileSrc}
             alt={`${tutor.name} profile`}
             className="w-28 h-28 rounded-full object-cover border-2 border-[var(--biru)]/60"
           />
@@ -34,3 +33,4 @@ export function ScheduleHeader({ tutor }: ScheduleHeaderProps) {
     </div>
   );
 }
+

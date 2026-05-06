@@ -178,15 +178,12 @@ export default function ConfirmationPage() {
                 ? `?${searchParams.toString()}&total=${totalPrice}`
                 : `?total=${totalPrice}`
             }`}
-            className="inline-flex min-h-[56px] items-center justify-center rounded-full bg-[var(--biru)] px-6 py-3 text-center text-[16px] font-semibold text-white shadow-[0_14px_28px_rgba(0,138,180,0.28)] transition hover:scale-[1.01] hover:opacity-95 active:scale-[0.99]"
+            className="btn-primary w-full"
           >
             Pembayaran (QRIS)
           </Link>
 
-          <Link
-            href="/tutor"
-            className="inline-flex min-h-[56px] items-center justify-center rounded-full border-2 border-[var(--biru)] px-6 py-3 text-center text-[16px] font-semibold text-[var(--biru)] bg-white transition hover:scale-[1.01] hover:opacity-95 active:scale-[0.99]"
-          >
+          <Link href="/tutor" className="btn-secondary w-full">
             Kembali
           </Link>
         </div>

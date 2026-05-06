@@ -5,8 +5,8 @@ import { dummyTutor } from "../../assets/assets";
 
 const ListTutor = () => {
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-12 sm:py-16 bg-[var(--putih)] text-[var(--gelap)]">
-      <div className="mt-8 grid w-full grid-cols-1 justify-items-center gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <section className="mx-auto w-full max-w-[1280px] px-2 sm:px-6 md:px-8 lg:px-12 py-2 sm:py-8 bg-[var(--putih)] text-[var(--gelap)]">
+      <div className="mt-16 grid w-full grid-cols-1 justify-items-center gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {dummyTutor.map((item) => (
           <Link
             key={item.id}
