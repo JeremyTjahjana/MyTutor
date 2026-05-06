@@ -91,7 +91,7 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4 margin-left-20px">
           <button
             type="button"
             aria-label="Open profile sidebar"
@@ -101,7 +101,7 @@ const Navbar = () => {
             <Image
               src={assets.mehehe}
               alt="Foto profil"
-              className="w-11 h-11 rounded-full object-cover hover:cursor-pointer  hover:scale-105 transition-transform"
+              className="w-14 h-14 rounded-full object-cover hover:cursor-pointer  hover:scale-105 transition-transform"
             />
           </button>
         </div>
