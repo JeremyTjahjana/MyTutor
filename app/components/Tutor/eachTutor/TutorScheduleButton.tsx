@@ -22,10 +22,6 @@ export function TutorScheduleButton({ tutorId }: TutorScheduleButtonProps) {
 
   return (
     <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full mx-auto sm:max-w-md">
-      <button onClick={handleBack} className="btn-secondary w-full">
-        Kembali
-      </button>
-
       <button
         onClick={handleViewSchedule}
         disabled={isPending}
@@ -42,6 +38,10 @@ export function TutorScheduleButton({ tutorId }: TutorScheduleButtonProps) {
             Cek Jadwal
           </>
         )}
+      </button>
+
+      <button onClick={handleBack} className="btn-secondary w-full">
+        Kembali
       </button>
     </div>
   );
