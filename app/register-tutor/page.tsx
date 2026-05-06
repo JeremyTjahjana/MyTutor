@@ -8,6 +8,7 @@ import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
 import Step4 from "./components/Step4";
+import Step5 from "./components/Step5";
 import Success from "./components/Success";
 
 export default function RegisterTutorPage() {
@@ -104,17 +105,25 @@ export default function RegisterTutorPage() {
     return formData.matkuls.length > 0 && formData.waktuTersedia.length > 0;
   };
 
+  const isStep5Valid = () => {
+    return (
+      formData.contractUploaded === true &&
+      formData.contractFileName.trim() !== ""
+    );
+  };
+
   const canProceedToNext = () => {
     if (currentStep === 1) return isStep1Valid();
     if (currentStep === 2) return isStep2Valid();
     if (currentStep === 3) return isStep3Valid();
     if (currentStep === 4) return isStep4Valid();
+    if (currentStep === 5) return isStep5Valid();
     return false;
   };
 
   const handleNextStep = () => {
     if (canProceedToNext()) {
-      if (currentStep === 4) {
+      if (currentStep === 5) {
         setIsSubmitted(true);
       } else {
         setCurrentStep(currentStep + 1);
@@ -155,7 +164,7 @@ export default function RegisterTutorPage() {
 
         {/* Stepper */}
         <div className="mb-10 flex items-center justify-center gap-2 sm:gap-4">
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2, 3, 4, 5].map((step) => (
             <div key={step} className="flex items-center gap-2 sm:gap-4">
               <div
                 className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base transition-colors ${
@@ -170,7 +179,7 @@ export default function RegisterTutorPage() {
                   step
                 )}
               </div>
-              {step < 4 && (
+              {step < 5 && (
                 <div
                   className={`h-1 w-4 sm:w-6 transition-colors ${
                     currentStep > step
@@ -229,6 +238,21 @@ export default function RegisterTutorPage() {
             />
           )}
 
+          {/* Step 5: Contract */}
+          {currentStep === 5 && (
+            <Step5
+              formData={formData}
+              onUploadContract={(file: File) => {
+                const name = file.name;
+                setFormData((prev) => ({
+                  ...prev,
+                  contractFileName: name,
+                  contractUploaded: true,
+                }));
+              }}
+            />
+          )}
+
           {/* Navigation Buttons */}
           <div className="mt-8 flex gap-3 sm:gap-4">
             <button
@@ -252,15 +276,15 @@ export default function RegisterTutorPage() {
                   : "bg-[var(--gelap)]/5 text-[var(--gelap)]/50 cursor-not-allowed"
               }`}
             >
-              {currentStep === 4 ? "Selesai" : "Lanjut"}
-              {currentStep < 4 && <ChevronRight className="w-4 h-4" />}
+              {currentStep === 5 ? "Selesai" : "Lanjut"}
+              {currentStep < 5 && <ChevronRight className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
         {/* Progress Text */}
         <p className="text-center text-sm text-[var(--gelap)]/60 mt-6">
-          Langkah {currentStep} dari 4
+          Langkah {currentStep} dari 5
         </p>
       </div>
     </main>

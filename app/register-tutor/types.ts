@@ -26,5 +26,8 @@ export type FormData = {
   // Step 4: Matkul & Waktu
   matkuls: string[];
   waktuTersedia: TimeSlot[];
+  // Step 5: Contract
+  contractFileName: string;
+  contractUploaded: boolean;
   inputMatkul: string;
 };

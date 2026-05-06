@@ -15,6 +15,9 @@ export const initialFormData: FormData = {
   biayaPerJam: "",
   matkuls: [],
   waktuTersedia: [],
+  // Step 5
+  contractFileName: "",
+  contractUploaded: false,
   inputMatkul: "",
 };
 
