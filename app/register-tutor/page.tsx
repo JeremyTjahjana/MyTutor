@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronRight, Check, Loader2 } from "lucide-react";
 import { FormData, TimeSlot } from "./types";
 import { initialFormData } from "./constants";
 import Step1 from "./components/Step1";
@@ -10,12 +11,20 @@ import Step3 from "./components/Step3";
 import Step4 from "./components/Step4";
 import Step5 from "./components/Step5";
 import Success from "./components/Success";
+import { registerTutorAction } from "@/app/server/actions/register.action";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function RegisterTutorPage() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // If already logged in, start at Step 2 (skip account creation)
+  const [currentStep, setCurrentStep] = useState(user ? 2 : 1);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -47,10 +56,9 @@ export default function RegisterTutorPage() {
   const handleToggleWaktu = (input: TimeSlot | string) => {
     const normalize = (val: TimeSlot | string): TimeSlot => {
       if (typeof val !== "string") return val;
-      // parse preset like "Senin 13:00 - 14:30"
       const [day, ...rest] = val.split(" ");
       const times = rest.join(" ");
-      const [start, , end] = times.split(" "); // ['13:00', '-', '14:30']
+      const [start, , end] = times.split(" ");
       return { day, start, end };
     };
 
@@ -76,41 +84,28 @@ export default function RegisterTutorPage() {
     });
   };
 
-  const isStep1Valid = () => {
-    return (
-      formData.namaLengkap.trim() &&
-      formData.emailIPB.includes("@apps.ipb.ac.id") &&
-      formData.password.length >= 6 &&
-      formData.nomorTelepon.trim()
-    );
-  };
+  const isStep1Valid = () =>
+    formData.namaLengkap.trim() &&
+    formData.emailIPB.includes("@apps.ipb.ac.id") &&
+    formData.password.length >= 6 &&
+    formData.nomorTelepon.trim();
 
-  const isStep2Valid = () => {
-    return (
-      formData.nim.trim() &&
-      formData.fakultas &&
-      formData.programStudi &&
-      formData.alamatDomisili &&
-      formData.angkatan
-    );
-  };
+  const isStep2Valid = () =>
+    formData.nim.trim() &&
+    formData.fakultas &&
+    formData.programStudi &&
+    formData.alamatDomisili &&
+    formData.angkatan;
 
-  const isStep3Valid = () => {
-    return (
-      formData.lamaExperience && formData.subject && formData.biayaPerJam.trim()
-    );
-  };
+  const isStep3Valid = () =>
+    formData.lamaExperience && formData.subject && formData.biayaPerJam.trim();
 
-  const isStep4Valid = () => {
-    return formData.matkuls.length > 0 && formData.waktuTersedia.length > 0;
-  };
+  const isStep4Valid = () =>
+    formData.matkuls.length > 0 && formData.waktuTersedia.length > 0;
 
-  const isStep5Valid = () => {
-    return (
-      formData.contractUploaded === true &&
-      formData.contractFileName.trim() !== ""
-    );
-  };
+  const isStep5Valid = () =>
+    formData.contractUploaded === true &&
+    formData.contractFileName.trim() !== "";
 
   const canProceedToNext = () => {
     if (currentStep === 1) return isStep1Valid();
@@ -121,20 +116,55 @@ export default function RegisterTutorPage() {
     return false;
   };
 
-  const handleNextStep = () => {
-    if (canProceedToNext()) {
-      if (currentStep === 5) {
-        setIsSubmitted(true);
-      } else {
-        setCurrentStep(currentStep + 1);
+  const handleNextStep = async () => {
+    if (!canProceedToNext()) return;
+
+    if (currentStep === 5) {
+      // Submit to backend
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        const result = await registerTutorAction(
+          user
+            ? {
+                // Logged-in: pass existing user ID, skip account creation
+                existingUserId: user.id,
+                nomorTelepon: formData.nomorTelepon,
+                lamaExperience: formData.lamaExperience,
+                biayaPerJam: formData.biayaPerJam,
+                matkuls: formData.matkuls,
+                waktuTersedia: formData.waktuTersedia,
+              }
+            : {
+                // Guest: full registration with new account
+                namaLengkap: formData.namaLengkap,
+                emailIPB: formData.emailIPB,
+                password: formData.password,
+                nomorTelepon: formData.nomorTelepon,
+                lamaExperience: formData.lamaExperience,
+                biayaPerJam: formData.biayaPerJam,
+                matkuls: formData.matkuls,
+                waktuTersedia: formData.waktuTersedia,
+              },
+        );
+
+        if (result.success) {
+          setIsSubmitted(true);
+        } else {
+          setSubmitError(result.error ?? "Terjadi kesalahan.");
+        }
+      } catch {
+        setSubmitError("Terjadi kesalahan jaringan. Coba lagi.");
+      } finally {
+        setIsSubmitting(false);
       }
+    } else {
+      setCurrentStep(currentStep + 1);
     }
   };
 
   const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
   if (isSubmitted) {
@@ -160,11 +190,16 @@ export default function RegisterTutorPage() {
           <p className="text-sm sm:text-base text-[var(--gelap)]/70">
             Tolong lengkapi data dengan baik sebelum di verifikasi
           </p>
+          {user && (
+            <p className="mt-2 text-sm text-green-600 font-medium">
+              Masuk sebagai: {user.fullName} ({user.email})
+            </p>
+          )}
         </div>
 
-        {/* Stepper */}
+        {/* Stepper — shows 4 steps when logged in (skip step 1), 5 when guest */}
         <div className="mb-10 flex items-center justify-center gap-2 sm:gap-4">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {(user ? [2, 3, 4, 5] : [1, 2, 3, 4, 5]).map((step, idx) => (
             <div key={step} className="flex items-center gap-2 sm:gap-4">
               <div
                 className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base transition-colors ${
@@ -176,10 +211,10 @@ export default function RegisterTutorPage() {
                 {currentStep > step ? (
                   <Check className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
                 ) : (
-                  step
+                  idx + 1
                 )}
               </div>
-              {step < 5 && (
+              {idx < (user ? 3 : 4) && (
                 <div
                   className={`h-1 w-4 sm:w-6 transition-colors ${
                     currentStep > step
@@ -194,7 +229,6 @@ export default function RegisterTutorPage() {
 
         {/* Form Container */}
         <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
-          {/* Step 1: Identitas Diri */}
           {currentStep === 1 && (
             <Step1
               formData={formData}
@@ -203,8 +237,6 @@ export default function RegisterTutorPage() {
               onTogglePassword={() => setShowPassword(!showPassword)}
             />
           )}
-
-          {/* Step 2: Data Akademik */}
           {currentStep === 2 && (
             <Step2
               formData={formData}
@@ -219,13 +251,9 @@ export default function RegisterTutorPage() {
               }
             />
           )}
-
-          {/* Step 3: Data Pengajaran */}
           {currentStep === 3 && (
             <Step3 formData={formData} onChange={handleInputChange} />
           )}
-
-          {/* Step 4: Matkul & Waktu */}
           {currentStep === 4 && (
             <Step4
               formData={formData}
@@ -237,29 +265,33 @@ export default function RegisterTutorPage() {
               onToggleWaktu={handleToggleWaktu}
             />
           )}
-
-          {/* Step 5: Contract */}
           {currentStep === 5 && (
             <Step5
               formData={formData}
               onUploadContract={(file: File) => {
-                const name = file.name;
                 setFormData((prev) => ({
                   ...prev,
-                  contractFileName: name,
+                  contractFileName: file.name,
                   contractUploaded: true,
                 }));
               }}
             />
           )}
 
+          {/* Error */}
+          {submitError && (
+            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              {submitError}
+            </p>
+          )}
+
           {/* Navigation Buttons */}
           <div className="mt-8 flex gap-3 sm:gap-4">
             <button
               onClick={handlePrevStep}
-              disabled={currentStep === 1}
+              disabled={currentStep === (user ? 2 : 1)}
               className={`flex-1 px-4 py-3 rounded-lg border-2 font-semibold transition-all ${
-                currentStep === 1
+                currentStep === (user ? 2 : 1)
                   ? "border-[var(--gelap)]/20 bg-[var(--gelap)]/5 text-[var(--gelap)]/50 cursor-not-allowed"
                   : "btn-secondary"
               }`}
@@ -269,15 +301,26 @@ export default function RegisterTutorPage() {
 
             <button
               onClick={handleNextStep}
-              disabled={!canProceedToNext()}
+              disabled={!canProceedToNext() || isSubmitting}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${
-                canProceedToNext()
+                canProceedToNext() && !isSubmitting
                   ? "btn-primary"
                   : "bg-[var(--gelap)]/5 text-[var(--gelap)]/50 cursor-not-allowed"
               }`}
             >
-              {currentStep === 5 ? "Selesai" : "Lanjut"}
-              {currentStep < 5 && <ChevronRight className="w-4 h-4" />}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Mendaftar...
+                </>
+              ) : currentStep === 5 ? (
+                "Selesai"
+              ) : (
+                <>
+                  Lanjut
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </div>

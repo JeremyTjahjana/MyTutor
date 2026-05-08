@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface ActionsSectionProps {
-  tutorId: number;
+  tutorId: string; // UUID
   confirmationHref?: string;
 }
 
@@ -16,7 +16,7 @@ export function ActionsSection({
           Pesan Sekarang
         </Link>
       ) : (
-        <button disabled className="btn-primary w-full">
+        <button disabled className="btn-primary w-full opacity-60 cursor-not-allowed">
           Pesan Sekarang
         </button>
       )}

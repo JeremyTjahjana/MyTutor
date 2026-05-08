@@ -1,12 +1,12 @@
-import type { Tutor } from "@/app/types/tutor";
+import { assets } from "@/app/assets/assets";
 
 interface TutorProfileCardProps {
-  tutor: Tutor;
+  name: string;
+  avatarUrl: string | null;
 }
 
-export function TutorProfileCard({ tutor }: TutorProfileCardProps) {
-  const profileSrc =
-    typeof tutor.profile === "string" ? tutor.profile : tutor.profile.src;
+export function TutorProfileCard({ name, avatarUrl }: TutorProfileCardProps) {
+  const profileSrc = avatarUrl ?? assets.mehehe.src;
 
   return (
     <div className="hidden lg:flex lg:col-span-4 items-center justify-center">
@@ -15,7 +15,7 @@ export function TutorProfileCard({ tutor }: TutorProfileCardProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={profileSrc}
-            alt={`${tutor.name} profile`}
+            alt={`${name} profile`}
             className="h-full w-full object-cover"
           />
         </div>

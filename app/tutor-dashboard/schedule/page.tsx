@@ -1,123 +1,168 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { TimeSlot } from "@/app/register-tutor/types";
-import { X } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { X, Loader2 } from "lucide-react";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { DAY_NAMES, DAY_NUMBERS } from "@/app/types/tutor";
+import type { Schedule } from "@/app/types/tutor";
+import {
+  updateTutorScheduleAction,
+  type ScheduleSlot,
+} from "@/app/server/actions/tutors.action";
+import { fetchTutorProfileByUserId } from "@/app/server/repositories/tutors.repository";
+
+type LocalSlot = {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+};
+
+function addMinutes(time: string, mins: number): string {
+  const [hh, mm] = time.split(":").map(Number);
+  const dt = new Date();
+  dt.setHours(hh, mm + mins, 0, 0);
+  return `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
+}
 
 export default function SchedulePage() {
-  const [selectedDay, setSelectedDay] = useState("");
+  const { user } = useAuth();
+  const [slots, setSlots] = useState<LocalSlot[]>([]);
+  const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedStart, setSelectedStart] = useState("");
-  const [availability, setAvailability] = useState<TimeSlot[]>([
-    { day: "Senin", start: "09:00", end: "10:30" },
-    { day: "Senin", start: "13:00", end: "14:30" },
-    { day: "Rabu", start: "14:00", end: "15:30" },
-    { day: "Jumat", start: "10:00", end: "11:30" },
-  ]);
 
   const days = useMemo(
-    () => ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
+    () => [1, 2, 3, 4, 5, 6, 0].map((d) => ({ value: d, label: DAY_NAMES[d] })),
     [],
   );
 
   const timeOptions = useMemo(() => {
     const opts: string[] = [];
     for (let h = 6; h <= 22; h++) {
-      for (let m of ["00", "30"]) {
-        const hh = String(h).padStart(2, "0");
-        opts.push(`${hh}:${m}`);
+      for (const m of ["00", "30"]) {
+        opts.push(`${String(h).padStart(2, "0")}:${m}`);
       }
     }
     return opts;
   }, []);
 
-  const addMinutes = (time: string, mins: number) => {
-    const [hh, mm] = time.split(":").map(Number);
-    const dt = new Date();
-    dt.setHours(hh, mm + mins, 0, 0);
-    const hh2 = String(dt.getHours()).padStart(2, "0");
-    const mm2 = String(dt.getMinutes()).padStart(2, "0");
-    return `${hh2}:${mm2}`;
-  };
+  // Load existing schedules
+  useEffect(() => {
+    if (!user) return;
+    const loadSchedules = async () => {
+      try {
+        const res = await fetch(`/api/schedules?tutorUserId=${user.id}`);
+        if (!res.ok) return;
+        const data: { tutorProfileId: string; schedules: Schedule[] } =
+          await res.json();
+        setTutorProfileId(data.tutorProfileId);
+        setSlots(
+          data.schedules.map((s) => ({
+            dayOfWeek: s.dayOfWeek,
+            startTime: s.startTime.slice(0, 5),
+            endTime: s.endTime.slice(0, 5),
+          })),
+        );
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSchedules();
+  }, [user]);
 
   const handleAddSlot = () => {
-    if (!selectedDay || !selectedStart) return;
-
-    const newSlot: TimeSlot = {
-      day: selectedDay,
-      start: selectedStart,
-      end: addMinutes(selectedStart, 90),
+    if (selectedDay === null || !selectedStart) return;
+    const endTime = addMinutes(selectedStart, 90);
+    const newSlot: LocalSlot = {
+      dayOfWeek: selectedDay,
+      startTime: selectedStart,
+      endTime,
     };
-
-    const exists = availability.some(
+    const exists = slots.some(
       (s) =>
-        s.day === newSlot.day &&
-        s.start === newSlot.start &&
-        s.end === newSlot.end,
+        s.dayOfWeek === newSlot.dayOfWeek &&
+        s.startTime === newSlot.startTime,
     );
-
-    if (!exists) {
-      setAvailability([...availability, newSlot]);
-    }
-
-    setSelectedDay("");
+    if (!exists) setSlots([...slots, newSlot]);
+    setSelectedDay(null);
     setSelectedStart("");
   };
 
-  const handleRemoveSlot = (slot: TimeSlot) => {
-    setAvailability(
-      availability.filter(
+  const handleRemoveSlot = (slot: LocalSlot) => {
+    setSlots(
+      slots.filter(
         (s) =>
-          !(s.day === slot.day && s.start === slot.start && s.end === slot.end),
+          !(
+            s.dayOfWeek === slot.dayOfWeek &&
+            s.startTime === slot.startTime &&
+            s.endTime === slot.endTime
+          ),
       ),
     );
   };
 
-  const handleSaveSchedule = () => {
-    // TODO: Save to backend
-    console.log("Saving availability:", availability);
-    alert("Schedule saved successfully!");
+  const handleSave = async () => {
+    if (!tutorProfileId) return;
+    setIsSaving(true);
+    setSaveMessage(null);
+    const result = await updateTutorScheduleAction(
+      tutorProfileId,
+      slots.map((s) => ({
+        dayOfWeek: s.dayOfWeek,
+        startTime: s.startTime + ":00",
+        endTime: s.endTime + ":00",
+      })),
+    );
+    setIsSaving(false);
+    setSaveMessage(result.success ? "Jadwal berhasil disimpan!" : result.error ?? "Gagal menyimpan.");
   };
 
-  const slotsByDay = days.map((day) => ({
-    day,
-    slots: availability.filter((s) => s.day === day),
+  const slotsByDay = days.map(({ value, label }) => ({
+    value,
+    label,
+    slots: slots.filter((s) => s.dayOfWeek === value),
   }));
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--biru)]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-[var(--biru)] mb-1">
-          Manage Schedule
-        </h1>
-        <p className="text-[var(--gelap)]/60">
-          Set your available teaching time slots.
-        </p>
+        <h1 className="text-3xl font-bold text-[var(--biru)] mb-1">Kelola Jadwal</h1>
+        <p className="text-[var(--gelap)]/60">Atur slot waktu mengajar yang tersedia.</p>
       </div>
 
       {/* Add New Slot */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-[var(--gelap)]/5">
-        <h2 className="text-lg font-semibold text-[var(--biru)] mb-4">
-          Add Available Slot
-        </h2>
-
+        <h2 className="text-lg font-semibold text-[var(--biru)] mb-4">Tambah Slot Waktu</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-4 items-end">
           {/* Day Picker */}
           <div>
-            <label className="block text-sm font-medium text-[var(--gelap)]/70 mb-2">
-              Day
-            </label>
+            <label className="block text-sm font-medium text-[var(--gelap)]/70 mb-2">Hari</label>
             <div className="flex flex-wrap gap-2">
               {days.map((d) => (
                 <button
-                  key={d}
-                  onClick={() => setSelectedDay(d)}
+                  key={d.value}
+                  onClick={() => setSelectedDay(d.value)}
                   className={`px-3 py-2 rounded-lg text-sm border transition-all ${
-                    selectedDay === d
+                    selectedDay === d.value
                       ? "bg-[var(--biru)] text-white border-[var(--biru)]"
                       : "bg-white border-[var(--gelap)]/20 text-[var(--gelap)]"
                   }`}
                 >
-                  {d}
+                  {d.label}
                 </button>
               ))}
             </div>
@@ -125,15 +170,13 @@ export default function SchedulePage() {
 
           {/* Time Picker */}
           <div>
-            <label className="block text-sm font-medium text-[var(--gelap)]/70 mb-2">
-              Start Time
-            </label>
+            <label className="block text-sm font-medium text-[var(--gelap)]/70 mb-2">Jam Mulai</label>
             <select
               value={selectedStart}
               onChange={(e) => setSelectedStart(e.target.value)}
               className="w-full px-4 py-2 border border-[var(--gelap)]/20 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/30"
             >
-              <option value="">Select time</option>
+              <option value="">Pilih jam</option>
               {timeOptions.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -142,17 +185,16 @@ export default function SchedulePage() {
             </select>
           </div>
 
-          {/* Add Button */}
           <button
             onClick={handleAddSlot}
-            disabled={!selectedDay || !selectedStart}
+            disabled={selectedDay === null || !selectedStart}
             className={`btn-primary px-6 py-2 rounded-lg text-sm font-medium ${
-              !selectedDay || !selectedStart
+              selectedDay === null || !selectedStart
                 ? "opacity-60 cursor-not-allowed"
                 : ""
             }`}
           >
-            Add Slot
+            Tambah Slot
           </button>
         </div>
       </div>
@@ -161,25 +203,25 @@ export default function SchedulePage() {
       <div className="space-y-4">
         {slotsByDay.map((daySchedule) => (
           <div
-            key={daySchedule.day}
+            key={daySchedule.value}
             className="bg-white rounded-lg shadow-sm p-6 border border-[var(--gelap)]/5"
           >
             <h3 className="font-semibold text-[var(--biru)] mb-3">
-              {daySchedule.day}
+              {daySchedule.label}
             </h3>
             {daySchedule.slots.length === 0 ? (
               <p className="text-sm text-[var(--gelap)]/50 italic">
-                No available slots
+                Belum ada slot tersedia
               </p>
             ) : (
               <div className="space-y-2">
                 {daySchedule.slots.map((slot) => (
                   <div
-                    key={`${slot.day}-${slot.start}-${slot.end}`}
+                    key={`${slot.dayOfWeek}-${slot.startTime}`}
                     className="flex items-center justify-between bg-[var(--putih)] p-4 rounded-lg border border-[var(--gelap)]/10"
                   >
                     <span className="font-medium text-[var(--biru)]">
-                      {slot.start} - {slot.end}
+                      {slot.startTime} - {slot.endTime}
                     </span>
                     <button
                       onClick={() => handleRemoveSlot(slot)}
@@ -195,12 +237,28 @@ export default function SchedulePage() {
         ))}
       </div>
 
-      {/* Save Button */}
+      {saveMessage && (
+        <p
+          className={`text-sm px-4 py-3 rounded-xl ${
+            saveMessage.includes("berhasil")
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-600"
+          }`}
+        >
+          {saveMessage}
+        </p>
+      )}
+
       <button
-        onClick={handleSaveSchedule}
-        className="btn-primary px-6 py-3 rounded-lg font-semibold text-white w-full sm:w-auto"
+        onClick={handleSave}
+        disabled={isSaving || !tutorProfileId}
+        className="btn-primary px-6 py-3 rounded-lg font-semibold w-full sm:w-auto"
       >
-        Save Schedule
+        {isSaving ? (
+          <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Menyimpan...</>
+        ) : (
+          "Simpan Jadwal"
+        )}
       </button>
     </div>
   );

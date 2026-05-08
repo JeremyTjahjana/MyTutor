@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   BarChart3,
   Calendar,
@@ -19,10 +19,15 @@ export default function TutorDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading, isApprovedTutor } = useAuth();
+  const { user, isLoading, isApprovedTutor, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    router.push("/");
+  }, [logout, router]);
 
   useEffect(() => {
     if (!isLoading && !isApprovedTutor) {
@@ -144,7 +149,7 @@ export default function TutorDashboardLayout({
             {/* User Info - Desktop Only */}
             <div className="hidden sm:block text-right">
               <p className="text-xs sm:text-sm font-semibold truncate max-w-[120px]">
-                {user?.name}
+                {user?.fullName}
               </p>
               <p className="text-xs text-blue-200 truncate max-w-[120px]">
                 {user?.email}
@@ -153,6 +158,7 @@ export default function TutorDashboardLayout({
 
             {/* Logout Button */}
             <button
+              onClick={handleLogout}
               className="p-2 rounded-lg text-blue-100 hover:bg-blue-600/50 transition-colors"
               title="Logout"
             >

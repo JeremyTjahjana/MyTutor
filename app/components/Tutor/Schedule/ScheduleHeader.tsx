@@ -1,12 +1,13 @@
-import type { Tutor } from "@/app/types/tutor";
+import { assets } from "@/app/assets/assets";
 
 interface ScheduleHeaderProps {
-  tutor: Tutor;
+  name: string;
+  avatarUrl: string | null;
+  subjects: string[];
 }
 
-export function ScheduleHeader({ tutor }: ScheduleHeaderProps) {
-  const profileSrc =
-    typeof tutor.profile === "string" ? tutor.profile : tutor.profile.src;
+export function ScheduleHeader({ name, avatarUrl, subjects }: ScheduleHeaderProps) {
+  const profileSrc = avatarUrl ?? assets.mehehe.src;
 
   return (
     <div className="pt-2 lg:pt-6">
@@ -16,21 +17,17 @@ export function ScheduleHeader({ tutor }: ScheduleHeaderProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={profileSrc}
-            alt={`${tutor.name} profile`}
+            alt={`${name} profile`}
             className="w-28 h-28 rounded-full object-cover border-2 border-[var(--biru)]/60"
           />
         </div>
-
         <div>
-          <h1 className="text-[34px] font-bold text-[var(--biru)]">
-            {tutor.name}
-          </h1>
+          <h1 className="text-[34px] font-bold text-[var(--biru)]">{name}</h1>
           <p className="mt-1 text-sm text-[var(--gelap)]">
-            {tutor.matkuls.join(", ")}
+            {subjects.join(", ")}
           </p>
         </div>
       </div>
     </div>
   );
 }
-

@@ -3,4 +3,4 @@ export { TutorDescription } from "./TutorDescription";
 export { PortfolioSection } from "./PortfolioSection";
 export { TestimoniesSection } from "./TestimoniesSection";
 export { TutorScheduleButton } from "./TutorScheduleButton";
-export type { TutorDetail, TutorTestimony } from "./types";
+export type { TutorDetail, Testimony } from "./types";

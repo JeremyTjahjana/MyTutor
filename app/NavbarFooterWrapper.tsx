@@ -11,12 +11,16 @@ export function NavbarFooterWrapper({
 }) {
   const pathname = usePathname();
   const isTutorDashboard = pathname.startsWith("/tutor-dashboard");
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname.startsWith("/auth/callback");
 
   return (
     <>
-      {!isTutorDashboard && <Navbar />}
+      {!isTutorDashboard && !isAuthPage && <Navbar />}
       {children}
-      {!isTutorDashboard && <Footer />}
+      {!isTutorDashboard && !isAuthPage && <Footer />}
     </>
   );
 }

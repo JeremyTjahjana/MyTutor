@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Calendar, Loader2 } from "lucide-react";
 
 interface TutorScheduleButtonProps {
-  tutorId: number;
+  tutorId: string; // UUID
 }
 
 export function TutorScheduleButton({ tutorId }: TutorScheduleButtonProps) {
@@ -17,7 +17,7 @@ export function TutorScheduleButton({ tutorId }: TutorScheduleButtonProps) {
   };
 
   const handleBack = () => {
-    router.push(`/tutor`);
+    router.push("/tutor");
   };
 
   return (
@@ -39,7 +39,6 @@ export function TutorScheduleButton({ tutorId }: TutorScheduleButtonProps) {
           </>
         )}
       </button>
-
       <button onClick={handleBack} className="btn-secondary w-full">
         Kembali
       </button>

@@ -2,16 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { assets } from "../assets/assets";
 import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
-  const { isApprovedTutor } = useAuth();
+  const { user, logout } = useAuth();
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
@@ -107,7 +109,7 @@ const Navbar = () => {
               <span>Bookings</span>
             </Link>
           </li>
-          {isApprovedTutor && (
+          {user?.role === "tutor" && (
             <li>
               <Link
                 href="/tutor-dashboard"
@@ -131,9 +133,16 @@ const Navbar = () => {
             className="btn-icon border-transparent bg-transparent p-0"
           >
             <Image
-              src={assets.mehehe}
+              src={
+                user?.avatarUrl && !imageError ? user.avatarUrl : assets.profile
+              }
               alt="Foto profil"
-              className="w-14 h-14 rounded-full object-cover hover:cursor-pointer  hover:scale-105 transition-transform"
+              width={56}
+              height={56}
+              className="w-14 h-14 rounded-full object-cover hover:cursor-pointer  hover:scale-105 
+              border border-1 border-[var(--gelap)]
+              transition-transform"
+              onError={() => setImageError(true)}
             />
           </button>
         </div>
@@ -198,14 +207,24 @@ const Navbar = () => {
         <div className="p-5">
           <div className="flex items-center gap-3 pb-5 border-b border-[var(--gelap)]/10">
             <Image
-              src={assets.mehehe}
+              src={
+                user?.avatarUrl && !imageError ? user.avatarUrl : assets.profile
+              }
               alt="Foto profil"
+              width={56}
+              height={56}
               className="w-14 h-14 rounded-full object-cover"
+              onError={() => setImageError(true)}
             />
             <div>
               <p className="text-base font-bold text-[var(--biru)]">
-                Mwehehehe
+                {user ? user.fullName : "Tamu"}
               </p>
+              {user && (
+                <p className="text-xs text-[var(--gelap)]/60 truncate max-w-[160px]">
+                  {user.email}
+                </p>
+              )}
             </div>
           </div>
 
@@ -249,7 +268,7 @@ const Navbar = () => {
                 <span>Status Booking</span>
               </Link>
             </li>
-            {isApprovedTutor && (
+            {user?.role === "tutor" && (
               <li>
                 <Link
                   href="/tutor-dashboard"
@@ -307,22 +326,52 @@ const Navbar = () => {
                 </div>
               )}
             </li> */}
-            <li>
-              <a
-                href="/register-tutor"
-                className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
-              >
-                Daftar sebagai tutor
-              </a>
-            </li>
-            <li>
-              <button
-                type="button"
-                className="w-full text-left px-3 py-2 rounded-lg text-[var(--merah)] font-semibold hover:bg-[var(--merah)]/10"
-              >
-                Sign out
-              </button>
-            </li>
+            {user?.role !== "tutor" && (
+              <li>
+                <a
+                  href="/register-tutor"
+                  className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
+                >
+                  Daftar sebagai tutor
+                </a>
+              </li>
+            )}
+            {!user ? (
+              <>
+                <li>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="w-full block px-3 py-2 rounded-lg font-semibold text-[var(--biru)] hover:bg-[var(--biru)]/10"
+                  >
+                    Masuk
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/signup"
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="w-full block px-3 py-2 rounded-lg font-semibold text-[var(--gelap)] hover:bg-[var(--gelap)]/5"
+                  >
+                    Daftar
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsSidebarOpen(false);
+                    await logout();
+                    router.push("/");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-[var(--merah)] font-semibold hover:bg-[var(--merah)]/10"
+                >
+                  Sign out
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </aside>

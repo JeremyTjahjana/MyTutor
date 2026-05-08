@@ -1,14 +1,9 @@
 import { TimeSlotButton } from "./TimeSlotButton";
-
-interface Waktu {
-  hari: string;
-  jamMulai: string;
-  jamSelesai: string;
-  tanggal: string;
-}
+import type { Schedule } from "@/app/types/tutor";
+import { DAY_NAMES, nextOccurrence } from "@/app/types/tutor";
 
 interface TimeSlotsSection {
-  waktuList: Waktu[];
+  schedules: Schedule[];
   activeTime: number;
   onTimeSelect: (index: number) => void;
   mobilePage: number;
@@ -16,18 +11,16 @@ interface TimeSlotsSection {
 }
 
 export function TimeSlotsSection({
-  waktuList,
+  schedules,
   activeTime,
   onTimeSelect,
   mobilePage,
   onMobilePageChange,
 }: TimeSlotsSection) {
-  // Calculate pagination for mobile (2x2 grid = 4 items per page)
   const itemsPerPage = 4;
-  const totalPages = Math.ceil(waktuList.length / itemsPerPage);
-  const mobileWaktuStart = mobilePage * itemsPerPage;
-  const mobileWaktuEnd = mobileWaktuStart + itemsPerPage;
-  const mobileWaktu = waktuList.slice(mobileWaktuStart, mobileWaktuEnd);
+  const totalPages = Math.ceil(schedules.length / itemsPerPage);
+  const mobileStart = mobilePage * itemsPerPage;
+  const mobileSchedules = schedules.slice(mobileStart, mobileStart + itemsPerPage);
 
   return (
     <section>
@@ -35,27 +28,33 @@ export function TimeSlotsSection({
         Waktu Tersedia
       </h2>
 
-      {/* Desktop: grid layout, no scroll needed */}
-      <div className="hidden lg:grid grid-cols-3 gap-4 bg-[#F3F4F8]  rounded-xl p-3">
-        {waktuList.map((w, idx) => (
+      {schedules.length === 0 && (
+        <p className="text-sm text-[var(--gelap)]/60 italic">
+          Tutor belum menambahkan jadwal.
+        </p>
+      )}
+
+      {/* Desktop: grid layout */}
+      <div className="hidden lg:grid grid-cols-3 gap-4 bg-[#F3F4F8] rounded-xl p-3">
+        {schedules.map((schedule, idx) => (
           <TimeSlotButton
-            key={w.tanggal + idx}
-            waktu={w}
+            key={schedule.id}
+            schedule={schedule}
             active={activeTime === idx}
             onClick={() => onTimeSelect(idx)}
           />
         ))}
       </div>
 
-      {/* Mobile: grid 2x2 */}
+      {/* Mobile: grid 2x2 with pagination */}
       <div className="lg:hidden flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 bg-[#F3F4F8] rounded-xl p-3">
-          {mobileWaktu.map((w, idx) => {
-            const actualIdx = mobileWaktuStart + idx;
+          {mobileSchedules.map((schedule, idx) => {
+            const actualIdx = mobileStart + idx;
             return (
               <TimeSlotButton
-                key={w.tanggal + actualIdx}
-                waktu={w}
+                key={schedule.id}
+                schedule={schedule}
                 active={activeTime === actualIdx}
                 onClick={() => onTimeSelect(actualIdx)}
                 isMobile
@@ -64,7 +63,6 @@ export function TimeSlotsSection({
           })}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-3">
             <button

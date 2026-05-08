@@ -1,29 +1,22 @@
+import type { Schedule } from "@/app/types/tutor";
+import { DAY_NAMES } from "@/app/types/tutor";
+
 interface TimeSlotButtonProps {
-  waktu: {
-    hari: string;
-    jamMulai: string;
-    jamSelesai: string;
-    tanggal: string;
-  };
+  schedule: Schedule;
   active: boolean;
   onClick: () => void;
   isMobile?: boolean;
 }
 
 export function TimeSlotButton({
-  waktu,
+  schedule,
   active,
   onClick,
   isMobile,
 }: TimeSlotButtonProps) {
-  const label = `${waktu.hari}, ${new Date(waktu.tanggal).toLocaleDateString(
-    "id-ID",
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    },
-  )} (${waktu.jamMulai} - ${waktu.jamSelesai})`;
+  const dayName = DAY_NAMES[schedule.dayOfWeek] ?? "—";
+  const timeLabel = `${schedule.startTime.slice(0, 5)} - ${schedule.endTime.slice(0, 5)}`;
+  const label = `${dayName} (${timeLabel})`;
 
   return (
     <button
