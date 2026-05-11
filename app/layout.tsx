@@ -3,9 +3,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import { AuthProvider } from "./contexts/AuthContext";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
@@ -24,7 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isTutorDashboard = pathname.startsWith("/tutor-dashboard");
+  const isTutorDashboard =
+    pathname === "/tutor-dashboard" || pathname.startsWith("/tutor-dashboard/");
 
   return (
     <html

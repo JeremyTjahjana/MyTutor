@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  fetchSchedulesByTutorProfileId,
   fetchTutorProfileByUserId,
+  fetchTutorSubjectsByProfileId,
 } from "@/features/tutor/repositories/tutor.repository";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const tutorUserId = searchParams.get("tutorUserId");
+  const tutorUserId = request.nextUrl.searchParams.get("tutorUserId");
 
   if (!tutorUserId) {
     return NextResponse.json(
@@ -18,21 +17,16 @@ export async function GET(request: NextRequest) {
   try {
     const profile = await fetchTutorProfileByUserId(tutorUserId);
     if (!profile) {
-      return NextResponse.json({ tutorProfileId: null, schedules: [] });
+      return NextResponse.json({ tutorProfileId: null, subjects: [] });
     }
 
-    const schedules = await fetchSchedulesByTutorProfileId(profile.id);
+    const subjects = await fetchTutorSubjectsByProfileId(profile.id);
     return NextResponse.json({
       tutorProfileId: profile.id,
-      schedules,
-      profile: {
-        bio: profile.bio,
-        experience: profile.experience,
-        cost_per_hour: profile.cost_per_hour,
-      },
+      subjects,
     });
   } catch (err) {
-    console.error("/api/schedules error:", err);
+    console.error("/api/tutor-subjects error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

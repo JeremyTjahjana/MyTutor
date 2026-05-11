@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listStudentBookings } from "@/app/server/services/bookings.service";
-import { fetchTutorProfileByUserId } from "@/app/server/repositories/tutors.repository";
-import { listTutorBookings } from "@/app/server/services/bookings.service";
-import { supabase } from "@/app/server/supabase";
+import { listStudentBookings } from "@/features/booking/services/booking.service";
+import { fetchTutorProfileByUserId } from "@/features/tutor/repositories/tutor.repository";
+import { listTutorBookings } from "@/features/booking/services/booking.service";
+import { supabase } from "@/lib/supabase/server";
 
 /**
  * Cancel pending bookings that conflict with an already-accepted booking
@@ -75,6 +75,9 @@ export async function GET(request: NextRequest) {
     );
   } catch (err) {
     console.error("/api/bookings error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
