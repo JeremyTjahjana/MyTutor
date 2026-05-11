@@ -21,7 +21,7 @@ const TestimonyCard = ({
   rating,
 }: TestimonyCardData) => {
   return (
-    <article className="flex w-full shrink-0 min-h-[240px] flex-col gap-3 rounded-2xl border border-[var(--gelap)]/15 bg-[var(--putih)] p-4 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.10)] sm:max-w-[330px] sm:min-h-[290px] sm:gap-4 sm:p-5 hover:scale-105 hover:opacity-90 active:scale-95 transition-transform duration-200 ease-out hover:shadow-[0px_4px_16px_0px_rgba(0,138,180,0.28)]">
+    <article className="flex w-full shrink-0 min-h-[240px] max-[400px]:min-h-[200px] max-[400px]:p-3 max-[400px]:gap-2 flex-col gap-3 rounded-2xl border border-[var(--gelap)]/15 bg-[var(--putih)] p-4 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.10)] sm:max-w-[330px] sm:min-h-[290px] sm:gap-4 sm:p-5 hover:scale-105 hover:opacity-90 active:scale-95 transition-transform duration-200 ease-out hover:shadow-[0px_4px_16px_0px_rgba(0,138,180,0.28)]">
       {/* Header: avatar + name + subjects */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gelap)]/20 overflow-hidden sm:h-12 sm:w-12">

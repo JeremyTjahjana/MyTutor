@@ -11,12 +11,6 @@ export default function AuthCallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    /**
-     * For Google OAuth (PKCE flow), Supabase redirects back with ?code=...
-     * The Supabase client auto-exchanges it via onAuthStateChange.
-     * We also ensure the user row exists in public.users (Google users
-     * won't have been inserted by the register flow).
-     */
     const ensureUserProfile = async () => {
       const {
         data: { session },
@@ -29,7 +23,6 @@ export default function AuthCallbackPage() {
 
       const { id, email, user_metadata } = session.user;
 
-      // Upsert so Google users get a public.users row on first login
       await supabase.from("users").upsert(
         {
           id,
@@ -45,12 +38,9 @@ export default function AuthCallbackPage() {
       router.replace("/");
     };
 
-    // Give the onAuthStateChange listener a moment to fire first
     const timer = setTimeout(ensureUserProfile, 300);
     return () => clearTimeout(timer);
   }, [router]);
-
-  // Fallback: once AuthContext resolves, redirect
   useEffect(() => {
     if (!isLoading && user) {
       router.replace("/");

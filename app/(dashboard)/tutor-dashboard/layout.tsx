@@ -193,9 +193,6 @@ export default function TutorDashboardLayout({
           <Menu className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1 text-center">
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--gelap)]/45">
-            Tutor hub
-          </p>
           <p className="truncate text-sm font-semibold text-[var(--biru)]">
             {pageTitle}
           </p>

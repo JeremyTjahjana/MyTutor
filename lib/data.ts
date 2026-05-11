@@ -140,14 +140,6 @@ export const IPB_FAKULTAS_LIST: readonly string[] = Array.from(
   new Set(IPB_PROGRAM_STUDI.map((p) => p.faculty)),
 ).sort((a, b) => a.localeCompare(b, "id"));
 
-// ─── Mata kuliah / skill bawaan (katalog aplikasi) ───────────────────────────
-/**
- * Katalog default untuk tutor & pendaftaran. **Bukan** sumber kebenaran di DB:
- * baris di tabel `subjects` Supabase tetap dipakai untuk booking; entri di sini
- * muncul di UI sampai nama yang sama ada di DB, lalu disatukan.
- *
- * Edit daftar ini untuk mengatur pilihan bawaan. `category` opsional (mis. kelompok mapel).
- */
 export type TutorSubjectPreset = {
   name: string;
   category: string | null;

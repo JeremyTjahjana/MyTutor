@@ -114,7 +114,7 @@ const Testimonies = () => {
             return (
               <div
                 key={`${item.studentName}-${slide.index}`}
-                className="absolute left-1/2 top-0 w-[200px] sm:w-[320px] transition-all duration-500 ease-out"
+                className="absolute left-1/2 top-0 w-[200px] max-[400px]:w-[160px] sm:w-[320px] transition-all duration-500 ease-out"
                 style={{
                   transform: `translateX(calc(-50% + ${slide.offset * 58}%)) translateY(${isActive ? "0px" : "12px"}) scale(${isActive ? 1 : 0.92})`,
                   opacity: isActive ? 1 : 0.72,

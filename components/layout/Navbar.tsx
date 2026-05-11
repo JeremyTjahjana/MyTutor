@@ -271,10 +271,10 @@ const Navbar = () => {
             {user?.role === "tutor" && (
               <li>
                 <Link
-                  href="/tutors"
+                  href="/tutor-dashboard"
                   onClick={() => setIsSidebarOpen(false)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    isActiveRoute("/tutors")
+                    isActiveRoute("/tutor-dashboard")
                       ? "bg-[var(--biru)]/10 text-[var(--biru)] font-semibold"
                       : "hover:bg-[var(--gelap)]/5"
                   }`}

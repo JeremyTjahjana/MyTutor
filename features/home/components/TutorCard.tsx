@@ -17,6 +17,12 @@ const TutorCard = ({
   description,
   rating,
 }: TutorCardProps) => {
+  const rolesArray = role.split(",").map((s) => s.trim()).filter(Boolean);
+  const displayRole =
+    rolesArray.length > 4
+      ? rolesArray.slice(0, 4).join(", ") + ", ..."
+      : rolesArray.join(", ");
+
   return (
     <article className="flex w-[265px] shrink-0 min-h-[240px] flex-row items-stretch gap-3 rounded-2xl border border-[var(--gelap)]/15 bg-[var(--putih)] p-4 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.10)] sm:w-full sm:max-w-[330px] sm:min-h-[290px] sm:gap-4 sm:p-5 hover:scale-105 hover:opacity-90 active:scale-95 transition-transform duration-200 ease-out hover:shadow-[0px_4px_16px_0px_rgba(0,138,180,0.28)]">
       <div className="mt-1 self-start flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gelap)]/20 bg-[var(--putih)] overflow-hidden sm:h-12 sm:w-12">
@@ -36,7 +42,7 @@ const TutorCard = ({
               {name}
             </p>
             <p className="text-[12px] leading-5 font-semibold text-[var(--gelap)]/80 sm:text-sm sm:leading-normal">
-              {role}
+              {displayRole}
             </p>
           </div>
 

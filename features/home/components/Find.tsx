@@ -55,7 +55,7 @@ const Find = () => {
         Find the right Tutor for you !
       </h3>
 
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-center gap-4 sm:gap-6 px-20 sm:px-0">
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-center gap-4 sm:gap-6 px-20 sm:px-0 mb-20">
         <Link
           href="/register-tutor"
           className={`fade-up btn-primary w-full sm:w-auto min-w-[190px] ${hasAnimatedIn ? "fade-up-visible" : ""}`}

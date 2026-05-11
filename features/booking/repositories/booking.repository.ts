@@ -1,14 +1,13 @@
 import { supabase } from "@/lib/supabase/server";
 import type { Booking } from "@/types/user";
 
-/** Extract first element from a Supabase joined relation (always returns array). */
 function one<T>(arr: T[] | T | null | undefined): T | null {
   if (arr == null) return null;
   if (Array.isArray(arr)) return arr[0] ?? null;
   return arr;
 }
 
-// ─── Student Bookings ─────────────────────────────────────────────────────────
+// ─── Student Bookings
 
 export async function fetchBookingsByStudentId(
   studentId: string,
@@ -54,7 +53,7 @@ export async function fetchBookingsByStudentId(
   });
 }
 
-// ─── Tutor Bookings ───────────────────────────────────────────────────────────
+// ─── Tutor Bookings
 
 export async function fetchBookingsByTutorProfileId(
   tutorProfileId: string,
@@ -100,7 +99,7 @@ export async function fetchBookingsByTutorProfileId(
   });
 }
 
-// ─── Create Booking ───────────────────────────────────────────────────────────
+// ─── Create Booking
 
 export type CreateBookingInput = {
   studentId: string;
@@ -134,7 +133,7 @@ export async function insertBooking(
   return { id: data.id };
 }
 
-// ─── Update Booking Status ────────────────────────────────────────────────────
+// ─── Update Booking Status
 
 export async function updateBookingStatus(
   bookingId: string,
@@ -148,7 +147,7 @@ export async function updateBookingStatus(
   if (error) throw error;
 }
 
-// ─── Slot Status for Schedule Page ────────────────────────────────────────────
+// ─── Slot Status for Schedule Page
 
 export type SlotStatus = {
   pendingCount: number;
@@ -157,7 +156,6 @@ export type SlotStatus = {
 
 const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 
-/** Convert a UTC ISO timestamp to WIB day-of-week (0=Sun) and "HH:MM" string */
 function toWIB(iso: string): { dow: number; timeStr: string } {
   const utcMs = new Date(iso).getTime();
   const wib = new Date(utcMs + WIB_OFFSET_MS);
@@ -167,12 +165,6 @@ function toWIB(iso: string): { dow: number; timeStr: string } {
   return { dow, timeStr: `${hh}:${mm}` };
 }
 
-/**
- * For each schedule of a tutor, count pending bookings and check for accepted.
- * Matching priority:
- *   1. schedule_id (exact, preferred for new bookings)
- *   2. WIB day-of-week + start time (fallback for old bookings without schedule_id)
- */
 export async function fetchSlotStatuses(
   tutorProfileId: string,
 ): Promise<Record<string, SlotStatus>> {

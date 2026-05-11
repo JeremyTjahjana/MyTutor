@@ -18,8 +18,6 @@ import {
 import Image from "next/image";
 import { assets } from "@/assets/assets";
 
-// ─── Status config ─────────────────────────────────────────────────────────────
-
 const statusConfig = {
   pending: {
     icon: Clock,
@@ -44,8 +42,6 @@ const statusConfig = {
 };
 
 type Filter = "all" | "pending" | "accepted" | "completed" | "cancelled";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const DAY_ID: Record<number, string> = {
   0: "Minggu",
@@ -83,8 +79,6 @@ function isToday(iso: string) {
     d.getDate() === now.getDate()
   );
 }
-
-// ─── Booking Card ─────────────────────────────────────────────────────────────
 
 function BookingCard({
   booking,
@@ -190,8 +184,6 @@ function BookingCard({
     </div>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BookingsPage() {
   const { user } = useAuth();

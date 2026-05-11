@@ -46,3 +46,6 @@ next-env.d.ts
 /supabase/migrations/
 /supabase/*.sql
 *.sql
+
+/database
+/database/subjects_and_tutors_subjects.pgsql
