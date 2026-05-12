@@ -397,7 +397,7 @@ export default function ProfilePage() {
                   Saving…
                 </>
               ) : (
-                "Save profile details"
+                "Simpan detail profil"
               )}
             </button>
           </div>
