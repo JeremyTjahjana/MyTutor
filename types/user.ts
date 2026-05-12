@@ -3,13 +3,9 @@
  * Mirrors the `users` and `bookings` tables in Supabase.
  */
 
-export type UserRole = "student" | "tutor";
+export type UserRole = "student" | "tutor" | "admin";
 export type TutorStatus = "pending" | "approved" | "rejected";
-export type BookingStatus =
-  | "pending"
-  | "accepted"
-  | "completed"
-  | "cancelled";
+export type BookingStatus = "pending" | "accepted" | "completed" | "cancelled";
 export type PaymentStatus = "pending" | "paid" | "failed";
 
 /** Mirrors public.users */

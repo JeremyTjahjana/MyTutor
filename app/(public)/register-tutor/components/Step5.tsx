@@ -5,7 +5,7 @@ import { FormData } from "../types";
 
 interface Step5Props {
   formData: FormData;
-  onUploadContract: (file: File) => void;
+  onUploadContract: (file: File) => void | Promise<void>;
 }
 
 export default function Step5({ formData, onUploadContract }: Step5Props) {

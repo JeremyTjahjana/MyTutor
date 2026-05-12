@@ -2,91 +2,50 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  LayoutDashboard,
-  CalendarClock,
-  ClipboardList,
-  UserCircle,
-  LogOut,
-  Home,
-  Menu,
-  X,
   ChevronRight,
-  GraduationCap,
+  Home,
+  LogOut,
+  Menu,
+  ShieldCheck,
+  UserCheck,
+  Users,
+  X,
 } from "lucide-react";
-import Image from "next/image";
-import { assets } from "@/assets/assets";
 
-const tutorNavItems = [
+const adminNavItems = [
   {
-    href: "/tutor-dashboard",
-    label: "Overview",
-    description: "Ringkasan, statistik, dan apa selanjutnya",
-    icon: LayoutDashboard,
-    match: (pathname: string) => pathname === "/tutor-dashboard",
+    href: "/admin-dashboard/pendaftaran",
+    label: "Pendaftaran",
+    description: "Review pengajuan tutor",
+    icon: UserCheck,
+    match: (pathname: string) =>
+      pathname === "/admin-dashboard" ||
+      pathname.startsWith("/admin-dashboard/pendaftaran"),
   },
   {
-    href: "/tutor-dashboard/bookings",
-    label: "Bookings",
-    description: "Permintaan siswa dan status sesi",
-    icon: ClipboardList,
+    href: "/admin-dashboard/list-tutors",
+    label: "List tutors",
+    description: "Lihat tutor aktif dan revoke role",
+    icon: Users,
     match: (pathname: string) =>
-      pathname === "/tutor-dashboard/bookings" ||
-      pathname.startsWith("/tutor-dashboard/bookings/"),
-  },
-  {
-    href: "/tutor-dashboard/schedule",
-    label: "Availability",
-    description: "Jadwal yang dapat dipesan siswa",
-    icon: CalendarClock,
-    match: (pathname: string) =>
-      pathname === "/tutor-dashboard/schedule" ||
-      pathname.startsWith("/tutor-dashboard/schedule/"),
-  },
-  {
-    href: "/tutor-dashboard/subjects",
-    label: "Mata kuliah & skill",
-    description: "Materi yang bisa Anda ajarkan",
-    icon: GraduationCap,
-    match: (pathname: string) =>
-      pathname === "/tutor-dashboard/subjects" ||
-      pathname.startsWith("/tutor-dashboard/subjects/"),
-  },
-  {
-    href: "/tutor-dashboard/profile",
-    label: "Profile",
-    description: "Foto, kontak, bio, dan tarif per jam",
-    icon: UserCircle,
-    match: (pathname: string) =>
-      pathname === "/tutor-dashboard/profile" ||
-      pathname.startsWith("/tutor-dashboard/profile/"),
+      pathname.startsWith("/admin-dashboard/list-tutors"),
   },
 ] as const;
 
-export default function TutorDashboardLayout({
+export default function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading, isApprovedTutor, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [avatarError, setAvatarError] = useState(false);
 
-  const handleLogout = useCallback(async () => {
-    await logout();
-    router.push("/");
-  }, [logout, router]);
-
-  const canAccessDashboard = user?.role === "admin" || isApprovedTutor;
-  const navItems = tutorNavItems;
-
-  useEffect(() => {
-    setAvatarError(false);
-  }, [user?.avatarUrl]);
+  const canAccessDashboard = user?.role === "admin";
 
   useEffect(() => {
     if (!isLoading && user && !canAccessDashboard) {
@@ -98,23 +57,27 @@ export default function TutorDashboardLayout({
     const onResize = () => {
       if (window.innerWidth >= 1024) setMenuOpen(false);
     };
+
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const activeItem = useMemo(
-    () => navItems.find((item) => item.match(pathname)),
-    [navItems, pathname],
-  );
+  const handleLogout = useCallback(async () => {
+    await logout();
+    router.push("/");
+  }, [logout, router]);
 
-  const pageTitle = activeItem?.label ?? "Dashboard";
-  const dashboardLabel =
-    user?.role === "admin" ? "Admin dashboard" : "Tutor dashboard";
+  const activeItem = useMemo(
+    () => adminNavItems.find((item) => item.match(pathname)),
+    [pathname],
+  );
 
   if (isLoading) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--putih)]">
-        <p className="text-sm text-[var(--gelap)]/60">Loading dashboard…</p>
+        <p className="text-sm text-[var(--gelap)]/60">
+          Loading admin dashboard…
+        </p>
       </div>
     );
   }
@@ -128,7 +91,7 @@ export default function TutorDashboardLayout({
           </p>
           <Link
             href="/"
-            className="btn-primary inline-block px-4 py-2 rounded-lg"
+            className="btn-primary inline-block rounded-lg px-4 py-2"
           >
             Back to home
           </Link>
@@ -139,9 +102,10 @@ export default function TutorDashboardLayout({
 
   const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
     <nav className="flex flex-col gap-1 p-3">
-      {navItems.map((item) => {
+      {adminNavItems.map((item) => {
         const Icon = item.icon;
         const active = item.match(pathname);
+
         return (
           <Link
             key={`${item.href}-${item.label}`}
@@ -187,7 +151,6 @@ export default function TutorDashboardLayout({
 
   return (
     <div className="min-h-[100dvh] bg-[var(--putih)] text-[var(--gelap)]">
-      {/* Mobile header */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-[var(--gelap)]/10 bg-white px-3 sm:px-4 lg:hidden">
         <button
           type="button"
@@ -197,11 +160,9 @@ export default function TutorDashboardLayout({
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div className="min-w-0 flex-1 text-center">
-          <p className="truncate text-sm font-semibold text-[var(--biru)]">
-            {pageTitle}
-          </p>
-        </div>
+        <p className="truncate text-sm font-semibold text-[var(--biru)]">
+          {activeItem?.label ?? "Admin dashboard"}
+        </p>
         <button
           type="button"
           onClick={handleLogout}
@@ -212,7 +173,6 @@ export default function TutorDashboardLayout({
         </button>
       </header>
 
-      {/* Mobile overlay */}
       {menuOpen ? (
         <button
           type="button"
@@ -222,7 +182,6 @@ export default function TutorDashboardLayout({
         />
       ) : null}
 
-      {/* Mobile drawer */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-[min(20rem,100vw-3rem)] flex-col border-r border-[var(--gelap)]/10 bg-white shadow-xl transition-transform duration-200 ease-out lg:hidden ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
@@ -255,12 +214,11 @@ export default function TutorDashboardLayout({
       </aside>
 
       <div className="flex min-h-[calc(100dvh-3.5rem)] flex-1 lg:min-h-[100dvh]">
-        {/* Desktop sidebar */}
         <aside className="relative hidden w-[280px] shrink-0 flex-col border-r border-[var(--gelap)]/10 bg-white lg:flex">
           <div className="border-b border-[var(--gelap)]/10 px-5 py-6">
             <p className="text-lg font-bold text-[var(--biru)]">MyTutor</p>
             <p className="mt-1 text-sm text-[var(--gelap)]/55">
-              {dashboardLabel}
+              Admin dashboard
             </p>
             <Link
               href="/"
@@ -277,25 +235,8 @@ export default function TutorDashboardLayout({
 
           <div className="absolute bottom-0 left-0 right-0 border-t border-[var(--gelap)]/10 bg-white p-4">
             <div className="flex items-center gap-3">
-              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--gelap)]/10 bg-[var(--biru)]/10">
-                {!avatarError && user?.avatarUrl ? (
-                  <Image
-                    src={user.avatarUrl}
-                    alt=""
-                    width={44}
-                    height={44}
-                    className="h-full w-full object-cover"
-                    onError={() => setAvatarError(true)}
-                  />
-                ) : (
-                  <Image
-                    src={assets.profile}
-                    alt=""
-                    width={28}
-                    height={28}
-                    className="opacity-70"
-                  />
-                )}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--gelap)]/10 bg-[var(--biru)]/10">
+                <ShieldCheck className="h-5 w-5 text-[var(--biru)]" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">
@@ -317,7 +258,6 @@ export default function TutorDashboardLayout({
           </div>
         </aside>
 
-        {/* Main */}
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="flex-1 overflow-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             {children}

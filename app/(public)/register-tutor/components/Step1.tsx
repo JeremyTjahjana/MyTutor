@@ -7,10 +7,7 @@ interface Step1Props {
   ) => void;
 }
 
-export default function Step1({
-  formData,
-  onChange,
-}: Step1Props) {
+export default function Step1({ formData, onChange }: Step1Props) {
   return (
     <div className="space-y-6">
       <h2 className="text-xl sm:text-2xl font-semibold text-[var(--biru)]">
@@ -26,8 +23,8 @@ export default function Step1({
           type="text"
           name="namaLengkap"
           value={formData.namaLengkap}
-          readOnly
-          className="w-full px-4 py-2.5 border border-[var(--gelap)]/20 rounded-lg bg-[var(--gelap)]/5 cursor-not-allowed focus:outline-none"
+          onChange={onChange}
+          className="w-full px-4 py-2.5 border border-[var(--gelap)]/20 rounded-lg bg-white cursor-text transition-all duration-200 hover:border-[var(--biru)]/40 focus:outline-none focus:border-[var(--biru)] focus:ring-2 focus:ring-[var(--biru)]/30"
         />
       </div>
 
@@ -40,8 +37,8 @@ export default function Step1({
           type="email"
           name="emailIPB"
           value={formData.emailIPB}
-          readOnly
-          className="w-full px-4 py-2.5 border border-[var(--gelap)]/20 rounded-lg bg-[var(--gelap)]/5 cursor-not-allowed focus:outline-none"
+          onChange={onChange}
+          className="w-full px-4 py-2.5 border border-[var(--gelap)]/20 rounded-lg bg-white cursor-text transition-all duration-200 hover:border-[var(--biru)]/40 focus:outline-none focus:border-[var(--biru)] focus:ring-2 focus:ring-[var(--biru)]/30"
         />
         {formData.emailIPB &&
           !formData.emailIPB.includes("@apps.ipb.ac.id") && (
@@ -50,7 +47,6 @@ export default function Step1({
             </p>
           )}
       </div>
-
 
       {/* Nomor Telepon */}
       <div>

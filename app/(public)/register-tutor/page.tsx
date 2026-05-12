@@ -1,5 +1,6 @@
 "use client";
 
+import { supabase } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Check, Loader2 } from "lucide-react";
@@ -22,7 +23,9 @@ export default function RegisterTutorPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contractUploading, setContractUploading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [contractError, setContractError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -44,10 +47,52 @@ export default function RegisterTutorPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
+    setSubmitError(null);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleUploadContract = async (file: File) => {
+    setContractUploading(true);
+    setContractError(null);
+
+    try {
+      const fileExt = file.name.split(".").pop() || "pdf";
+      const storagePath = `${user!.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("tutor-contracts")
+        .upload(storagePath, file, {
+          contentType: file.type || "application/pdf",
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("tutor-contracts").getPublicUrl(storagePath);
+
+      setFormData((prev) => ({
+        ...prev,
+        contractFileName: file.name,
+        contractPdfUrl: publicUrl,
+        contractUploaded: true,
+      }));
+    } catch (err) {
+      console.error("handleUploadContract error:", err);
+      setFormData((prev) => ({
+        ...prev,
+        contractFileName: "",
+        contractPdfUrl: "",
+        contractUploaded: false,
+      }));
+      setContractError("Gagal mengunggah PDF kontrak. Coba lagi.");
+    } finally {
+      setContractUploading(false);
+    }
   };
 
   const handleAddMatkul = () => {
@@ -118,7 +163,8 @@ export default function RegisterTutorPage() {
 
   const isStep5Valid = () =>
     formData.contractUploaded === true &&
-    formData.contractFileName.trim() !== "";
+    formData.contractFileName.trim() !== "" &&
+    formData.contractPdfUrl.trim() !== "";
 
   const canProceedToNext = () => {
     if (currentStep === 1) return isStep1Valid();
@@ -144,6 +190,8 @@ export default function RegisterTutorPage() {
           biayaPerJam: formData.biayaPerJam,
           matkuls: formData.matkuls,
           waktuTersedia: formData.waktuTersedia,
+          contractFileName: formData.contractFileName,
+          contractPdfUrl: formData.contractPdfUrl,
         });
 
         if (result.success) {
@@ -236,10 +284,7 @@ export default function RegisterTutorPage() {
         {/* Form Container */}
         <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
           {currentStep === 1 && (
-            <Step1
-              formData={formData}
-              onChange={handleInputChange}
-            />
+            <Step1 formData={formData} onChange={handleInputChange} />
           )}
           {currentStep === 2 && (
             <Step2
@@ -272,14 +317,14 @@ export default function RegisterTutorPage() {
           {currentStep === 5 && (
             <Step5
               formData={formData}
-              onUploadContract={(file: File) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  contractFileName: file.name,
-                  contractUploaded: true,
-                }));
-              }}
+              onUploadContract={handleUploadContract}
             />
+          )}
+
+          {contractError && (
+            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              {contractError}
+            </p>
           )}
 
           {/* Error */}
@@ -305,14 +350,21 @@ export default function RegisterTutorPage() {
 
             <button
               onClick={handleNextStep}
-              disabled={!canProceedToNext() || isSubmitting}
+              disabled={
+                !canProceedToNext() || isSubmitting || contractUploading
+              }
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${
-                canProceedToNext() && !isSubmitting
+                canProceedToNext() && !isSubmitting && !contractUploading
                   ? "btn-primary"
                   : "bg-[var(--gelap)]/5 text-[var(--gelap)]/50 cursor-not-allowed"
               }`}
             >
-              {isSubmitting ? (
+              {contractUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Mengunggah PDF...
+                </>
+              ) : isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Mendaftar...

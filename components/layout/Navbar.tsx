@@ -14,6 +14,14 @@ const Navbar = () => {
   const [imageError, setImageError] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const { user, logout } = useAuth();
+  const dashboardHref =
+    user?.role === "admin"
+      ? "/admin-dashboard"
+      : user?.role === "tutor"
+        ? "/tutor-dashboard"
+        : null;
+  const dashboardLabel =
+    user?.role === "admin" ? "Admin Dashboard" : "Tutor Dashboard";
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
@@ -109,17 +117,18 @@ const Navbar = () => {
               <span>Bookings</span>
             </Link>
           </li>
-          {user?.role === "tutor" && (
+          {dashboardHref && (
             <li>
               <Link
-                href="/tutor-dashboard"
+                href={dashboardHref}
                 className={`flex items-center gap-2 pb-1 transition-colors ${
+                  isActiveRoute("/admin-dashboard") ||
                   isActiveRoute("/tutor-dashboard")
                     ? "text-[var(--biru)] border-b-2 border-[var(--biru)] font-semibold"
                     : "hover:text-[var(--biru)] border-b-2 border-transparent"
                 }`}
               >
-                <span>Tutor Dashboard</span>
+                <span>{dashboardLabel}</span>
               </Link>
             </li>
           )}
@@ -268,10 +277,10 @@ const Navbar = () => {
                 <span>Status Booking</span>
               </Link>
             </li>
-            {user?.role === "tutor" && (
+            {dashboardHref && (
               <li>
                 <Link
-                  href="/tutor-dashboard"
+                  href={dashboardHref}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     isActiveRoute("/tutor-dashboard")
@@ -279,7 +288,7 @@ const Navbar = () => {
                       : "hover:bg-[var(--gelap)]/5"
                   }`}
                 >
-                  <span>Tutor Dashboard</span>
+                  <span>{dashboardLabel}</span>
                 </Link>
               </li>
             )}

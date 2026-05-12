@@ -18,6 +18,7 @@ export const initialFormData: FormData = {
   // Step 5
   contractFileName: "",
   contractUploaded: false,
+  contractPdfUrl: "",
   inputMatkul: "",
 };
 

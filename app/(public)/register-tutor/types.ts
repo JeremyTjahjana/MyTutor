@@ -28,5 +28,6 @@ export type FormData = {
   // Step 5: Contract
   contractFileName: string;
   contractUploaded: boolean;
+  contractPdfUrl: string;
   inputMatkul: string;
 };

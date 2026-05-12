@@ -83,7 +83,11 @@ export async function uploadTutorAvatarAction(
   }
 
   const ext =
-    file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    file.type === "image/png"
+      ? "png"
+      : file.type === "image/webp"
+        ? "webp"
+        : "jpg";
   const objectPath = `${userId}/avatar.${ext}`;
 
   try {

@@ -30,6 +30,8 @@ export type RegisterInput = {
   // Step 4
   matkuls: string[]; // subject names
   waktuTersedia: { day: string; start: string; end: string }[];
+  contractFileName: string;
+  contractPdfUrl: string;
 };
 
 export async function registerTutorAction(
@@ -44,8 +46,10 @@ export async function registerTutorAction(
     const { error: updateError } = await supabase
       .from("users")
       .update({
-        role: "tutor",
         tutor_status: "pending",
+        role: "student",
+        contract_pdf_name: input.contractFileName,
+        contract_pdf_url: input.contractPdfUrl,
         ...(input.nomorTelepon ? { phone: input.nomorTelepon } : {}),
       })
       .eq("id", userId);
@@ -63,7 +67,7 @@ export async function registerTutorAction(
     const { data: authData, error: authError } = await authClient.auth.signUp({
       email: input.emailIPB,
       password: input.password,
-      options: { data: { full_name: input.namaLengkap, role: "tutor" } },
+      options: { data: { full_name: input.namaLengkap, role: "student" } },
     });
 
     if (authError || !authData.user) {
@@ -80,8 +84,10 @@ export async function registerTutorAction(
       full_name: input.namaLengkap,
       email: input.emailIPB,
       phone: input.nomorTelepon ?? null,
-      role: "tutor",
+      role: "student",
       tutor_status: "pending",
+      contract_pdf_name: input.contractFileName,
+      contract_pdf_url: input.contractPdfUrl,
     });
   }
 

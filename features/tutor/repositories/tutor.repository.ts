@@ -68,7 +68,7 @@ export async function fetchTutorById(
     .select(
       `id, user_id, bio, experience, cost_per_hour, rating, total_sessions,
        portfolio_urls,
-       users!tutor_profiles_user_id_fkey(full_name, avatar_url)`,
+       users!tutor_profiles_user_id_fkey(full_name, avatar_url, role, tutor_status)`,
     )
     .eq("id", tutorProfileId)
     .single();
@@ -78,9 +78,12 @@ export async function fetchTutorById(
     return null;
   }
 
-  const user = unwrapJoin<{ full_name: string; avatar_url: string | null }>(
-    profile.users,
-  );
+  const user = unwrapJoin<{
+    full_name: string;
+    avatar_url: string | null;
+    role?: string;
+    tutor_status?: string | null;
+  }>(profile.users);
   if (!user)
     console.warn(
       "fetchTutorById: users join returned null for profile",
@@ -155,13 +158,13 @@ export async function fetchTutorById(
   return {
     id: profile.id,
     userId: profile.user_id,
-    name: user?.full_name ?? "Unknown",
+    name: user.full_name,
     bio: profile.bio ?? "",
     rating: toNumber(profile.rating),
     costPerHour: toNumber(profile.cost_per_hour),
     totalSessions: profile.total_sessions,
     experience: profile.experience,
-    avatarUrl: user?.avatar_url ?? null,
+    avatarUrl: user.avatar_url ?? null,
     portfolioUrls,
     subjects,
     schedules,
