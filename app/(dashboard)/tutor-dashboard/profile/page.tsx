@@ -1,22 +1,23 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useActionState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase/client";
+import { useState, useEffect, useRef, useActionState } from "react";
 import { Loader2, User, Camera, ImageIcon } from "lucide-react";
 import {
-  updateTutorProfileAction,
   uploadTutorAvatarAction,
-  type UpdateProfileState,
   type UploadAvatarState,
 } from "@/features/tutor/services/tutor.action";
 import Image from "next/image";
 
-const initialProfileState: UpdateProfileState = { success: false };
 const initialAvatarState: UploadAvatarState = { success: false };
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSuccess, setProfileSuccess] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,11 +30,6 @@ export default function ProfilePage() {
     costPerHour: "",
     bio: "",
   });
-
-  const [profileState, profileFormAction, profilePending] = useActionState(
-    updateTutorProfileAction,
-    initialProfileState,
-  );
 
   const [avatarState, avatarFormAction, avatarPending] = useActionState(
     uploadTutorAvatarAction,
@@ -89,7 +85,54 @@ export default function ProfilePage() {
     >,
   ) => {
     const { name, value } = e.target;
+    setProfileSuccess(false);
+    setProfileError(null);
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setProfileSaving(true);
+    setProfileSuccess(false);
+    setProfileError(null);
+
+    try {
+      const parsedCostPerHour = Number(formData.costPerHour);
+      const costPerHour = Number.isFinite(parsedCostPerHour)
+        ? parsedCostPerHour
+        : 0;
+
+      const { error: userError } = await supabase
+        .from("users")
+        .update({
+          full_name: formData.fullName.trim(),
+          phone: formData.phone.trim() || null,
+        })
+        .eq("id", user.id);
+
+      if (userError) throw userError;
+
+      const { error: profileError } = await supabase
+        .from("tutor_profiles")
+        .update({
+          bio: formData.bio,
+          experience: formData.experience,
+          cost_per_hour: costPerHour,
+        })
+        .eq("user_id", user.id);
+
+      if (profileError) throw profileError;
+
+      await refreshUser();
+      setProfileSuccess(true);
+    } catch (err) {
+      console.error("handleProfileSubmit error:", err);
+      setProfileError("Gagal memperbarui profil.");
+    } finally {
+      setProfileSaving(false);
+    }
   };
 
   const displayAvatarSrc =
@@ -142,14 +185,14 @@ export default function ProfilePage() {
         </p>
       </header>
 
-      {profileState.success && (
+      {profileSuccess && (
         <p className="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
           Profile details saved.
         </p>
       )}
-      {profileState.error && (
+      {profileError && (
         <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {profileState.error}
+          {profileError}
         </p>
       )}
 
@@ -237,7 +280,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Details form */}
-      <form action={profileFormAction}>
+      <form onSubmit={handleProfileSubmit}>
         <input type="hidden" name="userId" value={user?.id ?? ""} />
 
         <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-6 shadow-sm sm:p-8">
@@ -345,10 +388,10 @@ export default function ProfilePage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <button
               type="submit"
-              disabled={profilePending}
+              disabled={profileSaving}
               className="btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold disabled:opacity-60"
             >
-              {profilePending ? (
+              {profileSaving ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Saving…
