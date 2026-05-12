@@ -12,6 +12,27 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const ensureUserProfile = async () => {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const hasLegacyHashTokens =
+        url.hash.includes("access_token=") ||
+        url.hash.includes("refresh_token=") ||
+        url.hash.includes("provider_token=");
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("auth callback code exchange error", error);
+          router.replace("/login?error=auth");
+          return;
+        }
+      }
+
+      // Remove query/hash artifacts from OAuth callback URL as soon as possible.
+      if (code || hasLegacyHashTokens) {
+        window.history.replaceState({}, "", "/auth/callback");
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
