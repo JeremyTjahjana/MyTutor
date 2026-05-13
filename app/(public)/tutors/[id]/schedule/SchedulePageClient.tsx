@@ -26,6 +26,8 @@ export default function SchedulePageClient({
   const [activeSubjectIndex, setActiveSubjectIndex] = useState(0);
   const [activeScheduleIndex, setActiveScheduleIndex] = useState(0);
   const [mobilePage, setMobilePage] = useState(0);
+  const [studentCount, setStudentCount] = useState(1);
+  const [sessionCount, setSessionCount] = useState(1);
 
   // Exclude slots that already have an accepted booking — they're taken
   const availableSchedules = tutor.schedules.filter(
@@ -58,10 +60,12 @@ export default function SchedulePageClient({
       startTime: startDate.toISOString(),
       endTime: endDate.toISOString(),
       dayOfWeek: String(selectedSchedule.dayOfWeek),
+      studentCount: String(studentCount),
+      sessionCount: String(sessionCount),
     });
 
     return `/tutors/${tutor.id}/confirmation?${params.toString()}`;
-  }, [tutor, selectedSubject, selectedSchedule]);
+  }, [tutor, selectedSubject, selectedSchedule, studentCount, sessionCount]);
 
   return (
     <main className="min-h-screen bg-[#F7F8FC] px-4 py-6 sm:px-6 lg:px-12">
@@ -128,7 +132,44 @@ export default function SchedulePageClient({
                 Semua jadwal tutor saat ini sudah penuh.
               </p>
             )}
-          </div>
+
+            {/* Student & Session Count */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="studentCount"
+                  className="mb-2 block text-sm font-semibold text-[var(--biru)]"
+                >
+                  Jumlah Pelajar
+                </label>
+                <input
+                  id="studentCount"
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={studentCount}
+                  onChange={(e) => setStudentCount(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-full rounded-xl border-2 border-[var(--biru)] bg-white px-4 py-3 text-[15px] font-medium text-[var(--gelap)] outline-none"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="sessionCount"
+                  className="mb-2 block text-sm font-semibold text-[var(--biru)]"
+                >
+                  Jumlah Pertemuan
+                </label>
+                <input
+                  id="sessionCount"
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={sessionCount}
+                  onChange={(e) => setSessionCount(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-full rounded-xl border-2 border-[var(--biru)] bg-white px-4 py-3 text-[15px] font-medium text-[var(--gelap)] outline-none"
+                />
+              </div>
+            </div>          </div>
           {/* ── Right: profile photo (40%), desktop only ── */}
           <TutorProfileCard name={tutor.name} avatarUrl={tutor.avatarUrl} />
         </div>

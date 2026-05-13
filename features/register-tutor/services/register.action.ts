@@ -3,7 +3,6 @@
 import { supabase } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 import { DAY_NUMBERS } from "@/types/tutor";
-import { resolveOrCreateSubjectIdByName } from "@/features/tutor/repositories/tutor.repository";
 
 /** The client-facing anon key client — used here to call auth.signUp */
 const authClient = createClient(
@@ -91,19 +90,22 @@ export async function registerTutorAction(
     });
   }
 
-  // 3. Create tutor_profiles row
+  // 3. Upsert tutor_profiles row (handles re-registration after revoke)
   const { data: profileData, error: profileError } = await supabase
     .from("tutor_profiles")
-    .insert({
-      user_id: userId,
-      experience: input.lamaExperience,
-      cost_per_hour: Number(input.biayaPerJam) || 0,
-    })
+    .upsert(
+      {
+        user_id: userId,
+        experience: input.lamaExperience,
+        cost_per_hour: Number(input.biayaPerJam) || 0,
+      },
+      { onConflict: "user_id" },
+    )
     .select("id")
     .single();
 
   if (profileError || !profileData) {
-    console.error("registerTutor: tutor_profiles insert error", profileError);
+    console.error("registerTutor: tutor_profiles upsert error", profileError);
     return {
       success: false,
       error: `Gagal membuat profil tutor: ${profileError?.message ?? "unknown"}`,
@@ -112,17 +114,74 @@ export async function registerTutorAction(
 
   const tutorProfileId = profileData.id;
 
-  // 4. Resolve subjects — by (name, category); category null for legacy matkul list
-  for (const matkulName of input.matkuls) {
-    const subjectId = await resolveOrCreateSubjectIdByName(matkulName, null);
-    if (!subjectId) continue;
+  // Clear old tutor_subjects and schedules (in case of re-registration)
+  await supabase
+    .from("tutor_subjects")
+    .delete()
+    .eq("tutor_profile_id", tutorProfileId);
+  await supabase
+    .from("schedules")
+    .delete()
+    .eq("tutor_profile_id", tutorProfileId);
 
-    const { error: linkErr } = await supabase.from("tutor_subjects").insert({
-      tutor_profile_id: tutorProfileId,
-      subject_id: subjectId,
-    });
+  // 4. Resolve subjects by name (ignore category — registration doesn't know categories)
+  const subjectLinks: { tutor_profile_id: string; subject_id: string }[] = [];
+  for (const matkulName of input.matkuls) {
+    const trimmed = matkulName.trim();
+    if (!trimmed) continue;
+
+    // First try to find an existing subject by name (case-insensitive)
+    const { data: existing } = await supabase
+      .from("subjects")
+      .select("id")
+      .ilike("name", trimmed)
+      .limit(1)
+      .single();
+
+    let subjectId: string | null = existing?.id ?? null;
+
+    // If not found, create a new one
+    if (!subjectId) {
+      const { data: created, error: createErr } = await supabase
+        .from("subjects")
+        .insert({ name: trimmed, category: null })
+        .select("id")
+        .single();
+
+      if (createErr) {
+        // Handle race condition — try finding again
+        if (createErr.code === "23505") {
+          const { data: retry } = await supabase
+            .from("subjects")
+            .select("id")
+            .ilike("name", trimmed)
+            .limit(1)
+            .single();
+          subjectId = retry?.id ?? null;
+        } else {
+          console.error("registerTutor: subject create error for", trimmed, createErr);
+        }
+      } else {
+        subjectId = created.id;
+      }
+    }
+
+    if (subjectId) {
+      subjectLinks.push({
+        tutor_profile_id: tutorProfileId,
+        subject_id: subjectId,
+      });
+    } else {
+      console.warn("registerTutor: could not resolve subject:", trimmed);
+    }
+  }
+
+  if (subjectLinks.length > 0) {
+    const { error: linkErr } = await supabase
+      .from("tutor_subjects")
+      .insert(subjectLinks);
     if (linkErr) {
-      console.error("registerTutor: tutor_subjects insert", linkErr);
+      console.error("registerTutor: tutor_subjects batch insert error", linkErr);
     }
   }
 

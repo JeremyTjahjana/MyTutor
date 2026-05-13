@@ -81,7 +81,7 @@ export default function TutorDashboardLayout({
     router.push("/");
   }, [logout, router]);
 
-  const canAccessDashboard = user?.role === "admin" || isApprovedTutor;
+  const canAccessDashboard = isApprovedTutor;
   const navItems = tutorNavItems;
 
   useEffect(() => {
@@ -89,8 +89,11 @@ export default function TutorDashboardLayout({
   }, [user?.avatarUrl]);
 
   useEffect(() => {
-    if (!isLoading && user && !canAccessDashboard) {
-      router.push("/");
+    if (isLoading) return;
+    if (!user) {
+      router.replace("/login");
+    } else if (!canAccessDashboard) {
+      router.replace("/");
     }
   }, [canAccessDashboard, isLoading, router, user]);
 
@@ -111,28 +114,10 @@ export default function TutorDashboardLayout({
   const dashboardLabel =
     user?.role === "admin" ? "Admin dashboard" : "Tutor dashboard";
 
-  if (isLoading) {
+  if (isLoading || !canAccessDashboard) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--putih)]">
         <p className="text-sm text-[var(--gelap)]/60">Loading dashboard…</p>
-      </div>
-    );
-  }
-
-  if (!canAccessDashboard) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--putih)] px-4">
-        <div className="max-w-md text-center">
-          <p className="mb-4 text-[var(--gelap)]/70">
-            You do not have access to this dashboard.
-          </p>
-          <Link
-            href="/"
-            className="btn-primary inline-block px-4 py-2 rounded-lg"
-          >
-            Back to home
-          </Link>
-        </div>
       </div>
     );
   }

@@ -49,7 +49,7 @@ export function GoogleAuthButton() {
       id="google-auth-button"
       onClick={handleClick}
       disabled={isLoading}
-      className="flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--gelap)]/[0.12] bg-white px-4 py-3 text-[15px] font-semibold text-[var(--gelap)] shadow-sm transition-all hover:border-[var(--gelap)]/20 hover:bg-[var(--gelap)]/[0.02] disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--gelap)]/[0.12] bg-white px-4 py-3 text-[15px] font-semibold text-[var(--gelap)] shadow-sm transition-all hover:border-[var(--gelap)]/20 hover:bg-[var(--gelap)]/[0.02] disabled:opacity-60 cursor-pointer"
     >
       {isLoading ? (
         <Loader2 className="h-5 w-5 animate-spin text-[var(--gelap)]/40" />

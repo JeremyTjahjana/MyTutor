@@ -48,8 +48,11 @@ export default function AdminDashboardLayout({
   const canAccessDashboard = user?.role === "admin";
 
   useEffect(() => {
-    if (!isLoading && user && !canAccessDashboard) {
-      router.push("/");
+    if (isLoading) return;
+    if (!user) {
+      router.replace("/login");
+    } else if (!canAccessDashboard) {
+      router.replace("/");
     }
   }, [canAccessDashboard, isLoading, router, user]);
 
@@ -72,30 +75,12 @@ export default function AdminDashboardLayout({
     [pathname],
   );
 
-  if (isLoading) {
+  if (isLoading || !canAccessDashboard) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--putih)]">
         <p className="text-sm text-[var(--gelap)]/60">
           Loading admin dashboard…
         </p>
-      </div>
-    );
-  }
-
-  if (!canAccessDashboard) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--putih)] px-4">
-        <div className="max-w-md text-center">
-          <p className="mb-4 text-[var(--gelap)]/70">
-            You do not have access to this dashboard.
-          </p>
-          <Link
-            href="/"
-            className="btn-primary inline-block rounded-lg px-4 py-2"
-          >
-            Back to home
-          </Link>
-        </div>
       </div>
     );
   }

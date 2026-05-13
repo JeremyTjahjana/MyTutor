@@ -6,9 +6,10 @@ import { FormData } from "../types";
 interface Step5Props {
   formData: FormData;
   onUploadContract: (file: File) => void | Promise<void>;
+  isUploading?: boolean;
 }
 
-export default function Step5({ formData, onUploadContract }: Step5Props) {
+export default function Step5({ formData, onUploadContract, isUploading }: Step5Props) {
   return (
     <div className="space-y-6">
       <h2 className="text-xl sm:text-2xl font-semibold text-[var(--biru)] mb-2">
@@ -24,15 +25,17 @@ export default function Step5({ formData, onUploadContract }: Step5Props) {
         <a
           href="/contract-template.pdf"
           download
-          className="btn-secondary px-4 py-2 rounded-lg"
+          className={`btn-secondary px-4 py-2 rounded-lg ${isUploading ? "pointer-events-none opacity-50" : ""}`}
+          aria-disabled={isUploading}
         >
           Unduh Template Kontrak
         </a>
 
-        <label className="flex items-center gap-3">
+        <label className={`flex items-center gap-3 ${isUploading ? "pointer-events-none opacity-50" : ""}`}>
           <input
             type="file"
             accept="application/pdf"
+            disabled={isUploading}
             onChange={(e) => {
               const f = e.target.files && e.target.files[0];
               if (f) onUploadContract(f);
@@ -40,7 +43,7 @@ export default function Step5({ formData, onUploadContract }: Step5Props) {
             className="hidden"
           />
           <span className="btn-primary px-4 py-2 rounded-lg cursor-pointer">
-            Unggah Kontrak (PDF)
+            {isUploading ? "Mengunggah..." : "Unggah Kontrak (PDF)"}
           </span>
         </label>
       </div>
@@ -65,15 +68,17 @@ export default function Step5({ formData, onUploadContract }: Step5Props) {
 
       <div>
         <p className="text-sm font-medium">Status unggahan</p>
-        <p className="text-sm text-[var(--gelap)]/70 mt-2">
-          {formData.contractUploaded ? (
-            <span>Terunggah: {formData.contractFileName}</span>
+        <div className="text-sm mt-2">
+          {isUploading ? (
+            <span className="text-[var(--biru)] font-medium">Sedang mengunggah...</span>
+          ) : formData.contractUploaded ? (
+            <span className="text-green-600 font-medium">✓ Terunggah: {formData.contractFileName}</span>
           ) : (
             <span className="italic text-[var(--gelap)]/60">
               Belum mengunggah kontrak
             </span>
           )}
-        </p>
+        </div>
       </div>
     </div>
   );

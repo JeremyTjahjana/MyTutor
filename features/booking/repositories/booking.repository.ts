@@ -109,6 +109,8 @@ export type CreateBookingInput = {
   startTime: string; // ISO timestamp
   endTime: string;
   notes?: string;
+  studentCount?: number;
+  sessionCount?: number;
 };
 
 export async function insertBooking(
@@ -125,6 +127,8 @@ export async function insertBooking(
       end_time: input.endTime,
       notes: input.notes ?? null,
       status: "pending",
+      student_count: input.studentCount ?? 1,
+      session_count: input.sessionCount ?? 1,
     })
     .select("id")
     .single();

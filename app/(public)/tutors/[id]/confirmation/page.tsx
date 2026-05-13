@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useActionState, useRef } from "react";
+import React, { useState, useEffect, useActionState, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +10,7 @@ import {
 } from "@/features/booking/services/booking.action";
 import SuccessfulPayment from "@/components/shared/SuccessfulPayment";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("id-ID", {
@@ -44,10 +45,32 @@ export default function ConfirmationPage() {
   const subjectName = searchParams.get("subjectName") ?? "—";
   const startTime = searchParams.get("startTime") ?? "";
   const endTime = searchParams.get("endTime") ?? "";
-  const [note, setNote] = useState("");
+  const studentCount = Math.max(1, Number(searchParams.get("studentCount")) || 1);
+  const sessionCount = Math.max(1, Number(searchParams.get("sessionCount")) || 1);
 
-  // Derive cost from tutor (hard to get here without another fetch — use a default for now)
-  const totalPrice = 150000;
+  const [note, setNote] = useState("");
+  const [costPerHour, setCostPerHour] = useState<number | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState(true);
+
+  // Fetch tutor's cost_per_hour
+  useEffect(() => {
+    if (!tutorProfileId) {
+      setLoadingPrice(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("tutor_profiles")
+        .select("cost_per_hour")
+        .eq("id", tutorProfileId)
+        .single();
+      setCostPerHour(data?.cost_per_hour ?? 0);
+      setLoadingPrice(false);
+    })();
+  }, [tutorProfileId]);
+
+  // Total = cost_per_hour × studentCount × sessionCount
+  const totalPrice = costPerHour !== null ? costPerHour * studentCount * sessionCount : null;
 
   const [state, formAction, isPending] = useActionState(
     createBookingAction,
@@ -68,7 +91,7 @@ export default function ConfirmationPage() {
               : "—"
           }
           date={startTime ? formatDate(startTime) : "—"}
-          total={totalPrice}
+          total={totalPrice ?? 0}
           viewBookingsHref="/booking-list"
           backHref="/"
         />
@@ -151,13 +174,33 @@ export default function ConfirmationPage() {
                   : "—"}
               </dd>
             </div>
+            <div className="flex items-start justify-between gap-4">
+              <dt className="text-[var(--gelap)]/65">Jumlah Pelajar:</dt>
+              <dd className="text-right font-semibold text-[var(--gelap)]">
+                {studentCount} orang
+              </dd>
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <dt className="text-[var(--gelap)]/65">Jumlah Pertemuan:</dt>
+              <dd className="text-right font-semibold text-[var(--gelap)]">
+                {sessionCount}x pertemuan
+              </dd>
+            </div>
+            {!loadingPrice && costPerHour !== null && (
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-[var(--gelap)]/65">Biaya per sesi:</dt>
+                <dd className="text-right font-semibold text-[var(--gelap)]">
+                  {formatRupiah(costPerHour)}
+                </dd>
+              </div>
+            )}
             <div className="border-t border-[var(--gelap)]/10 pt-3">
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-[16px] font-semibold text-[var(--biru)]">
                   Total:
                 </dt>
                 <dd className="text-[16px] font-bold text-[var(--biru)]">
-                  {formatRupiah(totalPrice)}
+                  {loadingPrice ? "Memuat..." : formatRupiah(totalPrice ?? 0)}
                 </dd>
               </div>
             </div>
@@ -189,6 +232,8 @@ export default function ConfirmationPage() {
           <input type="hidden" name="startTime" value={startTime} />
           <input type="hidden" name="endTime" value={endTime} />
           <input type="hidden" name="notes" value={note} />
+          <input type="hidden" name="studentCount" value={String(studentCount)} />
+          <input type="hidden" name="sessionCount" value={String(sessionCount)} />
 
           <button
             type="submit"

@@ -12,6 +12,7 @@ import Step3 from "./components/Step3";
 import Step4 from "./components/Step4";
 import Step5 from "./components/Step5";
 import Success from "./components/Success";
+import WaitingConfirmation from "./components/WaitingConfirmation";
 import { registerTutorAction } from "@/features/register-tutor/services/register.action";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -156,10 +157,10 @@ export default function RegisterTutorPage() {
     formData.angkatan;
 
   const isStep3Valid = () =>
-    formData.lamaExperience && formData.subject && formData.biayaPerJam.trim();
+    formData.lamaExperience && formData.matkuls.length > 0 && formData.biayaPerJam.trim();
 
   const isStep4Valid = () =>
-    formData.matkuls.length > 0 && formData.waktuTersedia.length > 0;
+    formData.waktuTersedia.length > 0;
 
   const isStep5Valid = () =>
     formData.contractUploaded === true &&
@@ -217,9 +218,7 @@ export default function RegisterTutorPage() {
     return (
       <Success
         onReset={() => {
-          setCurrentStep(1);
-          setFormData(initialFormData);
-          setIsSubmitted(false);
+          router.push("/");
         }}
       />
     );
@@ -231,6 +230,11 @@ export default function RegisterTutorPage() {
         <Loader2 className="w-8 h-8 animate-spin text-[var(--biru)]" />
       </div>
     );
+  }
+
+  // If user already submitted tutor registration, show waiting page
+  if (user.tutorStatus === "pending" || user.tutorStatus === "approved" || user.role === "tutor") {
+    return <WaitingConfirmation />;
   }
 
   return (
@@ -301,16 +305,23 @@ export default function RegisterTutorPage() {
             />
           )}
           {currentStep === 3 && (
-            <Step3 formData={formData} onChange={handleInputChange} />
+            <Step3
+              formData={formData}
+              onChange={handleInputChange}
+              onAddSubject={(name: string) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  matkuls: prev.matkuls.includes(name)
+                    ? prev.matkuls
+                    : [...prev.matkuls, name],
+                }));
+              }}
+              onRemoveMatkul={handleRemoveMatkul}
+            />
           )}
           {currentStep === 4 && (
             <Step4
               formData={formData}
-              onInputChange={(value) =>
-                setFormData((prev) => ({ ...prev, inputMatkul: value }))
-              }
-              onAddMatkul={handleAddMatkul}
-              onRemoveMatkul={handleRemoveMatkul}
               onToggleWaktu={handleToggleWaktu}
             />
           )}
@@ -318,6 +329,7 @@ export default function RegisterTutorPage() {
             <Step5
               formData={formData}
               onUploadContract={handleUploadContract}
+              isUploading={contractUploading}
             />
           )}
 
@@ -338,11 +350,11 @@ export default function RegisterTutorPage() {
           <div className="mt-8 flex gap-3 sm:gap-4">
             <button
               onClick={handlePrevStep}
-              disabled={currentStep === 1}
+              disabled={currentStep === 1 || contractUploading || isSubmitting}
               className={`flex-1 px-4 py-3 rounded-lg border-2 font-semibold transition-all ${
-                currentStep === 1
+                currentStep === 1 || contractUploading || isSubmitting
                   ? "border-[var(--gelap)]/20 bg-[var(--gelap)]/5 text-[var(--gelap)]/50 cursor-not-allowed"
-                  : "btn-secondary"
+                  : "btn-secondary cursor-pointer"
               }`}
             >
               Kembali

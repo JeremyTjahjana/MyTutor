@@ -12,6 +12,7 @@ const Navbar = () => {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const { user, logout } = useAuth();
   const dashboardHref =
@@ -139,7 +140,7 @@ const Navbar = () => {
             type="button"
             aria-label="Open profile sidebar"
             onClick={() => setIsSidebarOpen(true)}
-            className="btn-icon border-transparent bg-transparent p-0"
+            className="btn-icon border-transparent bg-transparent p-0 cursor-pointer"
           >
             <Image
               src={
@@ -160,7 +161,7 @@ const Navbar = () => {
           aria-label="Open menu"
           type="button"
           onClick={() => setIsSidebarOpen(true)}
-          className="btn-icon md:hidden h-10 w-10 border border-[var(--gelap)]/20 text-[var(--gelap)]"
+          className="btn-icon md:hidden h-10 w-10 border border-[var(--gelap)]/20 text-[var(--gelap)] cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -187,6 +188,7 @@ const Navbar = () => {
             : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsSidebarOpen(false)}
+        style={{ cursor: "pointer" }}
       />
 
       <aside
@@ -207,7 +209,7 @@ const Navbar = () => {
             type="button"
             aria-label="Close menu"
             onClick={() => setIsSidebarOpen(false)}
-            className="btn-icon h-9 w-9 text-[var(--gelap)]/65 hover:text-[var(--gelap)]"
+            className="btn-icon h-9 w-9 text-[var(--gelap)]/65 hover:text-[var(--gelap)] cursor-pointer"
           >
             <Image src={assets.close} alt="Close" className="w-5 h-5" />
           </button>
@@ -339,7 +341,7 @@ const Navbar = () => {
               <li>
                 <a
                   href="/register-tutor"
-                  className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5"
+                  className="w-full block px-3 py-2 rounded-lg hover:bg-[var(--gelap)]/5 cursor-pointer"
                 >
                   Daftar sebagai tutor
                 </a>
@@ -370,14 +372,21 @@ const Navbar = () => {
               <li>
                 <button
                   type="button"
+                  disabled={isLoggingOut}
                   onClick={async () => {
-                    setIsSidebarOpen(false);
-                    await logout();
-                    router.push("/");
+                    if (isLoggingOut) return;
+                    setIsLoggingOut(true);
+                    try {
+                      await logout();
+                      setIsSidebarOpen(false);
+                      router.push("/");
+                    } finally {
+                      setIsLoggingOut(false);
+                    }
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-[var(--merah)] font-semibold hover:bg-[var(--merah)]/10"
+                  className="w-full text-left px-3 py-2 rounded-lg text-[var(--merah)] font-semibold hover:bg-[var(--merah)]/10 cursor-pointer disabled:opacity-50"
                 >
-                  Sign out
+                  {isLoggingOut ? "Logging out..." : "Sign out"}
                 </button>
               </li>
             )}

@@ -26,6 +26,8 @@ export async function createBookingAction(
   const startTime = formData.get("startTime") as string;
   const endTime = formData.get("endTime") as string;
   const notes = (formData.get("notes") as string) || undefined;
+  const studentCount = Math.max(1, Number(formData.get("studentCount")) || 1);
+  const sessionCount = Math.max(1, Number(formData.get("sessionCount")) || 1);
 
   if (!studentId || !tutorProfileId || !subjectId || !startTime || !endTime) {
     return { success: false, error: "Data pemesanan tidak lengkap." };
@@ -40,6 +42,8 @@ export async function createBookingAction(
       startTime,
       endTime,
       notes,
+      studentCount,
+      sessionCount,
     });
     revalidatePath("/booking-list");
     return { success: true, bookingId: id };

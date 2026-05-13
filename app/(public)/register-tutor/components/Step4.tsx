@@ -4,17 +4,11 @@ import { waktuOptions } from "../constants";
 
 interface Step4Props {
   formData: FormData;
-  onInputChange: (value: string) => void;
-  onAddMatkul: () => void;
-  onRemoveMatkul: (index: number) => void;
   onToggleWaktu: (waktu: TimeSlot) => void;
 }
 
 export default function Step4({
   formData,
-  onInputChange,
-  onAddMatkul,
-  onRemoveMatkul,
   onToggleWaktu,
 }: Step4Props) {
   const [selectedDay, setSelectedDay] = useState("");
@@ -78,61 +72,8 @@ export default function Step4({
     <div className="space-y-8">
       <div>
         <h2 className="text-xl sm:text-2xl font-semibold text-[var(--biru)] mb-6">
-          Matkul/Skill & Waktu Tersedia
+          Pengelolaan Jadwal
         </h2>
-
-        {/* Matkul Section */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-[var(--gelap)] mb-4">
-            Matkul yang Diajarkan
-          </h3>
-
-          {/* Input Matkul */}
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={formData.inputMatkul}
-              onChange={(e) => onInputChange(e.target.value)}
-              placeholder="Tambah matkul lain"
-              className="flex-1 px-4 py-2.5 border border-[var(--gelap)]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/30 text-sm"
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  onAddMatkul();
-                }
-              }}
-            />
-            <button
-              onClick={onAddMatkul}
-              className="btn-primary px-6 py-2.5 text-sm whitespace-nowrap"
-            >
-              Tambah
-            </button>
-          </div>
-
-          {/* Matkul Pills */}
-          <div className="flex flex-wrap gap-2">
-            {formData.matkuls.map((matkul, index) => (
-              <div
-                key={index}
-                className="bg-[var(--biru)] text-white px-4 py-2 rounded-full flex items-center gap-2 text-sm"
-              >
-                {matkul}
-                <button
-                  onClick={() => onRemoveMatkul(index)}
-                  className="ml-1 hover:opacity-80 transition-opacity"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {formData.matkuls.length === 0 && (
-            <p className="text-sm text-[var(--gelap)]/50 italic">
-              Belum ada matkul yang ditambahkan
-            </p>
-          )}
-        </div>
 
         {/* Waktu Section */}
         <div>
@@ -153,7 +94,7 @@ export default function Step4({
                 <button
                   key={waktu}
                   onClick={() => onToggleWaktu(slot)}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                  className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium cursor-pointer ${
                     selected
                       ? "border-[var(--biru)] bg-[var(--biru)] text-white"
                       : "border-[var(--gelap)]/20 bg-white text-[var(--gelap)]"
@@ -189,7 +130,7 @@ export default function Step4({
                       key={d}
                       type="button"
                       onClick={() => setSelectedDay(d)}
-                      className={`px-3 py-2 rounded-lg text-sm border transition-all ${
+                      className={`px-3 py-2 rounded-lg text-sm border transition-all cursor-pointer ${
                         selectedDay === d
                           ? "bg-[var(--biru)] text-white border-[var(--biru)]"
                           : "bg-white border-[var(--gelap)]/20 text-[var(--gelap)]"
@@ -223,7 +164,7 @@ export default function Step4({
                 type="button"
                 onClick={handleAddCustomWaktu}
                 disabled={!selectedDay || !selectedStart}
-                className={`btn-primary h-[46px] px-6 py-3 text-sm whitespace-nowrap rounded-xl ${
+                className={`btn-primary h-[46px] px-6 py-3 text-sm whitespace-nowrap rounded-xl cursor-pointer ${
                   !selectedDay || !selectedStart
                     ? "opacity-60 cursor-not-allowed"
                     : ""
@@ -249,7 +190,7 @@ export default function Step4({
                     <button
                       type="button"
                       onClick={() => onToggleWaktu(slot)}
-                      className="rounded-full px-2 text-[var(--gelap)]/60 hover:bg-[var(--gelap)]/5 hover:text-[var(--gelap)]"
+                      className="rounded-full px-2 text-[var(--gelap)]/60 hover:bg-[var(--gelap)]/5 hover:text-[var(--gelap)] cursor-pointer"
                       aria-label={`Hapus ${formatSlotLabel(slot)}`}
                     >
                       ×
