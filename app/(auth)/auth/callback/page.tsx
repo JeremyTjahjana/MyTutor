@@ -1,15 +1,27 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
   const redirectedRef = useRef(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
+    // If user is already loaded from AuthContext, redirect immediately
+    if (!authLoading && user) {
+      if (!redirectedRef.current) {
+        redirectedRef.current = true;
+        router.replace("/");
+      }
+      return;
+    }
+
     // Prevent multiple redirect attempts
     if (redirectedRef.current) return;
 
@@ -64,11 +76,12 @@ export default function AuthCallbackPage() {
 
         if (upsertError) {
           console.error("auth callback upsert error", upsertError);
-          // Still redirect even if upsert fails, since session is valid
+          // Still continue even if upsert fails, since session is valid
         }
 
-        redirectedRef.current = true;
-        router.replace("/");
+        // Wait briefly for AuthContext to detect the new session and fetch user profile
+        // onAuthStateChange should fire and update AuthContext
+        setRedirecting(true);
       } catch (err) {
         console.error("auth callback error", err);
         redirectedRef.current = true;
@@ -87,7 +100,7 @@ export default function AuthCallbackPage() {
 
     ensureUserProfile();
     return () => clearTimeout(timeoutId);
-  }, [router]);
+  }, [router, user, authLoading]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white">
