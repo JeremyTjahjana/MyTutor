@@ -26,6 +26,11 @@ export default function RootLayout({
   const pathname = usePathname();
   const isTutorDashboard =
     pathname === "/tutor-dashboard" || pathname.startsWith("/tutor-dashboard/");
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname.startsWith("/auth/callback");
+  const showChrome = !isTutorDashboard && !isAuthPage;
 
   return (
     <html
@@ -35,9 +40,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          {!isTutorDashboard && <Navbar />}
+          {showChrome && <Navbar />}
           {children}
-          {!isTutorDashboard && <Footer />}
+          {showChrome && <Footer />}
         </AuthProvider>
       </body>
     </html>
