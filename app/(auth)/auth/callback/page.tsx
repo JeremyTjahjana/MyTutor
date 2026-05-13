@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 
 export default function AuthCallbackPage() {
-  const { user, isLoading } = useAuth();
   const router = useRouter();
+  const redirectedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple redirect attempts
+    if (redirectedRef.current) return;
+
     const ensureUserProfile = async () => {
       const url = new URL(window.location.href);
       const code = url.searchParams.get("code");
@@ -23,6 +25,7 @@ export default function AuthCallbackPage() {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
           console.error("auth callback code exchange error", error);
+          redirectedRef.current = true;
           router.replace("/login?error=auth");
           return;
         }
@@ -38,6 +41,7 @@ export default function AuthCallbackPage() {
       } = await supabase.auth.getSession();
 
       if (!session?.user) {
+        redirectedRef.current = true;
         router.replace("/login?error=auth");
         return;
       }
@@ -56,17 +60,12 @@ export default function AuthCallbackPage() {
         { onConflict: "id", ignoreDuplicates: true },
       );
 
+      redirectedRef.current = true;
       router.replace("/");
     };
 
-    const timer = setTimeout(ensureUserProfile, 300);
-    return () => clearTimeout(timer);
+    ensureUserProfile();
   }, [router]);
-  useEffect(() => {
-    if (!isLoading && user) {
-      router.replace("/");
-    }
-  }, [isLoading, user, router]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white">
