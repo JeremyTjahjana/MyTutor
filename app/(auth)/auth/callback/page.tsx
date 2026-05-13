@@ -14,57 +14,79 @@ export default function AuthCallbackPage() {
     if (redirectedRef.current) return;
 
     const ensureUserProfile = async () => {
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-      const hasLegacyHashTokens =
-        url.hash.includes("access_token=") ||
-        url.hash.includes("refresh_token=") ||
-        url.hash.includes("provider_token=");
+      try {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        const hasLegacyHashTokens =
+          url.hash.includes("access_token=") ||
+          url.hash.includes("refresh_token=") ||
+          url.hash.includes("provider_token=");
 
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          console.error("auth callback code exchange error", error);
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            console.error("auth callback code exchange error", error);
+            redirectedRef.current = true;
+            router.replace("/login?error=auth");
+            return;
+          }
+        }
+
+        // Remove query/hash artifacts from OAuth callback URL as soon as possible.
+        if (code || hasLegacyHashTokens) {
+          window.history.replaceState({}, "", "/auth/callback");
+        }
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.user) {
+          console.error("No session found after code exchange");
           redirectedRef.current = true;
           router.replace("/login?error=auth");
           return;
         }
-      }
 
-      // Remove query/hash artifacts from OAuth callback URL as soon as possible.
-      if (code || hasLegacyHashTokens) {
-        window.history.replaceState({}, "", "/auth/callback");
-      }
+        const { id, email, user_metadata } = session.user;
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        const { error: upsertError } = await supabase.from("users").upsert(
+          {
+            id,
+            email: email ?? "",
+            full_name: user_metadata?.full_name ?? user_metadata?.name ?? "",
+            avatar_url:
+              user_metadata?.avatar_url ?? user_metadata?.picture ?? null,
+            role: "student",
+          },
+          { onConflict: "id", ignoreDuplicates: true },
+        );
 
-      if (!session?.user) {
+        if (upsertError) {
+          console.error("auth callback upsert error", upsertError);
+          // Still redirect even if upsert fails, since session is valid
+        }
+
+        redirectedRef.current = true;
+        router.replace("/");
+      } catch (err) {
+        console.error("auth callback error", err);
         redirectedRef.current = true;
         router.replace("/login?error=auth");
-        return;
       }
-
-      const { id, email, user_metadata } = session.user;
-
-      await supabase.from("users").upsert(
-        {
-          id,
-          email: email ?? "",
-          full_name: user_metadata?.full_name ?? user_metadata?.name ?? "",
-          avatar_url:
-            user_metadata?.avatar_url ?? user_metadata?.picture ?? null,
-          role: "student",
-        },
-        { onConflict: "id", ignoreDuplicates: true },
-      );
-
-      redirectedRef.current = true;
-      router.replace("/");
     };
 
+    // Set a timeout to redirect to home if callback takes too long
+    const timeoutId = setTimeout(() => {
+      if (!redirectedRef.current) {
+        console.warn("auth callback timeout, redirecting to home");
+        redirectedRef.current = true;
+        router.replace("/");
+      }
+    }, 5000);
+
     ensureUserProfile();
+    return () => clearTimeout(timeoutId);
   }, [router]);
 
   return (
