@@ -33,6 +33,7 @@ const Navbar = () => {
 
   useEffect(() => {
     document.body.style.overflow = isSidebarOpen ? "hidden" : "";
+    document.body.classList.toggle("sidebar-open", isSidebarOpen);
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -43,10 +44,15 @@ const Navbar = () => {
     const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
       if (!isSidebarOpen) return;
 
-      const target = event.target as Node | null;
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      // Check if clicked on toggle button
+      const isToggleButton = target.closest('[data-toggle-sidebar]');
+      if (isToggleButton) return;
+
       if (
         sidebarRef.current &&
-        target &&
         !sidebarRef.current.contains(target)
       ) {
         setIsSidebarOpen(false);
@@ -59,6 +65,7 @@ const Navbar = () => {
 
     return () => {
       document.body.style.overflow = "";
+      document.body.classList.remove("sidebar-open");
       window.removeEventListener("keydown", handleEscape);
       document.removeEventListener("mousedown", handleOutsideClick);
       document.removeEventListener("touchstart", handleOutsideClick);
@@ -66,8 +73,13 @@ const Navbar = () => {
   }, [isSidebarOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--putih)]/95 backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D] shadow-[0px_2px_16px_0px_#0000000D]">
-      <nav className="h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]">
+    <header style={{
+      transition: 'background-color 300ms ease, color 300ms ease'
+    }} className={`sticky top-0 z-50 ${isSidebarOpen ? "bg-[var(--putih)]/40" : "bg-[var(--putih)]/95"} backdrop-blur-sm shadow-[0px_4px_25px_0px_#0000000D] shadow-[0px_2px_16px_0px_#0000000D]`}>
+      <nav className={`h-[72px] w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 flex items-center justify-between text-[var(--gelap)]`} style={{
+        transition: 'opacity 300ms ease',
+        opacity: isSidebarOpen ? 0.6 : 1
+      }}>
         <Link href="/" aria-label="Go to home page" className="inline-flex">
           <Image
             src={assets.logo2}
@@ -137,8 +149,12 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-4">
           <button
             type="button"
-            aria-label="Open profile sidebar"
-            onClick={() => setIsSidebarOpen(true)}
+            data-toggle-sidebar
+            aria-label={isSidebarOpen ? "Close sidebar" : "Open profile sidebar"}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsSidebarOpen(!isSidebarOpen);
+            }}
             className="btn-icon border-transparent bg-transparent p-0"
           >
             <Image
@@ -148,7 +164,7 @@ const Navbar = () => {
               alt="Foto profil"
               width={56}
               height={56}
-              className="w-14 h-14 rounded-full object-cover hover:cursor-pointer  hover:scale-105 
+              className="w-12 h-12 rounded-full object-cover hover:cursor-pointer  hover:scale-105 
               border border-1 border-[var(--gelap)]
               transition-transform"
               onError={() => setImageError(true)}
@@ -157,9 +173,13 @@ const Navbar = () => {
         </div>
 
         <button
-          aria-label="Open menu"
+          data-toggle-sidebar
+          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
           type="button"
-          onClick={() => setIsSidebarOpen(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsSidebarOpen(!isSidebarOpen);
+          }}
           className="btn-icon md:hidden h-10 w-10 border border-[var(--gelap)]/20 text-[var(--gelap)]"
         >
           <svg
@@ -179,15 +199,6 @@ const Navbar = () => {
           </svg>
         </button>
       </nav>
-
-      <div
-        className={`fixed inset-0 z-40 bg-[var(--gelap)]/30 transition-opacity duration-300 ${
-          isSidebarOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setIsSidebarOpen(false)}
-      />
 
       <aside
         ref={sidebarRef}
