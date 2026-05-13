@@ -13,7 +13,7 @@ export default function AuthCallbackPage() {
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    // If user is already loaded from AuthContext, redirect immediately
+    // If AuthContext already has the profile, allow immediate redirect.
     if (!authLoading && user) {
       if (!redirectedRef.current) {
         redirectedRef.current = true;
@@ -81,7 +81,20 @@ export default function AuthCallbackPage() {
 
         // Refresh AuthContext immediately so navbar/sidebar can render the profile
         // without waiting for a manual refresh.
-        await refreshUser();
+        const profile = await refreshUser();
+
+        if (!profile) {
+          console.error("auth callback refreshUser returned no profile");
+          redirectedRef.current = true;
+          router.replace("/login?error=auth");
+          return;
+        }
+
+        // Give React one paint cycle so the updated auth state is committed
+        // before we leave the callback page.
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => resolve());
+        });
 
         redirectedRef.current = true;
         router.replace("/");
@@ -92,12 +105,12 @@ export default function AuthCallbackPage() {
       }
     };
 
-    // Set a timeout to redirect to home if callback takes too long
+    // Set a timeout to fail fast if callback takes too long.
     const timeoutId = setTimeout(() => {
       if (!redirectedRef.current) {
-        console.warn("auth callback timeout, redirecting to home");
+        console.warn("auth callback timeout, redirecting to login");
         redirectedRef.current = true;
-        router.replace("/");
+        router.replace("/login?error=auth");
       }
     }, 5000);
 

@@ -18,7 +18,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   /** Re-fetch `public.users` for the current session (e.g. after avatar upload). */
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -103,15 +103,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
-  const refreshUser = useCallback(async () => {
+  const refreshUser = useCallback(async (): Promise<User | null> => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
     if (session?.user) {
       const profile = await loadUserProfile(session.user.id);
       setUser(profile);
+      return profile;
     } else {
       setUser(null);
+      return null;
     }
   }, []);
 
