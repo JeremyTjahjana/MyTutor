@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, refreshUser } = useAuth();
   const redirectedRef = useRef(false);
   const [redirecting, setRedirecting] = useState(false);
 
