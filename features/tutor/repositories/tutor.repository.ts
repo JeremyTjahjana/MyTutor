@@ -27,34 +27,54 @@ function unwrapJoin<T>(join: unknown): T | null {
 
 // ─── Tutor Listings (public browse) ─────────────────────────────────────────
 
-type TutorListingRpcRow = {
-  id: string;
-  user_id: string;
-  name: string;
-  bio: string;
-  rating: number | string;
-  cost_per_hour: number | string;
-  total_sessions: number;
-  avatar_url: string | null;
-  subject_ids: string[];
-  subject_names: string[];
-};
-
 export async function fetchTutorListings(): Promise<TutorListItem[]> {
-  const { data, error } = await supabase.rpc("get_tutor_listings");
+  // Query tutor_profiles joined with users (role = 'tutor') to get ALL tutors
+  const { data, error } = await supabase
+    .from("tutor_profiles")
+    .select(
+      `id, user_id, bio, rating, cost_per_hour, total_sessions,
+       users!tutor_profiles_user_id_fkey(full_name, avatar_url, role)`,
+    );
+
   if (error) throw error;
 
-  return ((data ?? []) as TutorListingRpcRow[]).map((row) => ({
-    id: row.id,
-    userId: row.user_id,
-    name: row.name,
-    bio: row.bio,
-    rating: toNumber(row.rating),
-    costPerHour: toNumber(row.cost_per_hour),
-    totalSessions: row.total_sessions,
-    avatarUrl: row.avatar_url,
-    subjects: row.subject_names ?? [],
-  }));
+  // Filter to only include users with role = 'tutor'
+  const profiles = (data ?? []).filter((row) => {
+    const user = unwrapJoin<{ full_name: string; avatar_url: string | null; role: string }>(row.users);
+    return user?.role === "tutor";
+  });
+
+  // Fetch subjects for all tutor profiles in one query
+  const profileIds = profiles.map((p) => p.id);
+  const { data: subjectRows } = await supabase
+    .from("tutor_subjects")
+    .select("tutor_profile_id, subjects(name)")
+    .in("tutor_profile_id", profileIds);
+
+  // Build a map: tutor_profile_id → subject names[]
+  const subjectMap = new Map<string, string[]>();
+  for (const row of subjectRows ?? []) {
+    const s = unwrapJoin<{ name: string }>(row.subjects);
+    if (!s) continue;
+    const pid = row.tutor_profile_id as string;
+    if (!subjectMap.has(pid)) subjectMap.set(pid, []);
+    subjectMap.get(pid)!.push(s.name);
+  }
+
+  return profiles.map((row) => {
+    const user = unwrapJoin<{ full_name: string; avatar_url: string | null; role: string }>(row.users);
+    return {
+      id: row.id,
+      userId: row.user_id,
+      name: user?.full_name ?? "Unknown",
+      bio: row.bio ?? "",
+      rating: toNumber(row.rating),
+      costPerHour: toNumber(row.cost_per_hour),
+      totalSessions: row.total_sessions ?? 0,
+      avatarUrl: user?.avatar_url ?? null,
+      subjects: subjectMap.get(row.id) ?? [],
+    };
+  });
 }
 
 // ─── Single Tutor Detail ─────────────────────────────────────────────────────

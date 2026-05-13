@@ -24,8 +24,7 @@ export async function GET(request: Request) {
           {
             id,
             email: email ?? "",
-            full_name:
-              user_metadata?.full_name ?? user_metadata?.name ?? "",
+            full_name: user_metadata?.full_name ?? user_metadata?.name ?? "",
             avatar_url:
               user_metadata?.avatar_url ?? user_metadata?.picture ?? null,
             role: "student",
