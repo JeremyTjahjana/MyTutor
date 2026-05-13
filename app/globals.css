@@ -22,6 +22,22 @@ body {
   font-style: normal;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgb(36 39 49 / 0.45);
+  backdrop-filter: blur(1px);
+  opacity: 0;
+  transition: opacity 300ms ease 0ms;
+  z-index: 40;
+  pointer-events: none;
+}
+
+body.sidebar-open::before {
+  opacity: 1;
+}
+
 @layer components {
   .btn-base,
   .btn-primary,
