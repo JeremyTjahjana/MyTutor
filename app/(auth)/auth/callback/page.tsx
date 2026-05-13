@@ -79,9 +79,12 @@ export default function AuthCallbackPage() {
           // Still continue even if upsert fails, since session is valid
         }
 
-        // Wait briefly for AuthContext to detect the new session and fetch user profile
-        // onAuthStateChange should fire and update AuthContext
-        setRedirecting(true);
+        // Refresh AuthContext immediately so navbar/sidebar can render the profile
+        // without waiting for a manual refresh.
+        await refreshUser();
+
+        redirectedRef.current = true;
+        router.replace("/");
       } catch (err) {
         console.error("auth callback error", err);
         redirectedRef.current = true;
