@@ -28,6 +28,18 @@ export default function RegisterTutorPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [contractError, setContractError] = useState<string | null>(null);
 
+  const sanitizePhoneNumber = (value: string) => value.replace(/\D/g, "");
+
+  const formatPhoneNumberForServer = (value: string) => {
+    const digitsOnly = sanitizePhoneNumber(value);
+
+    if (!digitsOnly) return "";
+    if (digitsOnly.startsWith("62")) return `+${digitsOnly}`;
+    if (digitsOnly.startsWith("0")) return `+62${digitsOnly.slice(1)}`;
+
+    return `+62${digitsOnly}`;
+  };
+
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/login?redirect=/register-tutor");
@@ -51,7 +63,7 @@ export default function RegisterTutorPage() {
     setSubmitError(null);
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "nomorTelepon" ? sanitizePhoneNumber(value) : value,
     }));
   };
 
@@ -147,7 +159,7 @@ export default function RegisterTutorPage() {
   const isStep1Valid = () =>
     formData.namaLengkap.trim() &&
     formData.emailIPB.includes("@apps.ipb.ac.id") &&
-    formData.nomorTelepon.trim();
+    /^\d{8,13}$/.test(formData.nomorTelepon.trim());
 
   const isStep2Valid = () =>
     formData.nim.trim() &&
@@ -186,7 +198,7 @@ export default function RegisterTutorPage() {
       try {
         const result = await registerTutorAction({
           existingUserId: user!.id,
-          nomorTelepon: formData.nomorTelepon,
+          nomorTelepon: formatPhoneNumberForServer(formData.nomorTelepon),
           lamaExperience: formData.lamaExperience,
           biayaPerJam: formData.biayaPerJam,
           matkuls: formData.matkuls,

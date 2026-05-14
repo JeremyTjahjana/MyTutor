@@ -50,10 +50,10 @@ export const fakultasOptions = [
   "Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA)",
   "Fakultas Ekonomi dan Manajemen (FEM)",
   "Fakultas Ekologi Manusia (FEMA)",
-  "Sekolah Bisnis",
-  "Sekolah Vokasi",
-  "Fakultas Kedokteran",
-  "Sekolah Sains Data Matematika dan Informatika",
+  "Sekolah Bisnis (SB)",
+  "Sekolah Vokasi (SV)",
+  "Fakultas Kedokteran dan Gizi (FKGiz)",
+  "Sekolah Sains Data Matematika dan Informatika (SSMI)",
 ];
 
 export const programStudiOptions = [
