@@ -183,7 +183,7 @@ export default function Step3({
           Biaya Per Jam
         </label>
         <div className="flex items-center gap-2">
-          <span className="text-[var(--gelap)]/70 font-medium">Rp.</span>
+          <span className="text-[var(--gelap)]/70 font-medium">Rp</span>
           <input
             type="number"
             name="biayaPerJam"
