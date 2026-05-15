@@ -1,7 +1,10 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import type { Booking } from "@/types/user";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
+import Modal from "@/components/shared/ModalTestimoni";
 
 type BookingListCardProps = {
   booking: Booking;
@@ -32,6 +35,7 @@ const formatDay = (iso: string) =>
   });
 
 const BookingListCard = ({ booking }: BookingListCardProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const statusInfo = statusConfig[booking.status] ?? statusConfig.pending;
 
   const handleContactTutor = () => {
@@ -51,9 +55,9 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
   };
 
   return (
-    <article className="w-full max-w-[360px] rounded-2xl border border-[var(--gelap)]/20 bg-[var(--putih)] py-8 px-8 sm:p-5 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.12)]">
+    <article className="w-full max-w-90 rounded-2xl border border-(--gelap)/20 bg-(--putih) py-8 px-8 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.12)] sm:p-5">
       <div className="flex items-center gap-3">
-        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-[var(--gelap)]/20">
+        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-(--gelap)/20">
           <Image
             src={booking.tutorAvatarUrl ?? assets.mehehe}
             alt={booking.tutorName}
@@ -65,7 +69,7 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
 
         <div className="flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h4 className="text-xl leading-none font-semibold text-[var(--gelap)] sm:text-[20px]">
+            <h4 className="text-xl leading-none font-semibold text-(--gelap) sm:text-[20px]">
               {booking.subjectName}
             </h4>
             <span
@@ -74,13 +78,13 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
               {statusInfo.label}
             </span>
           </div>
-          <p className="mt-1 text-[15px] leading-none font-semibold uppercase tracking-widest text-[var(--gelap)]/90 sm:text-[16px]">
+          <p className="mt-1 text-[15px] leading-none font-semibold uppercase tracking-widest text-(--gelap)/90 sm:text-[16px]">
             {booking.tutorName}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 text-[15px] leading-[1.3] text-[var(--gelap)]/90 sm:mt-6 sm:text-[18px]">
+      <div className="mt-5 text-[15px] leading-[1.3] text-(--gelap)/90 sm:mt-6 sm:text-[18px]">
         <p className="font-medium">Jadwal Tutor:</p>
         <p className="mt-1">
           {formatDay(booking.startTime)} ({formatTime(booking.startTime)} -{" "}
@@ -97,6 +101,31 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
       >
         Kontak tutor
       </button>
+      
+      <button 
+        type="button" 
+        className="btn-primary mt-3 w-full"
+        onClick={() => setIsModalOpen(true)}
+      >
+        Beri Testimoni
+      </button>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        tutorName={booking.tutorName}
+        tutorAvatarUrl={booking.tutorAvatarUrl}
+        subjectName={booking.subjectName}
+        onSubmit={({ rating, testimonial, anonymous }) => {
+          console.log("Testimoni tutor", {
+            bookingId: booking.id,
+            tutorName: booking.tutorName,
+            rating,
+            testimonial,
+            anonymous,
+          });
+        }}
+      />
     </article>
   );
 };
