@@ -31,6 +31,7 @@ export interface Booking {
   /** In student context: the tutor's name. In tutor context: the student's name. */
   tutorName: string;
   tutorAvatarUrl: string | null;
+  tutorPhone: string | null;
   startTime: string; // ISO timestamp
   endTime: string;
   status: BookingStatus;

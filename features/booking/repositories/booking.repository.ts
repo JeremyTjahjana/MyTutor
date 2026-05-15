@@ -18,7 +18,7 @@ export async function fetchBookingsByStudentId(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, notes, created_at,
        subjects(name),
-       tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url))`,
+       tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url, phone))`,
     )
     .eq("student_id", studentId)
     .order("start_time", { ascending: false });
@@ -30,7 +30,7 @@ export async function fetchBookingsByStudentId(
     const tutorProfile = one(
       row.tutor_profiles as unknown as
         | {
-            users: { full_name: string; avatar_url: string | null }[];
+            users: { full_name: string; avatar_url: string | null; phone: string | null }[];
           }[]
         | null,
     );
@@ -44,6 +44,7 @@ export async function fetchBookingsByStudentId(
       subjectName: subject?.name ?? "—",
       tutorName: tutorUser?.full_name ?? "—",
       tutorAvatarUrl: tutorUser?.avatar_url ?? null,
+      tutorPhone: tutorUser?.phone ?? null,
       startTime: row.start_time as string,
       endTime: row.end_time as string,
       status: row.status as Booking["status"],
@@ -64,7 +65,7 @@ export async function fetchBookingsByTutorProfileId(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, notes, created_at,
        subjects(name),
-       users!bookings_student_id_fkey(full_name, avatar_url)`,
+       users!bookings_student_id_fkey(full_name, avatar_url, phone)`,
     )
     .eq("tutor_profile_id", tutorProfileId)
     .order("start_time", { ascending: false });
@@ -78,6 +79,7 @@ export async function fetchBookingsByTutorProfileId(
         | {
             full_name: string;
             avatar_url: string | null;
+            phone: string | null;
           }[]
         | null,
     );
@@ -90,6 +92,7 @@ export async function fetchBookingsByTutorProfileId(
       subjectName: subject?.name ?? "—",
       tutorName: studentUser?.full_name ?? "—",
       tutorAvatarUrl: studentUser?.avatar_url ?? null,
+      tutorPhone: studentUser?.phone ?? null,
       startTime: row.start_time as string,
       endTime: row.end_time as string,
       status: row.status as Booking["status"],

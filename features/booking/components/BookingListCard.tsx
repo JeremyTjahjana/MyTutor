@@ -34,6 +34,22 @@ const formatDay = (iso: string) =>
 const BookingListCard = ({ booking }: BookingListCardProps) => {
   const statusInfo = statusConfig[booking.status] ?? statusConfig.pending;
 
+  const handleContactTutor = () => {
+    if (booking.tutorPhone) {
+      // Remove non-numeric characters and add country code if needed
+      let phone = booking.tutorPhone.replace(/\D/g, "");
+      // If phone doesn't start with country code, assume Indonesia (62)
+      if (!phone.startsWith("62")) {
+        if (phone.startsWith("0")) {
+          phone = "62" + phone.substring(1);
+        } else {
+          phone = "62" + phone;
+        }
+      }
+      window.open(`https://wa.me/${phone}`, "_blank");
+    }
+  };
+
   return (
     <article className="w-full max-w-[360px] rounded-2xl border border-[var(--gelap)]/20 bg-[var(--putih)] py-8 px-8 sm:p-5 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.12)]">
       <div className="flex items-center gap-3">
@@ -72,7 +88,13 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
         </p>
       </div>
 
-      <button type="button" className="btn-primary mt-6 w-full">
+      <button
+        type="button"
+        className="btn-primary mt-6 w-full"
+        onClick={handleContactTutor}
+        disabled={!booking.tutorPhone}
+        title={booking.tutorPhone ? "Chat di WhatsApp" : "Nomor telepon tidak tersedia"}
+      >
         Kontak tutor
       </button>
     </article>
