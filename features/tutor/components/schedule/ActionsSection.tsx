@@ -10,21 +10,24 @@ export function ActionsSection({
   confirmationHref,
 }: ActionsSectionProps) {
   return (
-    <div className="mt-8 flex flex-col gap-4 justify-center align-center lg:justify-start px-10">
+    <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center items-center lg:justify-start">
       {confirmationHref ? (
-        <Link href={confirmationHref} className="btn-primary w-full">
+        <Link href={confirmationHref} className="btn-primary w-full md:order-2">
           Pesan Sekarang
         </Link>
       ) : (
         <button
           disabled
-          className="btn-primary w-full opacity-60 cursor-not-allowed"
+          className="btn-primary w-full opacity-60 cursor-not-allowed md:order-2"
         >
           Pesan Sekarang
         </button>
       )}
 
-      <Link href={`/tutors/${tutorId}`} className="btn-secondary w-full">
+      <Link
+        href={`/tutors/${tutorId}`}
+        className="btn-secondary w-full md:order-1"
+      >
         Kembali
       </Link>
     </div>

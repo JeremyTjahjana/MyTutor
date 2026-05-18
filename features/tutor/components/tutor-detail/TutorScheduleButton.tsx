@@ -21,7 +21,7 @@ export function TutorScheduleButton({ tutorId }: TutorScheduleButtonProps) {
   };
 
   return (
-    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full mx-auto sm:max-w-md">
+    <div className="my-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full mx-auto sm:max-w-md">
       <button
         onClick={handleViewSchedule}
         disabled={isPending}
