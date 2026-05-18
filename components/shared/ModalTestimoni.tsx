@@ -15,7 +15,7 @@ interface ModalProps {
     rating: number;
     testimonial: string;
     anonymous: boolean;
-  }) => void;
+  }) => Promise<void> | void;
 }
 
 const starIndexes = [1, 2, 3, 4, 5];
@@ -33,11 +33,16 @@ const Modal: React.FC<ModalProps> = ({
   const [anonymous, setAnonymous] = useState(false);
   const [isAnimatingRating, setIsAnimatingRating] = useState(false);
   const [animatedStarIndex, setAnimatedStarIndex] = useState<number | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
       setIsAnimatingRating(false);
       setAnimatedStarIndex(null);
+      setSubmitError(null);
+      setIsSubmitting(false);
       return;
     }
 
@@ -81,18 +86,58 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  if (!isOpen && !isClosing) return null;
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 150);
+  };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.({ rating, testimonial: testimonial.trim(), anonymous });
-    onClose();
+    if (isSubmitting) return;
+
+    if (rating < 1) {
+      setSubmitError("Pilih rating terlebih dahulu.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+      await onSubmit?.({ rating, testimonial: testimonial.trim(), anonymous });
+      handleClose();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Gagal mengirim testimoni.";
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -100,10 +145,10 @@ const Modal: React.FC<ModalProps> = ({
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full overflow-hidden rounded-t-3xl bg-(--putih) shadow-[0_-8px_30px_rgba(0,0,0,0.12)] sm:max-w-180 sm:rounded-[28px]">
+      <div className={`relative w-full overflow-hidden rounded-t-3xl bg-(--putih) shadow-[0_-8px_30px_rgba(0,0,0,0.12)] ${isClosing ? "modal-dialog-closing" : "modal-dialog"} sm:max-w-180 sm:rounded-[28px]`}>
         <button
-          onClick={onClose}
-          className="absolute left-3 top-3 z-10 rounded-full p-2 text-[#111827]/90 transition-colors hover:bg-black/5 sm:left-4 sm:top-4"
+          onClick={handleClose}
+          className="absolute left-3 top-3 z-10 rounded-full p-2 text-(--gelap)/90 transition-colors hover:bg-black/5 sm:left-4 sm:top-4"
           aria-label="Close modal"
           type="button"
         >
@@ -129,7 +174,7 @@ const Modal: React.FC<ModalProps> = ({
               />
             </div>
             <div className="min-w-0 flex-1 pr-7 sm:pr-10">
-              <p className="truncate text-[14px] leading-5 font-medium text-[#24262a] sm:text-[18px]">
+              <p className="truncate text-[14px] leading-5 font-medium text-(--gelap) sm:text-[18px]">
                 {tutorName}
               </p>
               <p className="mt-1 text-[12px] leading-4 text-[#737373] sm:text-[15px]">
@@ -165,10 +210,10 @@ const Modal: React.FC<ModalProps> = ({
           </div>
 
           <div className="mt-6 border-t border-black/10 pt-4 sm:mt-8 sm:pt-6">
-            <h3 className="text-[18px] font-extrabold leading-tight text-[#23262b] sm:text-[24px]">
+            <h3 className="text-[18px] font-extrabold leading-tight text-(--gelap) sm:text-[24px]">
               Apa yang bikin kamu puas?
             </h3>
-            <p className="mt-2 text-[13px] font-semibold text-[#13a97a] sm:text-[16px]">
+            <p className="mt-2 text-[13px] font-semibold text-(--biru) sm:text-[16px]">
               Sering dibahas:
             </p>
 
@@ -178,29 +223,32 @@ const Modal: React.FC<ModalProps> = ({
                 value={testimonial}
                 onChange={(event) => setTestimonial(event.target.value)}
                 placeholder="Contoh: Materinya jelas, cara ngajarnya sabar, dan bikin mudah paham."
-                className="min-h-32 w-full rounded-[18px] border border-black/10 bg-white px-4 py-3 text-[14px] leading-6 text-[#23262b] outline-none transition-colors placeholder:text-[#b7b7b7] focus:border-[#13a97a] sm:min-h-41 sm:px-5 sm:py-4 sm:text-[16px]"
+                className="min-h-32 w-full rounded-[18px] border border-black/10 bg-white px-4 py-3 text-[14px] leading-6 text-(--gelap) outline-none transition-colors placeholder:text-[#b7b7b7] focus:border-(--biru) sm:min-h-41 sm:px-5 sm:py-4 sm:text-[16px]"
               />
             </label>
 
-            <label className="mt-4 flex items-center gap-3 text-[14px] text-[#23262b] sm:mt-5 sm:text-[16px]">
+            <label className="mt-4 flex items-center gap-3 text-[14px] text-(--gelap) sm:mt-5 sm:text-[16px]">
               <input
                 type="checkbox"
                 checked={anonymous}
                 onChange={(event) => setAnonymous(event.target.checked)}
-                className="h-5 w-5 rounded border-black/20 text-[#13a97a] focus:ring-[#13a97a] sm:h-6 sm:w-6"
+                className="h-5 w-5 rounded border-black/20 text-(--biru) focus:ring-(--biru) sm:h-6 sm:w-6"
               />
               <span>Sembunyikan namamu</span>
-              <span className="text-[#8a8a8a]">ⓘ</span>
             </label>
 
             <div className="mt-5 flex items-stretch sm:justify-end">
               <button
                 type="submit"
-                className="w-full rounded-2xl bg-[#11b36d] px-6 py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[#0f9f60] sm:w-auto sm:px-10 sm:text-[16px]"
+                disabled={isSubmitting}
+                className="w-full rounded-2xl bg-(--biru) px-6 py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[#00a0bc] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:px-10 sm:text-[16px]"
               >
-                Kirim
+                {isSubmitting ? "Mengirim..." : "Kirim"}
               </button>
             </div>
+            {submitError ? (
+              <p className="mt-3 text-sm font-medium text-(--merah)">{submitError}</p>
+            ) : null}
           </div>
         </form>
       </div>

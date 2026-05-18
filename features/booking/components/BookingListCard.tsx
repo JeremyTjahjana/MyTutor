@@ -5,6 +5,7 @@ import type { Booking } from "@/types/user";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
 import Modal from "@/components/shared/ModalTestimoni";
+import { createTestimonyAction } from "@/features/booking/services/booking.action";
 
 type BookingListCardProps = {
   booking: Booking;
@@ -98,14 +99,16 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
         onClick={handleContactTutor}
         disabled={!booking.tutorPhone}
         title={booking.tutorPhone ? "Chat di WhatsApp" : "Nomor telepon tidak tersedia"}
+        style={{ display: booking.status === "completed" ? "none" : "inline-flex" }}
       >
         Kontak tutor
       </button>
       
       <button 
         type="button" 
-        className="btn-primary mt-3 w-full"
+        className="btn-secondary mt-6 w-full"
         onClick={() => setIsModalOpen(true)}
+        style={{ display: booking.status === "completed" ? "inline-flex" : "none" }}
       >
         Beri Testimoni
       </button>
@@ -116,14 +119,18 @@ const BookingListCard = ({ booking }: BookingListCardProps) => {
         tutorName={booking.tutorName}
         tutorAvatarUrl={booking.tutorAvatarUrl}
         subjectName={booking.subjectName}
-        onSubmit={({ rating, testimonial, anonymous }) => {
-          console.log("Testimoni tutor", {
+        onSubmit={async ({ rating, testimonial }) => {
+          const result = await createTestimonyAction({
             bookingId: booking.id,
-            tutorName: booking.tutorName,
+            studentId: booking.studentId,
+            tutorProfileId: booking.tutorProfileId,
             rating,
-            testimonial,
-            anonymous,
+            message: testimonial,
           });
+
+          if (!result.success) {
+            throw new Error(result.error ?? "Gagal mengirim testimoni.");
+          }
         }}
       />
     </article>

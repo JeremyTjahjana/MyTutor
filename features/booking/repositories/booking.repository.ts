@@ -140,6 +140,28 @@ export async function insertBooking(
   return { id: data.id };
 }
 
+// ─── Create Testimony
+
+export type CreateTestimonyInput = {
+  bookingId: string;
+  studentId: string;
+  tutorProfileId: string;
+  rating: number;
+  message?: string | null;
+};
+
+export async function insertTestimony(input: CreateTestimonyInput): Promise<void> {
+  const { error } = await supabase.from("testimonies").insert({
+    booking_id: input.bookingId,
+    student_id: input.studentId,
+    tutor_profile_id: input.tutorProfileId,
+    rating: input.rating,
+    message: input.message ?? null,
+  });
+
+  if (error) throw error;
+}
+
 // ─── Update Booking Status
 
 export async function updateBookingStatus(

@@ -22,6 +22,50 @@ body {
   font-style: normal;
 }
 
+@keyframes slideUpFromBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDownToBottom {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes scaleUpFromCenter {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleDownToCenter {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
 @layer components {
   .btn-base,
   .btn-primary,
@@ -163,6 +207,34 @@ body {
 .fade-up-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+@layer utilities {
+  .animate-slide-up {
+    animation: slideUpFromBottom 0.2s ease-out;
+  }
+
+  .animate-scale-up {
+    animation: scaleUpFromCenter 0.2s ease-out;
+  }
+
+  .modal-dialog {
+    animation: slideUpFromBottom 0.2s ease-out;
+  }
+
+  .modal-dialog-closing {
+    animation: slideDownToBottom 0.15s ease-in forwards;
+  }
+
+  @media (min-width: 640px) {
+    .modal-dialog {
+      animation: scaleUpFromCenter 0.2s ease-out;
+    }
+
+    .modal-dialog-closing {
+      animation: scaleDownToCenter 0.15s ease-in forwards;
+    }
+  }
 }
 
 
