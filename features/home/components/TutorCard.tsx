@@ -51,7 +51,7 @@ const TutorCard = ({
           </p>
         </div>
 
-        <div className="mt-4 flex w-full justify-start gap-1 sm:mt-6 sm:gap-1.5">
+        <div className="mt-4 flex w-full items-center justify-start gap-1 sm:mt-6 sm:gap-1.5">
           {Array.from({ length: 5 }).map((_, index) => {
             const filled = index < Math.max(0, Math.min(5, Math.round(rating)));
             return (
@@ -65,6 +65,7 @@ const TutorCard = ({
               />
             );
           })}
+          <span className="ml-1 text-[12px] font-semibold text-[var(--gelap)]/70 sm:text-sm">({rating.toFixed(1)})</span>
         </div>
       </div>
     </article>

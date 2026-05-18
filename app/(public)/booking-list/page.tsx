@@ -30,7 +30,7 @@ const BookingListPage = () => {
   if (isLoading || fetching) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--biru)]" />
+        <Loader2 className="h-8 w-8 animate-spin text-(--biru)" />
       </main>
     );
   }
@@ -39,7 +39,7 @@ const BookingListPage = () => {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <p className="text-[var(--gelap)]/60 mb-4">
+          <p className="mb-4 text-(--gelap)/60">
             Kamu harus masuk untuk melihat booking.
           </p>
           <Link href="/login" className="btn-primary px-6">
@@ -51,13 +51,13 @@ const BookingListPage = () => {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1280px] min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-10 md:px-8 lg:px-10">
-      <h1 className="text-center text-3xl font-semibold text-[var(--biru)] sm:text-4xl">
+    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col items-center px-4 py-8 sm:px-6 sm:py-10 md:px-8 lg:px-10">
+      <h1 className="text-center text-3xl font-semibold text-(--biru) sm:text-4xl">
         Status Booking
       </h1>
 
       {bookings.length === 0 ? (
-        <div className="mt-16 text-center text-[var(--gelap)]/60">
+        <div className="mt-16 text-center text-(--gelap)/60">
           <p className="text-lg">Belum ada booking.</p>
           <Link href="/tutors" className="btn-primary mt-6 inline-block px-6">
             Cari Tutor
@@ -66,7 +66,15 @@ const BookingListPage = () => {
       ) : (
         <div className="mt-6 grid w-full grid-cols-1 justify-items-center gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
           {bookings.map((booking) => (
-            <BookingListCard key={booking.id} booking={booking} />
+            <BookingListCard
+              key={booking.id}
+              booking={booking}
+              onBookingUpdated={() => {
+                if (user) {
+                  fetchStudentBookings(user.id).then(setBookings);
+                }
+              }}
+            />
           ))}
         </div>
       )}

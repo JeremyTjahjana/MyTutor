@@ -175,12 +175,17 @@ export async function fetchTutorById(
     ? (profile.portfolio_urls as string[])
     : [];
 
+  // Calculate average rating from testimonies
+  const averageRating = testimonies.length > 0
+    ? testimonies.reduce((sum, t) => sum + t.rating, 0) / testimonies.length
+    : 0;
+
   return {
     id: profile.id,
     userId: profile.user_id,
     name: user?.full_name ?? "Unknown",
     bio: profile.bio ?? "",
-    rating: toNumber(profile.rating),
+    rating: averageRating,
     costPerHour: toNumber(profile.cost_per_hour),
     totalSessions: profile.total_sessions,
     experience: profile.experience,

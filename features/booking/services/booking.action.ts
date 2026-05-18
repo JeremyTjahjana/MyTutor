@@ -1,6 +1,9 @@
 "use server";
 
-import { createBooking as createBookingService } from "@/features/booking/services/booking.service";
+import {
+  createBooking as createBookingService,
+  createTestimony,
+} from "@/features/booking/services/booking.service";
 import {
   acceptBooking,
   rejectBooking,
@@ -74,4 +77,59 @@ export async function completeBookingAction(bookingId: string): Promise<void> {
 export async function cancelBookingAction(bookingId: string): Promise<void> {
   await cancelBooking(bookingId);
   revalidatePath("/booking-list");
+}
+
+export type CreateTestimonyActionInput = {
+  bookingId: string;
+  studentId: string;
+  tutorProfileId: string;
+  rating: number;
+  message?: string | null;
+};
+
+export type CreateTestimonyActionState = {
+  success: boolean;
+  error?: string;
+};
+
+export async function createTestimonyAction(
+  input: CreateTestimonyActionInput,
+): Promise<CreateTestimonyActionState> {
+  if (
+    !input.bookingId ||
+    !input.studentId ||
+    !input.tutorProfileId ||
+    !Number.isFinite(input.rating)
+  ) {
+    return { success: false, error: "Data testimoni tidak lengkap." };
+  }
+
+  if (input.rating < 1 || input.rating > 5) {
+    return { success: false, error: "Rating harus antara 1 sampai 5." };
+  }
+
+  try {
+    await createTestimony({
+      bookingId: input.bookingId,
+      studentId: input.studentId,
+      tutorProfileId: input.tutorProfileId,
+      rating: input.rating,
+      message: input.message?.trim() || null,
+    });
+    revalidatePath("/booking-list");
+    return { success: true };
+  } catch (err: unknown) {
+    const maybeDbError = err as { code?: string };
+    if (maybeDbError?.code === "23505") {
+      return {
+        success: false,
+        error: "Testimoni untuk booking ini sudah pernah dikirim.",
+      };
+    }
+    console.error("createTestimonyAction error:", err);
+    return {
+      success: false,
+      error: "Gagal mengirim testimoni. Silakan coba lagi.",
+    };
+  }
 }

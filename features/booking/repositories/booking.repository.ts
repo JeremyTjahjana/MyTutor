@@ -18,7 +18,8 @@ export async function fetchBookingsByStudentId(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, notes, created_at,
        subjects(name),
-       tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url))`,
+       tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url, phone)),
+       testimonies(id, rating, message, created_at)`,
     )
     .eq("student_id", studentId)
     .order("start_time", { ascending: false });
@@ -30,11 +31,16 @@ export async function fetchBookingsByStudentId(
     const tutorProfile = one(
       row.tutor_profiles as unknown as
         | {
-            users: { full_name: string; avatar_url: string | null }[];
+            users: { full_name: string; avatar_url: string | null; phone: string | null }[];
           }[]
         | null,
     );
     const tutorUser = one(tutorProfile?.users ?? null);
+    const testimony = one(
+      row.testimonies as unknown as
+        | { id: string; rating: number; message: string | null; created_at: string }[]
+        | null,
+    );
 
     return {
       id: row.id as string,
@@ -44,11 +50,15 @@ export async function fetchBookingsByStudentId(
       subjectName: subject?.name ?? "—",
       tutorName: tutorUser?.full_name ?? "—",
       tutorAvatarUrl: tutorUser?.avatar_url ?? null,
+      tutorPhone: tutorUser?.phone ?? null,
       startTime: row.start_time as string,
       endTime: row.end_time as string,
       status: row.status as Booking["status"],
       notes: row.notes as string | null,
       createdAt: row.created_at as string,
+      hasTestimony: Boolean(testimony),
+      testimonyRating: testimony?.rating ?? null,
+      testimonyMessage: testimony?.message ?? null,
     };
   });
 }
@@ -64,7 +74,8 @@ export async function fetchBookingsByTutorProfileId(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, notes, created_at,
        subjects(name),
-       users!bookings_student_id_fkey(full_name, avatar_url)`,
+       users!bookings_student_id_fkey(full_name, avatar_url, phone),
+       testimonies(id, rating, message, created_at)`,
     )
     .eq("tutor_profile_id", tutorProfileId)
     .order("start_time", { ascending: false });
@@ -78,7 +89,13 @@ export async function fetchBookingsByTutorProfileId(
         | {
             full_name: string;
             avatar_url: string | null;
+            phone: string | null;
           }[]
+        | null,
+    );
+    const testimony = one(
+      row.testimonies as unknown as
+        | { id: string; rating: number; message: string | null; created_at: string }[]
         | null,
     );
 
@@ -90,11 +107,15 @@ export async function fetchBookingsByTutorProfileId(
       subjectName: subject?.name ?? "—",
       tutorName: studentUser?.full_name ?? "—",
       tutorAvatarUrl: studentUser?.avatar_url ?? null,
+      tutorPhone: studentUser?.phone ?? null,
       startTime: row.start_time as string,
       endTime: row.end_time as string,
       status: row.status as Booking["status"],
       notes: row.notes as string | null,
       createdAt: row.created_at as string,
+      hasTestimony: Boolean(testimony),
+      testimonyRating: testimony?.rating ?? null,
+      testimonyMessage: testimony?.message ?? null,
     };
   });
 }
@@ -135,6 +156,49 @@ export async function insertBooking(
 
   if (error) throw error;
   return { id: data.id };
+}
+
+// ─── Create Testimony
+
+export type CreateTestimonyInput = {
+  bookingId: string;
+  studentId: string;
+  tutorProfileId: string;
+  rating: number;
+  message?: string | null;
+};
+
+export async function insertTestimony(input: CreateTestimonyInput): Promise<void> {
+  // 1. Insert the testimony
+  const { error: insertError } = await supabase.from("testimonies").insert({
+    booking_id: input.bookingId,
+    student_id: input.studentId,
+    tutor_profile_id: input.tutorProfileId,
+    rating: input.rating,
+    message: input.message ?? null,
+  });
+
+  if (insertError) throw insertError;
+
+  // 2. Calculate average rating from all testimonies for this tutor
+  const { data: testimonies, error: fetchError } = await supabase
+    .from("testimonies")
+    .select("rating")
+    .eq("tutor_profile_id", input.tutorProfileId);
+
+  if (fetchError) throw fetchError;
+
+  const averageRating = testimonies && testimonies.length > 0
+    ? testimonies.reduce((sum, t) => sum + t.rating, 0) / testimonies.length
+    : 0;
+
+  // 3. Update the rating in tutor_profiles
+  const { error: updateError } = await supabase
+    .from("tutor_profiles")
+    .update({ rating: parseFloat(averageRating.toFixed(2)) })
+    .eq("id", input.tutorProfileId);
+
+  if (updateError) throw updateError;
 }
 
 // ─── Update Booking Status
