@@ -18,7 +18,8 @@ export async function fetchBookingsByStudentId(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, notes, created_at,
        subjects(name),
-       tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url, phone))`,
+       tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url, phone)),
+       testimonies(id, rating, message, created_at)`,
     )
     .eq("student_id", studentId)
     .order("start_time", { ascending: false });
@@ -35,6 +36,11 @@ export async function fetchBookingsByStudentId(
         | null,
     );
     const tutorUser = one(tutorProfile?.users ?? null);
+    const testimony = one(
+      row.testimonies as unknown as
+        | { id: string; rating: number; message: string | null; created_at: string }[]
+        | null,
+    );
 
     return {
       id: row.id as string,
@@ -50,6 +56,9 @@ export async function fetchBookingsByStudentId(
       status: row.status as Booking["status"],
       notes: row.notes as string | null,
       createdAt: row.created_at as string,
+      hasTestimony: Boolean(testimony),
+      testimonyRating: testimony?.rating ?? null,
+      testimonyMessage: testimony?.message ?? null,
     };
   });
 }
@@ -65,7 +74,8 @@ export async function fetchBookingsByTutorProfileId(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, notes, created_at,
        subjects(name),
-       users!bookings_student_id_fkey(full_name, avatar_url, phone)`,
+       users!bookings_student_id_fkey(full_name, avatar_url, phone),
+       testimonies(id, rating, message, created_at)`,
     )
     .eq("tutor_profile_id", tutorProfileId)
     .order("start_time", { ascending: false });
@@ -83,6 +93,11 @@ export async function fetchBookingsByTutorProfileId(
           }[]
         | null,
     );
+    const testimony = one(
+      row.testimonies as unknown as
+        | { id: string; rating: number; message: string | null; created_at: string }[]
+        | null,
+    );
 
     return {
       id: row.id as string,
@@ -98,6 +113,9 @@ export async function fetchBookingsByTutorProfileId(
       status: row.status as Booking["status"],
       notes: row.notes as string | null,
       createdAt: row.created_at as string,
+      hasTestimony: Boolean(testimony),
+      testimonyRating: testimony?.rating ?? null,
+      testimonyMessage: testimony?.message ?? null,
     };
   });
 }
@@ -151,7 +169,8 @@ export type CreateTestimonyInput = {
 };
 
 export async function insertTestimony(input: CreateTestimonyInput): Promise<void> {
-  const { error } = await supabase.from("testimonies").insert({
+  // 1. Insert the testimony
+  const { error: insertError } = await supabase.from("testimonies").insert({
     booking_id: input.bookingId,
     student_id: input.studentId,
     tutor_profile_id: input.tutorProfileId,
@@ -159,7 +178,27 @@ export async function insertTestimony(input: CreateTestimonyInput): Promise<void
     message: input.message ?? null,
   });
 
-  if (error) throw error;
+  if (insertError) throw insertError;
+
+  // 2. Calculate average rating from all testimonies for this tutor
+  const { data: testimonies, error: fetchError } = await supabase
+    .from("testimonies")
+    .select("rating")
+    .eq("tutor_profile_id", input.tutorProfileId);
+
+  if (fetchError) throw fetchError;
+
+  const averageRating = testimonies && testimonies.length > 0
+    ? testimonies.reduce((sum, t) => sum + t.rating, 0) / testimonies.length
+    : 0;
+
+  // 3. Update the rating in tutor_profiles
+  const { error: updateError } = await supabase
+    .from("tutor_profiles")
+    .update({ rating: parseFloat(averageRating.toFixed(2)) })
+    .eq("id", input.tutorProfileId);
+
+  if (updateError) throw updateError;
 }
 
 // ─── Update Booking Status

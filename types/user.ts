@@ -37,4 +37,7 @@ export interface Booking {
   status: BookingStatus;
   notes: string | null;
   createdAt: string;
+  hasTestimony?: boolean;
+  testimonyRating?: number | null;
+  testimonyMessage?: string | null;
 }
