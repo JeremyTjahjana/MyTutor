@@ -117,9 +117,9 @@ const Navbar = () => {
             <Image
               src={avatarSrc}
               alt="Foto profil"
-              width={56}
-              height={56}
-              className="w-14 h-14 rounded-full object-cover border border-[var(--gelap)] transition-transform hover:scale-105"
+              width={40}
+              height={40}
+              className="w-12 h-12 rounded-full object-cover border border-[var(--gelap)] transition-transform hover:scale-105"
               onError={() => setImageError(true)}
             />
           </button>
@@ -174,7 +174,7 @@ const Navbar = () => {
             onClick={closeSidebar}
             className="h-9 w-9 flex items-center justify-center cursor-pointer"
           >
-            <Image src={assets.close} alt="Close" className="w-5 h-5" />
+            <Image src={assets.close} alt="Close" className="w-6 h-6" />
           </button>
         </div>
 
@@ -183,9 +183,9 @@ const Navbar = () => {
             <Image
               src={avatarSrc}
               alt="Foto profil"
-              width={56}
-              height={56}
-              className="w-14 h-14 rounded-full object-cover"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-full object-cover"
               onError={() => setImageError(true)}
             />
 

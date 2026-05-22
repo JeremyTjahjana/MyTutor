@@ -81,8 +81,8 @@ const SearchTutor = () => {
     <div className="relative mx-auto flex w-full max-w-[330px] flex-col items-center gap-2 px-3 py-2 sm:w-[80vw] sm:max-w-[900px] sm:p-4">
       <div className="flex w-full items-center gap-2 sm:gap-3">
         {/* Container Input Pencarian */}
-        <div className="flex min-w-0 flex-1 items-center rounded-[10px] border border-transparent bg-[#F8F9FA] px-1 py-1 shadow-sm transition-all duration-200 focus-within:border-[var(--biru)]/50 focus-within:ring-2 focus-within:ring-[var(--biru)]/15 sm:px-2 sm:py-1">
-          <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 sm:mr-3 sm:h-9 sm:w-9">
+        <div className="flex min-w-0 flex-1 items-center rounded-[10px] border border-transparent bg-[#F5F6F7] px-1 py-1  transition-all duration-200 focus-within:border-[var(--biru)]/50 focus-within:ring-2 focus-within:ring-[var(--biru)]/15 sm:px-2 sm:py-1">
+          <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full  bg-[#F5F6F7] sm:mr-3 sm:h-9 sm:w-9">
             <Image
               src={assets.search}
               alt="Search"

@@ -16,7 +16,7 @@ const Footer = () => {
   }
 
   return (
-    <footer className="w-full relative bottom-0 bg-[var(--biru)] text-[var(--putih)]">
+    <footer className="w-full relative bottom-0 bg-[var(--biru)] text-[var(--putih)] mt-6 sm:mt-10">
       <div className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-6 sm:py-8 md:py-7">
         <div className="md:flex md:items-end md:justify-between md:gap-8">
           <div>

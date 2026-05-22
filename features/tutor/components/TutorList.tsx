@@ -60,7 +60,7 @@ function TutorListContent({ tutors }: TutorListProps) {
 
 export function TutorList(props: TutorListProps) {
   return (
-    <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
+    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
       <TutorListContent {...props} />
     </Suspense>
   );
