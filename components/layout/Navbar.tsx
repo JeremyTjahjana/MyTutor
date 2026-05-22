@@ -277,7 +277,8 @@ const Navbar = () => {
                     try {
                       await logout();
                       closeSidebar();
-                      router.push("/");
+                      router.replace("/");
+                      router.refresh();
                     } finally {
                       setIsLoggingOut(false);
                     }

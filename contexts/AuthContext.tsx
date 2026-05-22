@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import type { User } from "@/types/user";
 import { supabase } from "@/lib/supabase/client";
@@ -50,31 +51,48 @@ async function loadUserProfile(authId: string): Promise<User | null> {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const syncVersionRef = useRef(0);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const syncUserFromAuthId = async (authId: string | null) => {
+      const syncVersion = ++syncVersionRef.current;
+
+      if (!authId) {
+        if (isMounted) setUser(null);
+        return;
+      }
+
+      const profile = await loadUserProfile(authId);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const isCurrentSession = session?.user?.id === authId;
+
+      if (isMounted && syncVersion === syncVersionRef.current) {
+        setUser(isCurrentSession ? profile : null);
+      }
+    };
+
     // Check existing session on mount
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const profile = await loadUserProfile(session.user.id);
-        setUser(profile);
-      }
-      setIsLoading(false);
+      await syncUserFromAuthId(session?.user?.id ?? null);
+      if (isMounted) setIsLoading(false);
     });
 
     // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const profile = await loadUserProfile(session.user.id);
-        setUser(profile);
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
+      await syncUserFromAuthId(session?.user?.id ?? null);
+      if (isMounted) setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = useCallback(
@@ -99,6 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    syncVersionRef.current += 1;
+    setUser(null);
     await supabase.auth.signOut();
     setUser(null);
   }, []);
