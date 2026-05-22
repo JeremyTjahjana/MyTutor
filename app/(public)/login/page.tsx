@@ -28,7 +28,8 @@ export default function LoginPage() {
       setError(result.error);
       setIsLoading(false);
     } else {
-      router.push("/");
+      router.replace("/");
+      router.refresh();
     }
   };
 
@@ -66,7 +67,7 @@ export default function LoginPage() {
             type="email"
             required
             autoComplete="email"
-            placeholder="nama@apps.ipb.ac.id"
+            placeholder="nama@email.com"
             className="w-full rounded-xl border border-[var(--gelap)]/15 bg-[#F7F8FC] px-4 py-3 text-[15px] text-[var(--gelap)] outline-none transition-colors placeholder:text-[var(--gelap)]/35 focus:border-[var(--biru)] focus:bg-white focus:ring-2 focus:ring-[var(--biru)]/10"
           />
         </div>

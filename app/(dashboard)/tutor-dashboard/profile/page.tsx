@@ -26,6 +26,7 @@ export default function ProfilePage() {
     experience: "",
     costPerHour: "",
     bio: "",
+    portfolioUrls: "",
   });
 
   const [profileState, profileFormAction, profilePending] = useActionState(
@@ -54,6 +55,9 @@ export default function ProfilePage() {
               ? String(data.profile.cost_per_hour)
               : "",
             bio: data.profile.bio ?? "",
+            portfolioUrls: Array.isArray(data.profile.portfolio_urls)
+              ? data.profile.portfolio_urls.join("\n")
+              : "",
           }));
         }
         setProfileLoaded(true);
@@ -305,6 +309,33 @@ export default function ProfilePage() {
               placeholder="Describe your background, teaching style, and what students can expect."
               className="w-full rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
             />
+          </div>
+
+          <div className="mt-8 border-t border-[var(--gelap)]/10 pt-8">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <label className="block text-sm font-medium text-[var(--gelap)]">
+                  Portfolio
+                </label>
+                <p className="mt-1 text-sm text-[var(--gelap)]/55">
+                  Tambahkan URL gambar publik, satu URL per baris. Maksimal 12
+                  item.
+                </p>
+              </div>
+            </div>
+            <textarea
+              name="portfolioUrls"
+              value={formData.portfolioUrls}
+              onChange={handleChange}
+              rows={4}
+              placeholder={`https://example.com/portfolio-1.jpg\nhttps://example.com/portfolio-2.webp`}
+              className="mt-3 w-full rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
+            />
+            <p className="mt-2 text-xs text-[var(--gelap)]/45">
+              Rekomendasi: gunakan gambar JPG/WebP/PNG dari slide atau
+              screenshot karya. PDF sebaiknya diubah menjadi beberapa gambar
+              agar tampil bagus di carousel publik.
+            </p>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">

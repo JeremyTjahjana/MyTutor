@@ -32,10 +32,20 @@ const Modal: React.FC<ModalProps> = ({
   const [testimonial, setTestimonial] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [isAnimatingRating, setIsAnimatingRating] = useState(false);
-  const [animatedStarIndex, setAnimatedStarIndex] = useState<number | null>(null);
+  const [animatedStarIndex, setAnimatedStarIndex] = useState<number | null>(
+    null,
+  );
   const [isClosing, setIsClosing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 150);
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -89,8 +99,8 @@ const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         handleClose();
       }
     };
@@ -103,22 +113,14 @@ const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen && !isClosing) return null;
 
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 150);
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+  const handleBackdropClick = (event: React.MouseEvent) => {
+    if (event.target === event.currentTarget) {
       handleClose();
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (isSubmitting) return;
 
     if (rating < 1) {
@@ -142,17 +144,26 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3"
       onClick={handleBackdropClick}
     >
-      <div className={`relative w-full overflow-hidden rounded-t-3xl bg-(--putih) shadow-[0_-8px_30px_rgba(0,0,0,0.12)] ${isClosing ? "modal-dialog-closing" : "modal-dialog"} sm:max-w-180 sm:rounded-[28px]`}>
+      <div
+        className={`relative w-full max-w-[38rem] overflow-hidden rounded-2xl bg-(--putih) shadow-[0_10px_32px_rgba(0,0,0,0.16)] ${
+          isClosing ? "modal-dialog-closing" : "modal-dialog"
+        }`}
+      >
         <button
           onClick={handleClose}
-          className="absolute left-3 top-3 z-10 rounded-full p-2 text-(--gelap)/90 transition-colors hover:bg-black/5 sm:left-4 sm:top-4"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-(--gelap)/80 transition-colors hover:bg-black/5"
           aria-label="Close modal"
           type="button"
         >
-          <svg className="h-7 w-7 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -162,34 +173,38 @@ const Modal: React.FC<ModalProps> = ({
           </svg>
         </button>
 
-        <form onSubmit={handleSubmit} className="max-h-[calc(100dvh-1rem)] overflow-y-auto px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-14 sm:max-h-[88vh] sm:px-8 sm:pb-8 sm:pt-20">
-          <div className="flex items-center gap-3 sm:items-start sm:gap-4">
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-black/10 bg-[#f5f5f5] sm:h-16 sm:w-16">
+        <form
+          onSubmit={handleSubmit}
+          className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-12 sm:px-6 sm:pb-6 sm:pt-14"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-black/10 bg-[#f5f5f5]">
               <Image
                 src={tutorAvatarUrl ?? assets.profile}
                 alt={tutorName}
-                width={64}
-                height={64}
+                width={48}
+                height={48}
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="min-w-0 flex-1 pr-7 sm:pr-10">
-              <p className="truncate text-[14px] leading-5 font-medium text-(--gelap) sm:text-[18px]">
+            <div className="min-w-0 flex-1 pr-9">
+              <p className="truncate text-[16px] font-semibold leading-5 text-(--gelap)">
                 {tutorName}
               </p>
-              <p className="mt-1 text-[12px] leading-4 text-[#737373] sm:text-[15px]">
+              <p className="mt-0.5 line-clamp-1 text-[12px] leading-4 text-[#737373]">
                 Varian: {subjectName}
               </p>
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:mt-6 sm:gap-3">
+          <div className="mt-4 flex items-center justify-center gap-1.5">
             {starIndexes.map((index) => {
               const active = index <= rating;
               const isCurrentAnimatedStar = animatedStarIndex === index;
               const animatedStarClass = isCurrentAnimatedStar
-                ? "scale-[1.45] sm:scale-[1.65] drop-shadow-[0_0_14px_rgba(245,190,18,0.45)]"
+                ? "scale-[1.35] drop-shadow-[0_0_12px_rgba(245,190,18,0.45)]"
                 : "scale-100 hover:scale-105";
+
               return (
                 <button
                   key={index}
@@ -200,7 +215,9 @@ const Modal: React.FC<ModalProps> = ({
                     }
                   }}
                   disabled={isAnimatingRating}
-                  className={`text-[38px] leading-none transition-all duration-200 ease-in-out sm:text-[56px] ${active ? "text-[#f5be12]" : "text-black/15"} ${isAnimatingRating ? "cursor-default" : "hover:scale-105"} ${animatedStarClass}`}
+                  className={`text-[38px] leading-none transition-all duration-200 ease-in-out sm:text-[44px] ${
+                    active ? "text-[#f5be12]" : "text-black/15"
+                  } ${isAnimatingRating ? "cursor-default" : "hover:scale-105"} ${animatedStarClass}`}
                   aria-label={`Beri rating ${index} bintang`}
                 >
                   ★
@@ -209,45 +226,44 @@ const Modal: React.FC<ModalProps> = ({
             })}
           </div>
 
-          <div className="mt-6 border-t border-black/10 pt-4 sm:mt-8 sm:pt-6">
-            <h3 className="text-[18px] font-extrabold leading-tight text-(--gelap) sm:text-[24px]">
+          <div className="mt-4 border-t border-black/10 pt-4">
+            <h3 className="text-[18px] font-extrabold leading-tight text-(--gelap) sm:text-[20px]">
               Apa yang bikin kamu puas?
             </h3>
-            <p className="mt-2 text-[13px] font-semibold text-(--biru) sm:text-[16px]">
-              Sering dibahas:
-            </p>
 
-            <label className="mt-3 block sm:mt-4">
+            <label className="mt-3 block">
               <span className="sr-only">Testimoni</span>
               <textarea
                 value={testimonial}
                 onChange={(event) => setTestimonial(event.target.value)}
                 placeholder="Contoh: Materinya jelas, cara ngajarnya sabar, dan bikin mudah paham."
-                className="min-h-32 w-full rounded-[18px] border border-black/10 bg-white px-4 py-3 text-[14px] leading-6 text-(--gelap) outline-none transition-colors placeholder:text-[#b7b7b7] focus:border-(--biru) sm:min-h-41 sm:px-5 sm:py-4 sm:text-[16px]"
+                className="min-h-24 w-full resize-none rounded-2xl border border-black/10 bg-white px-4 py-3 text-[14px] leading-5 text-(--gelap) outline-none transition-colors placeholder:text-[#b7b7b7] focus:border-(--biru) sm:min-h-28"
               />
             </label>
 
-            <label className="mt-4 flex items-center gap-3 text-[14px] text-(--gelap) sm:mt-5 sm:text-[16px]">
+            {/* <label className="mt-3 flex items-center gap-3 text-[14px] text-(--gelap)">
               <input
                 type="checkbox"
                 checked={anonymous}
                 onChange={(event) => setAnonymous(event.target.checked)}
-                className="h-5 w-5 rounded border-black/20 text-(--biru) focus:ring-(--biru) sm:h-6 sm:w-6"
+                className="h-4 w-4 rounded border-black/20 text-(--biru) focus:ring-(--biru)"
               />
               <span>Sembunyikan namamu</span>
-            </label>
+            </label> */}
 
-            <div className="mt-5 flex items-stretch sm:justify-end">
+            <div className="mt-4 flex items-stretch sm:justify-end">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full rounded-2xl bg-(--biru) px-6 py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[#00a0bc] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:px-10 sm:text-[16px]"
+                className="w-full rounded-2xl bg-(--biru) px-6 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#00a0bc] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:px-9"
               >
                 {isSubmitting ? "Mengirim..." : "Kirim"}
               </button>
             </div>
             {submitError ? (
-              <p className="mt-3 text-sm font-medium text-(--merah)">{submitError}</p>
+              <p className="mt-2 text-sm font-medium text-(--merah)">
+                {submitError}
+              </p>
             ) : null}
           </div>
         </form>

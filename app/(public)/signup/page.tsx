@@ -33,7 +33,7 @@ export default function SignupPage() {
             Akun berhasil dibuat!
           </h2>
           <p className="mt-3 text-sm text-[var(--gelap)]/60">
-            Cek email kamu untuk verifikasi akun, lalu masuk.
+            Cek email kamu, klik link verifikasi Supabase, lalu masuk.
           </p>
           <Link href="/login" className="btn-primary mt-8 w-full">
             Masuk Sekarang
@@ -49,7 +49,7 @@ export default function SignupPage() {
         Buat akun baru
       </h2>
       <p className="mb-6 text-sm text-[var(--gelap)]/55">
-        Daftar sebagai mahasiswa dan mulai belajar bersama tutor terbaik.
+        Daftar dengan email aktif dan mulai belajar bersama tutor terbaik.
       </p>
 
       {/* Google Sign-up */}
@@ -71,7 +71,7 @@ export default function SignupPage() {
             htmlFor="signup-name"
             className="mb-1.5 block text-sm font-semibold text-[var(--gelap)]"
           >
-            Nama Lengkap
+            Nama lengkap
           </label>
           <input
             id="signup-name"
@@ -79,7 +79,7 @@ export default function SignupPage() {
             type="text"
             required
             autoComplete="name"
-            placeholder="Nama sesuai KTM"
+            placeholder="Masukkan nama lengkap"
             className="w-full rounded-xl border border-[var(--gelap)]/15 bg-[#F7F8FC] px-4 py-3 text-[15px] text-[var(--gelap)] outline-none transition-colors placeholder:text-[var(--gelap)]/35 focus:border-[var(--biru)] focus:bg-white focus:ring-2 focus:ring-[var(--biru)]/10"
           />
         </div>
@@ -90,7 +90,7 @@ export default function SignupPage() {
             htmlFor="signup-email"
             className="mb-1.5 block text-sm font-semibold text-[var(--gelap)]"
           >
-            Email IPB
+            Email
           </label>
           <input
             id="signup-email"
@@ -98,7 +98,7 @@ export default function SignupPage() {
             type="email"
             required
             autoComplete="email"
-            placeholder="nama@apps.ipb.ac.id"
+            placeholder="nama@email.com"
             className="w-full rounded-xl border border-[var(--gelap)]/15 bg-[#F7F8FC] px-4 py-3 text-[15px] text-[var(--gelap)] outline-none transition-colors placeholder:text-[var(--gelap)]/35 focus:border-[var(--biru)] focus:bg-white focus:ring-2 focus:ring-[var(--biru)]/10"
           />
         </div>
@@ -143,7 +143,7 @@ export default function SignupPage() {
             htmlFor="signup-confirm"
             className="mb-1.5 block text-sm font-semibold text-[var(--gelap)]"
           >
-            Konfirmasi Password
+            Konfirmasi password
           </label>
           <div className="relative">
             <input

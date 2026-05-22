@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
         bio: profile.bio,
         experience: profile.experience,
         cost_per_hour: profile.cost_per_hour,
+        portfolio_urls: Array.isArray(profile.portfolio_urls)
+          ? profile.portfolio_urls
+          : [],
       },
     });
   } catch (err) {

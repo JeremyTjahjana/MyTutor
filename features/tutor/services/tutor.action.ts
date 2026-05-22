@@ -57,6 +57,30 @@ export type UploadAvatarState = {
   error?: string;
 };
 
+function parsePortfolioUrls(raw: FormDataEntryValue | null): string[] {
+  if (typeof raw !== "string") return [];
+
+  const urls = raw
+    .split(/\r?\n|,/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const uniqueUrls = Array.from(new Set(urls)).slice(0, 12);
+
+  for (const url of uniqueUrls) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        throw new Error("Unsupported protocol");
+      }
+    } catch {
+      throw new Error("Portfolio harus berisi URL gambar yang valid.");
+    }
+  }
+
+  return uniqueUrls;
+}
+
 async function requireMatchingUser(userId: string) {
   const authClient = await createSupabaseServerClient();
   const {
@@ -280,6 +304,8 @@ export async function updateTutorProfileAction(
     : 0;
 
   try {
+    const portfolioUrls = parsePortfolioUrls(formData.get("portfolioUrls"));
+
     // Update users table
     const { error: userError } = await supabase
       .from("users")
@@ -295,6 +321,7 @@ export async function updateTutorProfileAction(
         bio: bio?.trim() || "",
         experience: experience?.trim() || "",
         cost_per_hour: cleanCostPerHour,
+        portfolio_urls: portfolioUrls,
       })
       .eq("user_id", userId)
       .select("id")
@@ -312,10 +339,14 @@ export async function updateTutorProfileAction(
     revalidatePath("/tutor-dashboard/profile");
     revalidatePath("/tutor-dashboard");
     revalidatePath("/tutors");
+    revalidatePath(`/tutors/${updatedProfile.id}`);
     return { success: true };
   } catch (err) {
     console.error("updateTutorProfileAction error:", err);
-    return { success: false, error: "Gagal memperbarui profil." };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Gagal memperbarui profil.",
+    };
   }
 }
 

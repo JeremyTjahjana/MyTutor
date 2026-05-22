@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { headers } from "next/headers";
 import { supabase } from "@/lib/supabase/server";
 
 const authClient = createClient(
@@ -12,6 +13,17 @@ export type SignupState = {
   success: boolean;
   error?: string;
 };
+
+async function getAuthCallbackUrl() {
+  const headerStore = await headers();
+  const origin =
+    headerStore.get("origin") ??
+    (headerStore.get("host")
+      ? `${headerStore.get("x-forwarded-proto") ?? "http"}://${headerStore.get("host")}`
+      : process.env.NEXT_PUBLIC_SITE_URL);
+
+  return origin ? `${origin}/auth/callback` : undefined;
+}
 
 export async function signupStudentAction(
   _prev: SignupState,
@@ -28,12 +40,18 @@ export async function signupStudentAction(
   if (password.length < 6) {
     return { success: false, error: "Password minimal 6 karakter." };
   }
+  if (!email || !email.includes("@")) {
+    return { success: false, error: "Email tidak valid." };
+  }
 
   // 1. Create Supabase auth user
   const { data: authData, error: authError } = await authClient.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName, role: "student" } },
+    options: {
+      data: { full_name: fullName, role: "student" },
+      emailRedirectTo: await getAuthCallbackUrl(),
+    },
   });
 
   if (authError || !authData.user) {

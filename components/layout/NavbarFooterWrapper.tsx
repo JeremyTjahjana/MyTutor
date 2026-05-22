@@ -16,10 +16,11 @@ export function NavbarFooterWrapper({
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname.startsWith("/auth/callback");
+  const isAuthCallback = pathname.startsWith("/auth/callback");
 
   return (
     <>
-      {!isTutorDashboard && !isAuthPage && <Navbar />}
+      {!isTutorDashboard && !isAuthCallback && <Navbar />}
       {children}
       {!isTutorDashboard && !isAuthPage && <Footer />}
     </>
