@@ -32,7 +32,7 @@ function TestimonyCard({ testimony }: { testimony: Testimony }) {
           </div>
           <div className="mt-2 flex items-start gap-3">
             <Image
-              src={assets.mehehe}
+              src={assets.profile}
               alt={`${testimony.studentName} profile`}
               width={28}
               height={28}

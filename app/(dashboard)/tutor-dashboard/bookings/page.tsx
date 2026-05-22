@@ -100,7 +100,7 @@ function BookingCard({
       {/* Avatar */}
       <div className="w-12 h-12 rounded-full overflow-hidden border border-[var(--gelap)]/10 shrink-0">
         <Image
-          src={booking.tutorAvatarUrl ?? assets.mehehe}
+          src={booking.tutorAvatarUrl ?? assets.profile}
           alt={booking.tutorName}
           width={48}
           height={48}

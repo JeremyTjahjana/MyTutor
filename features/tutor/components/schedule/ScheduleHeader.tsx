@@ -11,7 +11,7 @@ export function ScheduleHeader({
   avatarUrl,
   subjects,
 }: ScheduleHeaderProps) {
-  const profileSrc = avatarUrl ?? assets.mehehe.src;
+  const profileSrc = avatarUrl ?? assets.profile.src;
 
   return (
     <div className="pt-2 lg:pt-6">

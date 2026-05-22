@@ -3,7 +3,6 @@
 import Link from "next/link";
 import type { TutorListItem } from "@/types/tutor";
 import TutorCard from "@/features/home/components/TutorCard";
-import { assets } from "@/assets/assets";
 import { useSearchParams } from "next/navigation";
 import { useMemo, Suspense } from "react";
 
@@ -46,7 +45,7 @@ function TutorListContent({ tutors }: TutorListProps) {
             className="flex w-full justify-center"
           >
             <TutorCard
-              profile={tutor.avatarUrl ?? assets.mehehe}
+              profile={tutor.avatarUrl}
               name={tutor.name}
               role={tutor.subjects.join(", ")}
               description={tutor.bio}

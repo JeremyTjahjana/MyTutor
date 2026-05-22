@@ -166,7 +166,7 @@ const Modal: React.FC<ModalProps> = ({
           <div className="flex items-center gap-3 sm:items-start sm:gap-4">
             <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-black/10 bg-[#f5f5f5] sm:h-16 sm:w-16">
               <Image
-                src={tutorAvatarUrl ?? assets.mehehe}
+                src={tutorAvatarUrl ?? assets.profile}
                 alt={tutorName}
                 width={64}
                 height={64}

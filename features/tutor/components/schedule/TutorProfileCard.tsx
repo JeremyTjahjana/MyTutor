@@ -6,7 +6,7 @@ interface TutorProfileCardProps {
 }
 
 export function TutorProfileCard({ name, avatarUrl }: TutorProfileCardProps) {
-  const profileSrc = avatarUrl ?? assets.mehehe.src;
+  const profileSrc = avatarUrl ?? assets.profile.src;
 
   return (
     <div className="hidden lg:flex lg:col-span-4 items-center justify-center">

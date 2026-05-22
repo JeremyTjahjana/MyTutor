@@ -25,7 +25,7 @@ export function TutorHeader({
   return (
     <section className="mt-6 flex items-start gap-3 sm:gap-4">
       <Image
-        src={avatarUrl ?? assets.mehehe}
+        src={avatarUrl ?? assets.profile}
         alt={`${name} profile`}
         width={80}
         height={80}

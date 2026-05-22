@@ -1,7 +1,6 @@
 import logo1 from "./images/logo1.png";
 import logo2 from "./images/logo2.png";
 import logo3 from "./images/logo3.png";
-import mehehe from "./images/mehehe.jpg";
 import bgimage from "./images/bgimg.jpg";
 import logohd from "./images/logohd.png";
 import porto1 from "./images/porto1.jpg";
@@ -31,7 +30,6 @@ const assets = {
   logo2,
   logo3,
   logoreal,
-  mehehe,
   home,
   lightbulb,
   book,

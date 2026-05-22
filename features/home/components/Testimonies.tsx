@@ -1,186 +1,80 @@
-"use client";
+import { connection } from "next/server";
+import { supabase } from "@/lib/supabase/server";
+import TestimoniesCarousel, { type HomeTestimony } from "./TestimoniesCarousel";
 
-import React, { useEffect, useState } from "react";
-import TestimonyCard from "./TestimonyCard";
-import { assets } from "@/assets/assets";
+function unwrapJoin<T>(join: unknown): T | null {
+  if (!join) return null;
+  if (Array.isArray(join)) return (join[0] as T) ?? null;
+  return join as T;
+}
 
-const testimonials = [
-  {
-    profile: assets.mehehe,
-    studentName: "John Carter",
-    subjects: "MK1, MK2, MK3",
-    message:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit amet hendrerit pretium nulla sed enim iaculis mi.",
-    rating: 4,
-  },
-  {
-    profile: assets.mehehe,
-    studentName: "Dina Putri",
-    subjects: "Kalkulus, Statistika",
-    message:
-      "Penjelasannya runtut dan mudah dipahami, jadi saya lebih percaya diri saat ujian.",
-    rating: 5,
-  },
-  {
-    profile: assets.mehehe,
-    studentName: "Rafi Maulana",
-    subjects: "Fisika Dasar, Mekanika",
-    message:
-      "Sesi belajar interaktif dan fleksibel. Progress belajar saya terasa jauh lebih cepat.",
-    rating: 5,
-  },
-  {
-    profile: assets.mehehe,
-    studentName: "Keisya Ananda",
-    subjects: "Kimia Organik",
-    message:
-      "Tutor sangat sabar membimbing. Materi yang rumit jadi terasa lebih sederhana.",
-    rating: 4,
-  },
-  {
-    profile: assets.mehehe,
-    studentName: "Bagas Pratama",
-    subjects: "Bahasa Inggris Akademik",
-    message:
-      "Latihan dan feedback-nya detail. Nilai tugas saya meningkat setelah beberapa sesi.",
-    rating: 5,
-  },
-];
+async function fetchHomeTestimonies(): Promise<HomeTestimony[]> {
+  await connection();
 
-const Testimonies = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
-  const sectionRef = React.useRef<HTMLElement | null>(null);
-  const total = testimonials.length;
+  const { data, error } = await supabase
+    .from("testimonies")
+    .select(
+      `id, tutor_profile_id, rating, message, created_at,
+       users!testimonies_student_id_fkey(full_name, avatar_url)`,
+    )
+    .eq("rating", 5)
+    .not("message", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(30);
 
-  useEffect(() => {
-    const target = sectionRef.current;
-    if (!target) return;
+  if (error) {
+    console.error("fetchHomeTestimonies error:", error);
+    return [];
+  }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setHasAnimatedIn(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.25 },
-    );
-
-    observer.observe(target);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  const prevIndex = (activeIndex - 1 + total) % total;
-  const nextIndex = (activeIndex + 1) % total;
-
-  const visibleSlides = [
-    { index: prevIndex, offset: -1 },
-    { index: activeIndex, offset: 0 },
-    { index: nextIndex, offset: 1 },
+  const rows = (data ?? []).filter(
+    (row) => typeof row.message === "string" && row.message.trim().length > 0,
+  ).sort(() => Math.random() - 0.5).slice(0, 5);
+  const tutorProfileIds = [
+    ...new Set(rows.map((row) => row.tutor_profile_id as string)),
   ];
+  const subjectMap = new Map<string, string[]>();
 
-  const handlePrev = () => {
-    setActiveIndex((current) => (current - 1 + total) % total);
-  };
+  if (tutorProfileIds.length > 0) {
+    const { data: subjectRows, error: subjectError } = await supabase
+      .from("tutor_subjects")
+      .select("tutor_profile_id, subjects(name)")
+      .in("tutor_profile_id", tutorProfileIds);
 
-  const handleNext = () => {
-    setActiveIndex((current) => (current + 1) % total);
-  };
+    if (subjectError) {
+      console.error("fetchHomeTestimonies subjects error:", subjectError);
+    }
 
-  return (
-    <section
-      ref={sectionRef}
-      className="mx-auto w-full max-w-[1280px] px-6 sm:px-10 md:px-14 lg:px-20 py-12 sm:py-16 bg-[var(--putih)] text-[var(--gelap)]"
-    >
-      <h2
-        className={`fade-up text-center text-3xl sm:text-5xl font-semibold text-[var(--biru)] ${hasAnimatedIn ? "fade-up-visible" : ""}`}
-      >
-        Testimonies
-      </h2>
+    for (const row of subjectRows ?? []) {
+      const subject = unwrapJoin<{ name: string }>(row.subjects);
+      if (!subject) continue;
 
-      <div className="mt-8 mx-auto w-full max-w-[840px]">
-        <div className="relative h-[250px] sm:h-[340px]">
-          {visibleSlides.map((slide) => {
-            const item = testimonials[slide.index];
-            const isActive = slide.offset === 0;
-            const staggerDelay = (slide.offset + 1) * 110 + 150;
+      const tutorProfileId = row.tutor_profile_id as string;
+      const currentSubjects = subjectMap.get(tutorProfileId) ?? [];
+      subjectMap.set(tutorProfileId, [...currentSubjects, subject.name]);
+    }
+  }
 
-            return (
-              <div
-                key={`${item.studentName}-${slide.index}`}
-                className="absolute left-1/2 top-0 w-[200px] max-[400px]:w-[160px] sm:w-[320px] transition-all duration-500 ease-out"
-                style={{
-                  transform: `translateX(calc(-50% + ${slide.offset * 58}%)) translateY(${isActive ? "0px" : "12px"}) scale(${isActive ? 1 : 0.92})`,
-                  opacity: isActive ? 1 : 0.72,
-                  zIndex: isActive ? 30 : 20,
-                }}
-                onClick={() => setActiveIndex(slide.index)}
-              >
-                <div
-                  className={`fade-up ${hasAnimatedIn ? "fade-up-visible" : ""}`}
-                  style={
-                    {
-                      "--fade-up-delay": `${staggerDelay}ms`,
-                    } as React.CSSProperties
-                  }
-                >
-                  <TestimonyCard
-                    profile={item.profile}
-                    studentName={item.studentName}
-                    subjects={item.subjects}
-                    message={item.message}
-                    rating={item.rating}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
+  return rows.map((row) => {
+    const student = unwrapJoin<{ full_name: string; avatar_url: string | null }>(
+      row.users,
+    );
+    const subjects = subjectMap.get(row.tutor_profile_id as string) ?? [];
 
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={handlePrev}
-            className="btn-icon h-9 w-9 border border-[var(--biru)]/35 text-[var(--biru)]"
-            aria-label="Previous testimony"
-          >
-            &lt;
-          </button>
+    return {
+      id: row.id as string,
+      profile: student?.avatar_url ?? null,
+      studentName: student?.full_name ?? "Anonim",
+      subjects:
+        subjects.length > 0 ? subjects.slice(0, 3).join(", ") : "General",
+      message: row.message as string,
+      rating: Number(row.rating) || 0,
+    };
+  });
+}
 
-          <div className="flex items-center gap-2">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                className={`h-2.5 rounded-full transition-all ${
-                  index === activeIndex
-                    ? "w-6 bg-[var(--biru)]"
-                    : "w-2.5 bg-[var(--gelap)]/25"
-                }`}
-                aria-label={`Go to testimony ${index + 1}`}
-              />
-            ))}
-          </div>
+export default async function Testimonies() {
+  const testimonials = await fetchHomeTestimonies();
 
-          <button
-            type="button"
-            onClick={handleNext}
-            className="btn-icon h-9 w-9 border border-[var(--biru)]/35 text-[var(--biru)]"
-            aria-label="Next testimony"
-          >
-            &gt;
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-export default Testimonies;
+  return <TestimoniesCarousel testimonials={testimonials} />;
+}

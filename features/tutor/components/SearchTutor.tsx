@@ -9,34 +9,53 @@ const SearchTutor = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [rating, setRating] = useState(searchParams.get("rating") || "");
+  const currentParams = searchParams.toString();
+  const urlQuery = searchParams.get("q") || "";
+  const urlRating = searchParams.get("rating") || "";
+  const [query, setQuery] = useState(urlQuery);
+  const [rating, setRating] = useState(urlRating);
   const [showFilter, setShowFilter] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setQuery(urlQuery);
+    setRating(urlRating);
+  }, [urlQuery, urlRating]);
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (query) {
-        params.set("q", query);
+      const params = new URLSearchParams(currentParams);
+      const nextQuery = query.trim();
+
+      if (nextQuery) {
+        params.set("q", nextQuery);
       } else {
         params.delete("q");
       }
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+
+      const nextParams = params.toString();
+      if (nextParams === currentParams) return;
+
+      router.replace(nextParams ? `${pathname}?${nextParams}` : pathname, { scroll: false });
     }, 300);
     return () => clearTimeout(timer);
-  }, [query, router, searchParams, pathname]);
+  }, [query, router, currentParams, pathname]);
 
   const handleRatingChange = (newRating: string) => {
     setRating(newRating);
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(currentParams);
     if (newRating) {
       params.set("rating", newRating);
     } else {
       params.delete("rating");
     }
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+
+    const nextParams = params.toString();
+    if (nextParams !== currentParams) {
+      router.replace(nextParams ? `${pathname}?${nextParams}` : pathname, { scroll: false });
+    }
+
     setShowFilter(false);
   };
 

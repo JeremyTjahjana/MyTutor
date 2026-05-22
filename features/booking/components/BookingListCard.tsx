@@ -87,7 +87,7 @@ const BookingListCard = ({
         <div className="flex items-start gap-3">
           <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-black/10 bg-[#f6f6fb] sm:h-16 sm:w-16">
             <Image
-              src={booking.tutorAvatarUrl ?? assets.mehehe}
+              src={booking.tutorAvatarUrl ?? assets.profile}
               alt={booking.tutorName}
               width={64}
               height={64}
