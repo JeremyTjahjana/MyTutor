@@ -69,8 +69,12 @@ export async function rejectBookingAction(bookingId: string): Promise<void> {
   revalidatePath("/tutor-dashboard/bookings");
 }
 
-export async function completeBookingAction(bookingId: string): Promise<void> {
-  await completeBooking(bookingId);
+export async function completeBookingAction(
+  bookingId: string,
+  actor: "student" | "tutor" = "tutor",
+): Promise<void> {
+  await completeBooking(bookingId, actor);
+  revalidatePath("/booking-list");
   revalidatePath("/tutor-dashboard/bookings");
 }
 

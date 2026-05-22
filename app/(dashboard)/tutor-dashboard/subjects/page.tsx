@@ -2,16 +2,13 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, Plus, Search, Trash2, Sparkles } from "lucide-react";
+import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import type { Subject } from "@/types/tutor";
 import {
-  addTutorSubjectBySubjectIdAction,
   addTutorSubjectByCustomNameAction,
+  addTutorSubjectBySubjectIdAction,
   removeTutorSubjectAction,
 } from "@/features/tutor/services/tutor.action";
-import { subjectNameCategoryMatch } from "@/lib/subject-utils";
-
-type SubjectPreset = { name: string; category: string | null };
 
 async function fetchJson<T>(url: string): Promise<T> {
   const sep = url.includes("?") ? "&" : "?";
@@ -33,10 +30,8 @@ export default function TutorSubjectsPage() {
   const [loadingList, setLoadingList] = useState(true);
   const [search, setSearch] = useState("");
   const [catalog, setCatalog] = useState<Subject[]>([]);
-  const [presets, setPresets] = useState<SubjectPreset[]>([]);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [customName, setCustomName] = useState("");
-  const [customCategory, setCustomCategory] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<{
     type: "ok" | "err";
@@ -70,15 +65,10 @@ export default function TutorSubjectsPage() {
         const url = q
           ? `/api/subjects?search=${encodeURIComponent(q)}`
           : "/api/subjects";
-        const data = await fetchJson<{
-          subjects: Subject[];
-          presets?: SubjectPreset[];
-        }>(url);
+        const data = await fetchJson<{ subjects: Subject[] }>(url);
         setCatalog(data.subjects);
-        setPresets(data.presets ?? []);
       } catch {
         setCatalog([]);
-        setPresets([]);
       } finally {
         setLoadingCatalog(false);
       }
@@ -87,62 +77,49 @@ export default function TutorSubjectsPage() {
   }, [search]);
 
   const linkedIds = useMemo(
-    () => new Set(subjects.map((s) => s.id)),
+    () => new Set(subjects.map((subject) => subject.id)),
     [subjects],
   );
 
-  const presetsFiltered = useMemo(
+  const catalogFiltered = useMemo(
     () =>
-      presets.filter(
-        (p) =>
-          !subjects.some((s) =>
-            subjectNameCategoryMatch(p.name, p.category, s.name, s.category),
+      catalog.filter(
+        (catalogSubject) =>
+          !linkedIds.has(catalogSubject.id) &&
+          !subjects.some(
+            (subject) =>
+              subject.name.trim().toLowerCase() ===
+              catalogSubject.name.trim().toLowerCase(),
           ),
       ),
-    [presets, subjects],
+    [catalog, linkedIds, subjects],
   );
 
-  const catalogFiltered = useMemo(
-    () => catalog.filter((c) => !linkedIds.has(c.id)),
-    [catalog, linkedIds],
-  );
-
-  const hasCatalogResults =
-    presetsFiltered.length > 0 || catalogFiltered.length > 0;
+  const hasCatalogResults = catalogFiltered.length > 0;
 
   const showFlash = (type: "ok" | "err", text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
 
-  const onAddPreset = async (preset: SubjectPreset) => {
+  const onAddCatalogSubject = async (subject: Subject) => {
     if (!user?.id) return;
-    const key = `preset:${preset.name}`;
-    setBusyId(key);
-    const res = await addTutorSubjectByCustomNameAction(
-      user.id,
-      preset.name,
-      preset.category,
-    );
+    setBusyId(subject.id);
+    const res = subject.id.startsWith("preset:")
+      ? await addTutorSubjectByCustomNameAction(
+          user.id,
+          subject.name,
+          subject.category,
+        )
+      : await addTutorSubjectBySubjectIdAction(user.id, subject.id);
     setBusyId(null);
-    if (!res.success) {
-      showFlash("err", res.error ?? "Gagal menambahkan.");
-      return;
-    }
-    showFlash("ok", "Mata kuliah ditambahkan.");
-    void loadMine();
-  };
 
-  const onAddById = async (subjectId: string) => {
-    if (!user?.id) return;
-    setBusyId(subjectId);
-    const res = await addTutorSubjectBySubjectIdAction(user.id, subjectId);
-    setBusyId(null);
     if (!res.success) {
       showFlash("err", res.error ?? "Gagal menambahkan.");
       return;
     }
-    showFlash("ok", "Mata kuliah ditambahkan.");
+
+    showFlash("ok", "Materi ditambahkan.");
     void loadMine();
   };
 
@@ -153,20 +130,18 @@ export default function TutorSubjectsPage() {
       showFlash("err", "Isi nama mata kuliah atau skill terlebih dahulu.");
       return;
     }
+
     setBusyId("__custom__");
-    const res = await addTutorSubjectByCustomNameAction(
-      user.id,
-      name,
-      customCategory.trim() ? customCategory.trim() : null,
-    );
+    const res = await addTutorSubjectByCustomNameAction(user.id, name, null);
     setBusyId(null);
+
     if (!res.success) {
       showFlash("err", res.error ?? "Gagal menambahkan.");
       return;
     }
+
     setCustomName("");
-    setCustomCategory("");
-    showFlash("ok", "Mata kuliah / skill baru ditambahkan.");
+    showFlash("ok", "Materi baru ditambahkan.");
     void loadMine();
   };
 
@@ -175,10 +150,12 @@ export default function TutorSubjectsPage() {
     setBusyId(subjectId);
     const res = await removeTutorSubjectAction(user.id, subjectId);
     setBusyId(null);
+
     if (!res.success) {
       showFlash("err", res.error ?? "Gagal menghapus.");
       return;
     }
+
     showFlash("ok", "Dihapus dari daftar Anda.");
     void loadMine();
   };
@@ -192,11 +169,14 @@ export default function TutorSubjectsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <header>
+    <div className="mx-auto max-w-6xl space-y-5">
+      <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <h1 className="text-2xl font-bold text-[var(--biru)] sm:text-3xl">
           Mata kuliah & skill
         </h1>
+        <p className="max-w-xl text-sm text-[var(--gelap)]/55">
+          Kelola daftar materi yang tampil di profil tutor Anda.
+        </p>
       </header>
 
       {message ? (
@@ -211,204 +191,156 @@ export default function TutorSubjectsPage() {
         </p>
       ) : null}
 
-      {/* Daftar saat ini */}
-      <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-6 shadow-sm sm:p-8">
-        <h2 className="text-lg font-semibold text-[var(--gelap)]">
-          Yang Anda ajarkan sekarang
-        </h2>
-        <p className="mt-1 text-sm text-[var(--gelap)]/55">
-          Hapus jika Anda tidak lagi menawarkan materi tersebut.
-        </p>
-
-        {loadingList ? (
-          <div className="mt-6 flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-[var(--biru)]" />
-          </div>
-        ) : subjects.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-[var(--gelap)]/15 bg-[var(--putih)] px-4 py-6 text-center text-sm text-[var(--gelap)]/55">
-            Belum ada mata kuliah. Tambahkan dari katalog di bawah atau buat
-            nama baru.
-          </p>
-        ) : (
-          <ul className="mt-6 space-y-2">
-            {subjects.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-[var(--gelap)]/10 bg-[var(--putih)] px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="font-medium text-[var(--gelap)]">{s.name}</p>
-                  {s.category ? (
-                    <p className="text-xs text-[var(--gelap)]/50">
-                      {s.category}
-                    </p>
-                  ) : null}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void onRemove(s.id)}
-                  disabled={busyId === s.id}
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-red-100 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
-                >
-                  {busyId === s.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                  Hapus
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Katalog */}
-      <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-6 shadow-sm sm:p-8">
-        <h2 className="text-lg font-semibold text-[var(--gelap)]">
-          Tambah dari katalog
-        </h2>
-        <div className="relative mt-4">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--gelap)]/40" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Contoh: Kalkulus, Bahasa Inggris…"
-            className="w-full rounded-xl border border-[var(--gelap)]/15 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
-          />
-        </div>
-
-        <div className="mt-4 max-h-72 overflow-y-auto rounded-xl border border-[var(--gelap)]/10">
-          {loadingCatalog ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-[var(--biru)]" />
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-[var(--gelap)]">
+                Yang diajarkan
+              </h2>
+              <p className="text-sm text-[var(--gelap)]/55">
+                {subjects.length} materi aktif
+              </p>
             </div>
-          ) : !hasCatalogResults ? (
-            <p className="px-4 py-8 text-center text-sm text-[var(--gelap)]/50">
-              {search.trim()
-                ? "Tidak ada hasil yang belum ada di daftar Anda."
-                : "Ketik untuk mencari atau gunakan tambah baru di bawah."}
+          </div>
+
+          {loadingList ? (
+            <div className="mt-4 flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--biru)]" />
+            </div>
+          ) : subjects.length === 0 ? (
+            <p className="mt-4 rounded-xl border border-dashed border-[var(--gelap)]/15 bg-[var(--putih)] px-4 py-6 text-center text-sm text-[var(--gelap)]/55">
+              Belum ada materi. Tambahkan dari katalog atau buat nama baru.
             </p>
           ) : (
-            <ul className="divide-y divide-[var(--gelap)]/8">
-              {presetsFiltered.map((p) => (
+            <ul className="mt-4 max-h-[58vh] space-y-2 overflow-y-auto pr-1">
+              {subjects.map((subject) => (
                 <li
-                  key={`preset-${p.name}`}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--gelap)]/[0.03]"
+                  key={subject.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[var(--gelap)]/10 bg-[var(--putih)] px-3 py-2.5"
                 >
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-[var(--gelap)]">
-                        {p.name}
-                      </p>
-                      <span className="rounded-full bg-[var(--biru)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--biru)]">
-                        Bawaan
-                      </span>
-                    </div>
-                    {p.category ? (
-                      <p className="text-xs text-[var(--gelap)]/50">
-                        {p.category}
+                    <p className="truncate font-medium text-[var(--gelap)]">
+                      {subject.name}
+                    </p>
+                    {subject.category ? (
+                      <p className="truncate text-xs text-[var(--gelap)]/50">
+                        {subject.category}
                       </p>
                     ) : null}
                   </div>
                   <button
                     type="button"
-                    onClick={() => void onAddPreset(p)}
-                    disabled={busyId === `preset:${p.name}`}
-                    className="btn-primary inline-flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-sm disabled:opacity-50"
+                    onClick={() => void onRemove(subject.id)}
+                    disabled={busyId === subject.id}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-red-100 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                    aria-label={`Hapus ${subject.name}`}
+                    title="Hapus"
                   >
-                    {busyId === `preset:${p.name}` ? (
+                    {busyId === subject.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Plus className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     )}
-                    Tambah
-                  </button>
-                </li>
-              ))}
-              {catalogFiltered.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--gelap)]/[0.03]"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium text-[var(--gelap)]">{s.name}</p>
-                    {s.category ? (
-                      <p className="text-xs text-[var(--gelap)]/50">
-                        {s.category}
-                      </p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void onAddById(s.id)}
-                    disabled={busyId === s.id}
-                    className="btn-primary inline-flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-sm disabled:opacity-50"
-                  >
-                    {busyId === s.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                    Tambah
                   </button>
                 </li>
               ))}
             </ul>
           )}
-        </div>
-      </section>
+        </section>
 
-      {/* Custom */}
-      <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-6 shadow-sm sm:p-8">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--gelap)]">
-          <Sparkles className="h-5 w-5 text-[var(--biru)]" />
-          Tambah mata kuliah / skill baru
-        </h2>
+        <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-[var(--gelap)]">
+            Tambah materi
+          </h2>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-          <div className="min-w-0 sm:col-span-2">
-            <label className="mb-1.5 block text-xs font-medium text-[var(--gelap)]/70">
-              Nama mata kuliah atau skill
-            </label>
-            <input
-              type="text"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              placeholder="Contoh: Blender"
-              className="w-full rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
-            />
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--gelap)]/40" />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Cari: Struktur Data, Kalkulus..."
+                className="w-full rounded-xl border border-[var(--gelap)]/15 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
+              />
+            </div>
+            <div className="flex min-w-0 flex-1 gap-2">
+              <input
+                type="text"
+                value={customName}
+                onChange={(event) => setCustomName(event.target.value)}
+                placeholder="Atau tulis materi baru"
+                className="min-w-0 flex-1 rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
+              />
+              <button
+                type="button"
+                onClick={() => void onAddCustom()}
+                disabled={busyId === "__custom__"}
+                className="btn-primary inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 text-sm font-semibold disabled:opacity-50"
+                aria-label="Tambah materi baru"
+                title="Tambah"
+              >
+                {busyId === "__custom__" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Tambah
+              </button>
+            </div>
           </div>
-          <div className="min-w-0">
-            <label className="mb-1.5 block text-xs font-medium text-[var(--gelap)]/70">
-              Kategori (opsional)
-            </label>
-            <input
-              type="text"
-              value={customCategory}
-              onChange={(e) => setCustomCategory(e.target.value)}
-              placeholder="Contoh: 3D & desain, Software…"
-              className="w-full rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
-            />
-          </div>
-        </div>
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={() => void onAddCustom()}
-            disabled={busyId === "__custom__"}
-            className="btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50 sm:shrink-0"
-          >
-            {busyId === "__custom__" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+
+          <div className="mt-4 max-h-[58vh] overflow-y-auto rounded-xl border border-[var(--gelap)]/10">
+            {loadingCatalog ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-[var(--biru)]" />
+              </div>
+            ) : !hasCatalogResults ? (
+              <p className="px-4 py-8 text-center text-sm text-[var(--gelap)]/50">
+                {search.trim()
+                  ? "Tidak ada hasil yang belum ada di daftar Anda."
+                  : "Semua materi katalog sudah ada di daftar Anda."}
+              </p>
             ) : (
-              <Plus className="h-4 w-4" />
+              <ul className="divide-y divide-[var(--gelap)]/8">
+                {catalogFiltered.map((subject) => (
+                  <li
+                    key={subject.id}
+                    className="flex items-center justify-between gap-3 px-3 py-2.5 hover:bg-[var(--gelap)]/[0.03]"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-[var(--gelap)]">
+                        {subject.name}
+                      </p>
+                      {subject.category ? (
+                        <p className="truncate text-xs text-[var(--gelap)]/50">
+                          {subject.category}
+                        </p>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void onAddCatalogSubject(subject)}
+                      disabled={busyId === subject.id}
+                      className="btn-primary inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold disabled:opacity-50"
+                      aria-label={`Tambah ${subject.name}`}
+                      title="Tambah"
+                    >
+                      {busyId === subject.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      Tambah
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
-            Simpan ke daftar
-          </button>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

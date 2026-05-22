@@ -4,6 +4,7 @@ import {
   insertBooking,
   insertTestimony,
   updateBookingStatus,
+  confirmBookingCompletion,
   type CreateBookingInput,
   type CreateTestimonyInput,
 } from "../repositories/booking.repository";
@@ -39,8 +40,11 @@ export async function rejectBooking(bookingId: string): Promise<void> {
   return updateBookingStatus(bookingId, "cancelled");
 }
 
-export async function completeBooking(bookingId: string): Promise<void> {
-  return updateBookingStatus(bookingId, "completed");
+export async function completeBooking(
+  bookingId: string,
+  actor: "student" | "tutor",
+): Promise<void> {
+  return confirmBookingCompletion(bookingId, actor);
 }
 
 export async function cancelBooking(bookingId: string): Promise<void> {

@@ -35,6 +35,8 @@ export interface Booking {
   startTime: string; // ISO timestamp
   endTime: string;
   status: BookingStatus;
+  studentCompletedAt: string | null;
+  tutorCompletedAt: string | null;
   notes: string | null;
   createdAt: string;
   hasTestimony?: boolean;

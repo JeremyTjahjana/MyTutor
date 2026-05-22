@@ -19,7 +19,6 @@ const adminNavItems = [
   {
     href: "/admin-dashboard/pendaftaran",
     label: "Pendaftaran",
-    description: "Review pengajuan tutor",
     icon: UserCheck,
     match: (pathname: string) =>
       pathname === "/admin-dashboard" ||
@@ -28,7 +27,6 @@ const adminNavItems = [
   {
     href: "/admin-dashboard/list-tutors",
     label: "List tutors",
-    description: "Lihat tutor aktif dan revoke role",
     icon: Users,
     match: (pathname: string) =>
       pathname.startsWith("/admin-dashboard/list-tutors"),
@@ -119,13 +117,6 @@ export default function AdminDashboardLayout({
                     active ? "opacity-80" : ""
                   }`}
                 />
-              </span>
-              <span
-                className={`mt-0.5 block text-xs leading-snug ${
-                  active ? "text-blue-100" : "text-[var(--gelap)]/55"
-                }`}
-              >
-                {item.description}
               </span>
             </span>
           </Link>

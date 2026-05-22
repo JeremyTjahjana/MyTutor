@@ -6,7 +6,10 @@ import type { Booking } from "@/types/user";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
 import Modal from "@/components/shared/ModalTestimoni";
-import { createTestimonyAction } from "@/features/booking/services/booking.action";
+import {
+  completeBookingAction,
+  createTestimonyAction,
+} from "@/features/booking/services/booking.action";
 
 type BookingListCardProps = {
   booking: Booking;
@@ -15,32 +18,27 @@ type BookingListCardProps = {
 
 const statusConfig: Record<
   string,
-  { label: string; pillClass: string; stripeClass: string }
+  { label: string; pillClass: string }
 > = {
   pending: {
     label: "Menunggu",
     pillClass: "bg-yellow-100 text-yellow-700",
-    stripeClass: "bg-yellow-400",
   },
   accepted: {
     label: "Diterima",
     pillClass: "bg-green-100 text-green-700",
-    stripeClass: "bg-green-400",
   },
   completed: {
     label: "Selesai",
     pillClass: "bg-[var(--ijo1)] text-[var(--putih)]",
-    stripeClass: "bg-[var(--ijo1)]",
   },
   rejected: {
     label: "Ditolak",
     pillClass: "bg-red-100 text-red-600",
-    stripeClass: "bg-red-400",
   },
   cancelled: {
     label: "Dibatalkan",
     pillClass: "bg-gray-100 text-gray-600",
-    stripeClass: "bg-gray-300",
   },
 };
 
@@ -59,9 +57,12 @@ const BookingListCard = ({
   onBookingUpdated,
 }: BookingListCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const hasTestimony = Boolean(booking.hasTestimony);
   const testimonialRating = booking.testimonyRating ?? 0;
   const statusInfo = statusConfig[booking.status] ?? statusConfig.pending;
+  const studentHasConfirmed = Boolean(booking.studentCompletedAt);
+  const tutorHasConfirmed = Boolean(booking.tutorCompletedAt);
 
   const handleContactTutor = () => {
     if (booking.tutorPhone) {
@@ -75,12 +76,18 @@ const BookingListCard = ({
     }
   };
 
+  const handleCompleteBooking = async () => {
+    setIsCompleting(true);
+    try {
+      await completeBookingAction(booking.id, "student");
+      onBookingUpdated?.();
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
   return (
     <article className="flex w-full max-w-[360px] flex-col overflow-hidden rounded-[28px] border border-[#d7d3ef] bg-[var(--putih)] shadow-[0px_2px_10px_0px_rgba(0,0,0,0.08)]">
-
-      {/* Color stripe — visual status cue */}
-      <div className={`h-1.5 w-full ${statusInfo.stripeClass}`} />
-
       <div className="flex flex-1 flex-col justify-center px-6 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6">
 
         {/* Header: avatar + subject + tutor + status */}
@@ -203,6 +210,48 @@ const BookingListCard = ({
           >
             Beri Testimoni
           </button>
+        ) : booking.status === "accepted" ? (
+          <div className="mt-5 space-y-3 border-t border-[#d7d3ef]/60 pt-5">
+            <div className="rounded-2xl bg-[#f6f6fb] px-4 py-3 text-[12px] text-[var(--gelap)]/65">
+              <p className="font-semibold text-[var(--gelap)]/80">
+                Konfirmasi selesai
+              </p>
+              <p className="mt-1">
+                Murid: {studentHasConfirmed ? "sudah" : "belum"} konfirmasi
+                {" · "}
+                Tutor: {tutorHasConfirmed ? "sudah" : "belum"} konfirmasi
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                className="btn-primary flex flex-1 items-center justify-center gap-2"
+                onClick={handleCompleteBooking}
+                disabled={isCompleting || studentHasConfirmed}
+              >
+                {studentHasConfirmed
+                  ? "Menunggu tutor"
+                  : isCompleting
+                    ? "Memproses..."
+                    : "Selesai"}
+              </button>
+
+              <button
+                type="button"
+                className="btn-secondary flex flex-1 items-center justify-center gap-2"
+                onClick={handleContactTutor}
+                disabled={!booking.tutorPhone}
+                title={
+                  booking.tutorPhone
+                    ? "Chat di WhatsApp"
+                    : "Nomor telepon tidak tersedia"
+                }
+              >
+                Kontak tutor
+              </button>
+            </div>
+          </div>
         ) : (
           <button
             type="button"

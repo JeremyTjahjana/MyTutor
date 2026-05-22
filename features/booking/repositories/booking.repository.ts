@@ -16,7 +16,7 @@ export async function fetchBookingsByStudentId(
     .from("bookings")
     .select(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
-       status, notes, created_at,
+       status, student_completed_at, tutor_completed_at, notes, created_at,
        subjects(name),
        tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url, phone)),
        testimonies(id, rating, message, created_at)`,
@@ -54,6 +54,8 @@ export async function fetchBookingsByStudentId(
       startTime: row.start_time as string,
       endTime: row.end_time as string,
       status: row.status as Booking["status"],
+      studentCompletedAt: (row.student_completed_at as string | null) ?? null,
+      tutorCompletedAt: (row.tutor_completed_at as string | null) ?? null,
       notes: row.notes as string | null,
       createdAt: row.created_at as string,
       hasTestimony: Boolean(testimony),
@@ -72,7 +74,7 @@ export async function fetchBookingsByTutorProfileId(
     .from("bookings")
     .select(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
-       status, notes, created_at,
+       status, student_completed_at, tutor_completed_at, notes, created_at,
        subjects(name),
        users!bookings_student_id_fkey(full_name, avatar_url, phone),
        testimonies(id, rating, message, created_at)`,
@@ -111,6 +113,8 @@ export async function fetchBookingsByTutorProfileId(
       startTime: row.start_time as string,
       endTime: row.end_time as string,
       status: row.status as Booking["status"],
+      studentCompletedAt: (row.student_completed_at as string | null) ?? null,
+      tutorCompletedAt: (row.tutor_completed_at as string | null) ?? null,
       notes: row.notes as string | null,
       createdAt: row.created_at as string,
       hasTestimony: Boolean(testimony),
@@ -207,10 +211,54 @@ export async function updateBookingStatus(
   bookingId: string,
   status: "accepted" | "completed" | "cancelled",
 ): Promise<void> {
+  const update =
+    status === "accepted"
+      ? { status, student_completed_at: null, tutor_completed_at: null }
+      : { status };
+
+  const { error } = await supabase.from("bookings").update(update).eq("id", bookingId);
+
+  if (error) throw error;
+}
+
+export async function confirmBookingCompletion(
+  bookingId: string,
+  actor: "student" | "tutor",
+): Promise<void> {
+  const completedAtColumn =
+    actor === "student" ? "student_completed_at" : "tutor_completed_at";
+  const now = new Date().toISOString();
+
+  const { error: confirmError } = await supabase
+    .from("bookings")
+    .update({ [completedAtColumn]: now })
+    .eq("id", bookingId)
+    .eq("status", "accepted")
+    .is(completedAtColumn, null);
+
+  if (confirmError) throw confirmError;
+
+  const { data: booking, error: fetchError } = await supabase
+    .from("bookings")
+    .select("status, student_completed_at, tutor_completed_at")
+    .eq("id", bookingId)
+    .single();
+
+  if (fetchError) throw fetchError;
+  if (
+    !booking ||
+    booking.status !== "accepted" ||
+    !booking.student_completed_at ||
+    !booking.tutor_completed_at
+  ) {
+    return;
+  }
+
   const { error } = await supabase
     .from("bookings")
-    .update({ status })
-    .eq("id", bookingId);
+    .update({ status: "completed" })
+    .eq("id", bookingId)
+    .eq("status", "accepted");
 
   if (error) throw error;
 }

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/server";
+import { DEFAULT_TUTOR_SUBJECTS } from "@/lib/data";
 import type { TutorListItem } from "@/types/tutor";
 import type { TutorDetail, Subject, Schedule, Testimony } from "@/types/tutor";
 import { subjectNameCategoryMatch } from "@/lib/subject-utils";
@@ -365,6 +366,7 @@ export async function fetchSubjectsCatalog(
 ): Promise<Subject[]> {
   const t = search?.trim();
   const safe = t ? t.replace(/%/g, "").replace(/_/g, "") : "";
+  const safeLower = safe.toLowerCase();
   const limit = Math.min(options?.limit ?? (safe.length > 0 ? 120 : 150), 500);
 
   let q = supabase.from("subjects").select("id, name, category");
@@ -399,11 +401,33 @@ export async function fetchSubjectsCatalog(
     throw error;
   }
 
-  return (data ?? []).map((row) => ({
+  const dbSubjects = (data ?? []).map((row) => ({
     id: row.id as string,
     name: row.name as string,
     category: (row.category as string | null) ?? null,
   }));
+
+  const dbKeys = new Set(
+    dbSubjects.map(
+      (subject) =>
+        `${subject.name.trim().toLowerCase()}::${(subject.category ?? "").trim().toLowerCase()}`,
+    ),
+  );
+  const presetSubjects = DEFAULT_TUTOR_SUBJECTS.filter((preset) => {
+    const key = `${preset.name.trim().toLowerCase()}::${(preset.category ?? "").trim().toLowerCase()}`;
+    if (dbKeys.has(key)) return false;
+    if (!safe) return true;
+    return (
+      preset.name.toLowerCase().includes(safeLower) ||
+      (preset.category ?? "").toLowerCase().includes(safeLower)
+    );
+  }).map((preset) => ({
+    id: `preset:${preset.name}::${preset.category ?? ""}`,
+    name: preset.name,
+    category: preset.category,
+  }));
+
+  return [...dbSubjects, ...presetSubjects].slice(0, limit);
 }
 
 /**
@@ -431,7 +455,11 @@ export async function resolveOrCreateSubjectIdByName(
 
   const existing = (candidates ?? []).find((row) =>
     subjectNameCategoryMatch(trimmed, catTrim, row.name, row.category),
-  );
+  ) ?? (catTrim
+    ? (candidates ?? []).find(
+        (row) => row.name.trim().toLowerCase() === trimmed.toLowerCase(),
+      )
+    : null);
 
   if (existing?.id) {
     return existing.id as string;
@@ -456,7 +484,11 @@ export async function resolveOrCreateSubjectIdByName(
         .ilike("name", trimmed);
       const hit = (again ?? []).find((row) =>
         subjectNameCategoryMatch(trimmed, catTrim, row.name, row.category),
-      );
+      ) ?? (catTrim
+        ? (again ?? []).find(
+            (row) => row.name.trim().toLowerCase() === trimmed.toLowerCase(),
+          )
+        : null);
       return (hit?.id as string | undefined) ?? null;
     }
     console.error("resolveOrCreateSubjectIdByName insert:", error);

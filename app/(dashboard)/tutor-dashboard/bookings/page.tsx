@@ -167,18 +167,25 @@ function BookingCard({
           </div>
         )}
         {booking.status === "accepted" && (
-          <button
-            onClick={() => onAction(booking.id, "complete")}
-            disabled={!!actionLoading}
-            className="btn-primary mt-3 px-4 py-1.5 text-sm rounded-lg flex items-center gap-1.5"
-          >
-            {actionLoading === booking.id + "complete" ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <CheckCircle className="h-3.5 w-3.5" />
-            )}
-            Tandai Selesai
-          </button>
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-[var(--gelap)]/55">
+              Konfirmasi selesai: tutor{" "}
+              {booking.tutorCompletedAt ? "sudah" : "belum"}, murid{" "}
+              {booking.studentCompletedAt ? "sudah" : "belum"}.
+            </p>
+            <button
+              onClick={() => onAction(booking.id, "complete")}
+              disabled={!!actionLoading || Boolean(booking.tutorCompletedAt)}
+              className="btn-primary px-4 py-1.5 text-sm rounded-lg flex items-center gap-1.5"
+            >
+              {actionLoading === booking.id + "complete" ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <CheckCircle className="h-3.5 w-3.5" />
+              )}
+              {booking.tutorCompletedAt ? "Menunggu murid" : "Tandai Selesai"}
+            </button>
+          </div>
         )}
       </div>
     </div>

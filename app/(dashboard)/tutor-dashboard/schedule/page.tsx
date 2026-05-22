@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { DAY_NAMES, DAY_NUMBERS } from "@/types/tutor";
+import { DAY_NAMES } from "@/types/tutor";
 import type { Schedule } from "@/types/tutor";
 import {
   updateTutorScheduleAction,
@@ -213,34 +213,40 @@ export default function SchedulePage() {
       </div>
 
       {/* Schedule by Day */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {slotsByDay.map((daySchedule) => (
           <div
             key={daySchedule.value}
-            className="bg-white rounded-lg shadow-sm p-6 border border-[var(--gelap)]/5"
+            className="flex min-h-[180px] flex-col rounded-lg border border-[var(--gelap)]/5 bg-white p-4 shadow-sm sm:p-5"
           >
-            <h3 className="font-semibold text-[var(--biru)] mb-3">
-              {daySchedule.label}
-            </h3>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h3 className="font-semibold text-[var(--biru)]">
+                {daySchedule.label}
+              </h3>
+              <span className="rounded-full bg-[var(--biru)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--biru)]">
+                {daySchedule.slots.length}
+              </span>
+            </div>
             {daySchedule.slots.length === 0 ? (
-              <p className="text-sm text-[var(--gelap)]/50 italic">
+              <p className="flex flex-1 items-center rounded-lg border border-dashed border-[var(--gelap)]/10 px-3 py-4 text-sm italic text-[var(--gelap)]/50">
                 Belum ada slot tersedia
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="flex max-h-[260px] flex-1 flex-col gap-2 overflow-y-auto pr-1">
                 {daySchedule.slots.map((slot) => (
                   <div
                     key={`${slot.dayOfWeek}-${slot.startTime}`}
-                    className="flex items-center justify-between bg-[var(--putih)] p-4 rounded-lg border border-[var(--gelap)]/10"
+                    className="flex items-center justify-between rounded-lg border border-[var(--gelap)]/10 bg-[var(--putih)] px-3 py-2.5"
                   >
-                    <span className="font-medium text-[var(--biru)]">
+                    <span className="text-sm font-medium text-[var(--biru)]">
                       {slot.startTime} - {slot.endTime}
                     </span>
                     <button
                       onClick={() => handleRemoveSlot(slot)}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      className="rounded-lg p-1.5 transition-colors hover:bg-red-50"
+                      aria-label={`Hapus slot ${daySchedule.label} ${slot.startTime}`}
                     >
-                      <X className="w-5 h-5 text-red-600" />
+                      <X className="h-4 w-4 text-red-600" />
                     </button>
                   </div>
                 ))}
