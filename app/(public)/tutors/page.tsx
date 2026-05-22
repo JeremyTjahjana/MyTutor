@@ -7,7 +7,7 @@ export default async function TutorPage() {
 
   return (
     <>
-      <h2 className="text-center text-[40px] sm:text-5xl md:text-7xl font-semibold text-[var(--biru)] pt-12">
+      <h2 className="text-center text-[40px] sm:text-5xl md:text-7xl font-semibold text-[var(--biru)] py-12">
         Tutors Available
       </h2>
       <SearchTutor />
