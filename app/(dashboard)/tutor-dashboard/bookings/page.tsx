@@ -155,7 +155,7 @@ function BookingCard({
             <button
               onClick={() => onAction(booking.id, "cancel")}
               disabled={!!actionLoading}
-              className="btn-secondary px-4 py-1.5 text-sm rounded-lg flex items-center gap-1.5"
+              className="btn-secondary px-4 py-1.5 text-sm rounded-lg flex items-center gap-1.5 "
             >
               {actionLoading === booking.id + "cancel" ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

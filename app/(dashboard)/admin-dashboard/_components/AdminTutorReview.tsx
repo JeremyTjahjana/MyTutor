@@ -7,6 +7,7 @@ import {
   Loader2,
   UserCheck,
   UserMinus,
+  XCircle,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,7 +111,10 @@ export default function AdminTutorReview({ mode }: { mode: AdminMode }) {
   const { user } = useAuth();
   const [items, setItems] = useState<TutorAdminItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState<{
+    id: string | null;
+    action: "approve" | "reject" | "revoke" | null;
+  }>({ id: null, action: null });
   const [error, setError] = useState<string | null>(null);
 
   const buildItems = async (rows: TutorRow[]) => {
@@ -166,7 +170,7 @@ export default function AdminTutorReview({ mode }: { mode: AdminMode }) {
   }, [mode, user?.role]);
 
   const approveTutor = async (tutorId: string) => {
-    setSubmittingId(tutorId);
+    setSubmitting({ id: tutorId, action: "approve" });
     setError(null);
 
     try {
@@ -182,12 +186,12 @@ export default function AdminTutorReview({ mode }: { mode: AdminMode }) {
       console.error("approveTutor error:", err);
       setError("Gagal meng-approve tutor.");
     } finally {
-      setSubmittingId(null);
+      setSubmitting({ id: null, action: null });
     }
   };
 
   const revokeTutor = async (tutorId: string) => {
-    setSubmittingId(tutorId);
+    setSubmitting({ id: tutorId, action: "revoke" });
     setError(null);
 
     try {
@@ -203,7 +207,28 @@ export default function AdminTutorReview({ mode }: { mode: AdminMode }) {
       console.error("revokeTutor error:", err);
       setError("Gagal merevoke tutor.");
     } finally {
-      setSubmittingId(null);
+      setSubmitting({ id: null, action: null });
+    }
+  };
+
+  const rejectTutor = async (tutorId: string) => {
+    setSubmitting({ id: tutorId, action: "reject" });
+    setError(null);
+
+    try {
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ role: "student", tutor_status: null })
+        .eq("id", tutorId);
+
+      if (updateError) throw updateError;
+
+      await loadAdminData();
+    } catch (err) {
+      console.error("rejectTutor error:", err);
+      setError("Gagal menolak tutor.");
+    } finally {
+      setSubmitting({ id: null, action: null });
     }
   };
 
@@ -348,27 +373,43 @@ export default function AdminTutorReview({ mode }: { mode: AdminMode }) {
 
                   <div className="flex shrink-0 items-center gap-3 lg:flex-col lg:items-stretch">
                     {mode === "pendaftaran" ? (
-                      <button
-                        type="button"
-                        onClick={() => approveTutor(tutor.id)}
-                        disabled={submittingId === tutor.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--biru)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {submittingId === tutor.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <BadgeCheck className="h-4 w-4" />
-                        )}
-                        Approve tutor
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => approveTutor(tutor.id)}
+                          disabled={submitting.id === tutor.id && submitting.action === "approve"}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--biru)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {submitting.id === tutor.id && submitting.action === "approve" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <BadgeCheck className="h-4 w-4" />
+                          )}
+                          Approve tutor
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => rejectTutor(tutor.id)}
+                          disabled={submitting.id === tutor.id && submitting.action === "reject"}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {submitting.id === tutor.id && submitting.action === "reject" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <XCircle className="h-4 w-4" />
+                          )}
+                          Reject tutor
+                        </button>
+                      </>
                     ) : (
                       <button
                         type="button"
                         onClick={() => revokeTutor(tutor.id)}
-                        disabled={submittingId === tutor.id}
+                        disabled={submitting.id === tutor.id && submitting.action === "revoke"}
                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {submittingId === tutor.id ? (
+                        {submitting.id === tutor.id && submitting.action === "revoke" ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <UserMinus className="h-4 w-4" />
