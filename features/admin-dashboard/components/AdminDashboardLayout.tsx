@@ -1,13 +1,13 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { adminTutorReviewModeConfig } from "@/features/admin-dashboard/constants";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ChevronRight,
   Home,
-  LogOut,
   Menu,
   ShieldCheck,
   UserCheck,
@@ -19,6 +19,7 @@ const adminNavItems = [
   {
     href: "/admin-dashboard/pendaftaran",
     label: "Pendaftaran",
+    description: adminTutorReviewModeConfig.pendaftaran.description,
     icon: UserCheck,
     match: (pathname: string) =>
       pathname === "/admin-dashboard" ||
@@ -27,6 +28,7 @@ const adminNavItems = [
   {
     href: "/admin-dashboard/list-tutors",
     label: "List tutors",
+    description: adminTutorReviewModeConfig["list-tutors"].description,
     icon: Users,
     match: (pathname: string) =>
       pathname.startsWith("/admin-dashboard/list-tutors"),
@@ -38,7 +40,7 @@ export default function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,11 +64,6 @@ export default function AdminDashboardLayout({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  const handleLogout = useCallback(async () => {
-    await logout();
-    router.push("/");
-  }, [logout, router]);
 
   const activeItem = useMemo(
     () => adminNavItems.find((item) => item.match(pathname)),
@@ -118,6 +115,13 @@ export default function AdminDashboardLayout({
                   }`}
                 />
               </span>
+              <span
+                className={`mt-0.5 block text-xs leading-snug ${
+                  active ? "text-blue-100" : "text-[var(--gelap)]/55"
+                }`}
+              >
+                {item.description}
+              </span>
             </span>
           </Link>
         );
@@ -128,6 +132,9 @@ export default function AdminDashboardLayout({
   return (
     <div className="min-h-[100dvh] bg-[var(--putih)] text-[var(--gelap)]">
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-[var(--gelap)]/10 bg-white px-3 sm:px-4 lg:hidden">
+        <p className="min-w-0 flex-1 truncate text-sm font-semibold text-[var(--biru)]">
+          {activeItem?.label ?? "Admin dashboard"}
+        </p>
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
@@ -135,17 +142,6 @@ export default function AdminDashboardLayout({
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
-        </button>
-        <p className="truncate text-sm font-semibold text-[var(--biru)]">
-          {activeItem?.label ?? "Admin dashboard"}
-        </p>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--gelap)] hover:bg-red-50 hover:text-red-600"
-          aria-label="Log out"
-        >
-          <LogOut className="h-5 w-5" />
         </button>
       </header>
 
@@ -222,14 +218,6 @@ export default function AdminDashboardLayout({
                   {user?.email}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--gelap)]/60 hover:bg-red-50 hover:text-red-600"
-                title="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
             </div>
           </div>
         </aside>

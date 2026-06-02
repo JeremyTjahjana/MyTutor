@@ -20,6 +20,10 @@ export function NavbarFooterWrapper({
   const isTutorDashboard =
     clientPathname === "/tutor-dashboard" ||
     clientPathname.startsWith("/tutor-dashboard/");
+  const isAdminDashboard =
+    clientPathname === "/admin-dashboard" ||
+    clientPathname.startsWith("/admin-dashboard/");
+  const isDashboard = isTutorDashboard || isAdminDashboard;
   const isAuthPage =
     clientPathname === "/login" ||
     clientPathname === "/signup" ||
@@ -28,11 +32,11 @@ export function NavbarFooterWrapper({
 
   return (
     <>
-      {!isTutorDashboard && !isAuthCallback && (
+      {!isDashboard && !isAuthCallback && (
         <Navbar pathname={clientPathname} />
       )}
       {children}
-      {!isTutorDashboard && !isAuthPage && (
+      {!isDashboard && !isAuthPage && (
         <Footer pathname={clientPathname} />
       )}
     </>
