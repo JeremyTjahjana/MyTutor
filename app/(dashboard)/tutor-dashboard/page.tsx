@@ -3,6 +3,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, DollarSign, TrendingUp } from "lucide-react";
+import Link from "next/link";
 import { getDashboardDataAction } from "@/features/tutor/services/tutor.action";
 import type { Booking } from "@/types/user";
 
@@ -269,12 +270,12 @@ export default function TutorDashboard() {
             <h2 className="text-lg font-semibold text-[var(--biru)]">
               Booking Mendatang
             </h2>
-            <a
+            <Link
               href="/tutor-dashboard/bookings"
               className="text-sm text-[var(--biru)] hover:underline"
             >
               Lihat Semua
-            </a>
+            </Link>
           </div>
 
           <div className="space-y-3">

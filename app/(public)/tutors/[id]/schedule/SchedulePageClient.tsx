@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 import type { TutorDetail, Schedule } from "@/types/tutor";
 import { DAY_NAMES, nextOccurrence } from "@/types/tutor";
 import type { SlotStatus } from "@/features/booking/repositories/booking.repository";
@@ -23,11 +24,13 @@ export default function SchedulePageClient({
   slotStatuses,
 }: SchedulePageClientProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [activeSubjectIndex, setActiveSubjectIndex] = useState(0);
   const [activeScheduleIndex, setActiveScheduleIndex] = useState(0);
   const [mobilePage, setMobilePage] = useState(0);
   const [studentCount, setStudentCount] = useState(1);
   const [sessionCount, setSessionCount] = useState(1);
+  const isOwnTutorProfile = user?.id === tutor.userId;
 
   // Exclude slots that already have an accepted booking — they're taken
   const availableSchedules = tutor.schedules.filter(
@@ -40,7 +43,9 @@ export default function SchedulePageClient({
 
   // Build confirmation href with UUIDs and computed timestamps
   const confirmationHref = useMemo(() => {
-    if (!selectedSubject || !selectedSchedule) return undefined;
+    if (isOwnTutorProfile || !selectedSubject || !selectedSchedule) {
+      return undefined;
+    }
 
     const startDate = nextOccurrence(
       selectedSchedule.dayOfWeek,
@@ -65,7 +70,14 @@ export default function SchedulePageClient({
     });
 
     return `/tutors/${tutor.id}/confirmation?${params.toString()}`;
-  }, [tutor, selectedSubject, selectedSchedule, studentCount, sessionCount]);
+  }, [
+    isOwnTutorProfile,
+    tutor,
+    selectedSubject,
+    selectedSchedule,
+    studentCount,
+    sessionCount,
+  ]);
 
   return (
     <main className="min-h-screen bg-[#F7F8FC] px-4 py-6 sm:px-6 lg:px-12">
@@ -176,6 +188,7 @@ export default function SchedulePageClient({
         <ActionsSection
           tutorId={tutor.id}
           confirmationHref={confirmationHref}
+          isOwnTutorProfile={isOwnTutorProfile}
         />
       </div>
     </main>

@@ -3,13 +3,12 @@
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   LayoutDashboard,
   CalendarClock,
   ClipboardList,
   UserCircle,
-  LogOut,
   Home,
   Menu,
   X,
@@ -70,16 +69,11 @@ export default function TutorDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading, isApprovedTutor, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, isApprovedTutor } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-
-  const handleLogout = useCallback(async () => {
-    await logout();
-    router.push("/");
-  }, [logout, router]);
 
   const canAccessDashboard = isApprovedTutor;
   const navItems = tutorNavItems;
@@ -90,12 +84,12 @@ export default function TutorDashboardLayout({
 
   useEffect(() => {
     if (isLoading) return;
-    if (!user) {
+    if (!isAuthenticated) {
       router.replace("/login");
     } else if (!canAccessDashboard) {
       router.replace("/");
     }
-  }, [canAccessDashboard, isLoading, router, user]);
+  }, [canAccessDashboard, isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     const onResize = () => {
@@ -174,6 +168,11 @@ export default function TutorDashboardLayout({
     <div className="min-h-[100dvh] bg-[var(--putih)] text-[var(--gelap)]">
       {/* Mobile header */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-[var(--gelap)]/10 bg-white px-3 sm:px-4 lg:hidden">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-[var(--biru)]">
+            {pageTitle}
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
@@ -181,19 +180,6 @@ export default function TutorDashboardLayout({
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
-        </button>
-        <div className="min-w-0 flex-1 text-center">
-          <p className="truncate text-sm font-semibold text-[var(--biru)]">
-            {pageTitle}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--gelap)] hover:bg-red-50 hover:text-red-600"
-          aria-label="Log out"
-        >
-          <LogOut className="h-5 w-5" />
         </button>
       </header>
 
@@ -234,7 +220,7 @@ export default function TutorDashboardLayout({
             className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--biru)] hover:bg-[var(--biru)]/5"
           >
             <Home className="h-4 w-4" />
-            Exit to website
+            Kembali ke Home
           </Link>
         </div>
       </aside>
@@ -290,14 +276,6 @@ export default function TutorDashboardLayout({
                   {user?.email}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--gelap)]/60 hover:bg-red-50 hover:text-red-600"
-                title="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
             </div>
           </div>
         </aside>

@@ -318,8 +318,8 @@ export default function ProfilePage() {
                   Portfolio
                 </label>
                 <p className="mt-1 text-sm text-[var(--gelap)]/55">
-                  Tambahkan URL gambar publik, satu URL per baris. Maksimal 12
-                  item.
+                  Tambahkan URL gambar publik atau link share Google Drive, satu
+                  URL per baris. Maksimal 12 item.
                 </p>
               </div>
             </div>
@@ -328,13 +328,14 @@ export default function ProfilePage() {
               value={formData.portfolioUrls}
               onChange={handleChange}
               rows={4}
-              placeholder={`https://example.com/portfolio-1.jpg\nhttps://example.com/portfolio-2.webp`}
+              placeholder={`https://drive.google.com/file/d/FILE_ID/view?usp=sharing\nhttps://example.com/portfolio-2.webp`}
               className="mt-3 w-full rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
             />
             <p className="mt-2 text-xs text-[var(--gelap)]/45">
-              Rekomendasi: gunakan gambar JPG/WebP/PNG dari slide atau
-              screenshot karya. PDF sebaiknya diubah menjadi beberapa gambar
-              agar tampil bagus di carousel publik.
+              Untuk Google Drive, ubah akses setiap gambar menjadi
+              &quot;Anyone with the link&quot; sebagai Viewer. PDF sebaiknya
+              diubah menjadi beberapa gambar agar tampil bagus di carousel
+              publik.
             </p>
           </div>
 

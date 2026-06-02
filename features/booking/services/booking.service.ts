@@ -5,10 +5,14 @@ import {
   insertTestimony,
   updateBookingStatus,
   confirmBookingCompletion,
+  calculateTutorProfileStats,
+  BookingRuleError,
   type CreateBookingInput,
   type CreateTestimonyInput,
 } from "../repositories/booking.repository";
 import type { Booking } from "@/types/user";
+
+export { BookingRuleError };
 
 export async function listStudentBookings(
   studentId: string,
@@ -45,6 +49,13 @@ export async function completeBooking(
   actor: "student" | "tutor",
 ): Promise<void> {
   return confirmBookingCompletion(bookingId, actor);
+}
+
+export async function getTutorProfileStats(
+  tutorProfileId: string,
+  fallbackCostPerHour: number,
+) {
+  return calculateTutorProfileStats(tutorProfileId, fallbackCostPerHour);
 }
 
 export async function cancelBooking(bookingId: string): Promise<void> {

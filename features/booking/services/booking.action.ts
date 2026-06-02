@@ -1,9 +1,11 @@
 "use server";
 
 import {
+  BookingRuleError,
   createBooking as createBookingService,
   createTestimony,
 } from "@/features/booking/services/booking.service";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   acceptBooking,
   rejectBooking,
@@ -22,7 +24,6 @@ export async function createBookingAction(
   _prevState: CreateBookingState,
   formData: FormData,
 ): Promise<CreateBookingState> {
-  const studentId = formData.get("studentId") as string;
   const tutorProfileId = formData.get("tutorProfileId") as string;
   const subjectId = formData.get("subjectId") as string;
   const scheduleId = formData.get("scheduleId") as string | undefined;
@@ -32,13 +33,26 @@ export async function createBookingAction(
   const studentCount = Math.max(1, Number(formData.get("studentCount")) || 1);
   const sessionCount = Math.max(1, Number(formData.get("sessionCount")) || 1);
 
-  if (!studentId || !tutorProfileId || !subjectId || !startTime || !endTime) {
+  if (!tutorProfileId || !subjectId || !startTime || !endTime) {
     return { success: false, error: "Data pemesanan tidak lengkap." };
   }
 
   try {
+    const authClient = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await authClient.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "Kamu harus masuk terlebih dahulu untuk memesan.",
+      };
+    }
+
     const { id } = await createBookingService({
-      studentId,
+      studentId: user.id,
       tutorProfileId,
       subjectId,
       scheduleId: scheduleId || undefined,
@@ -52,6 +66,9 @@ export async function createBookingAction(
     return { success: true, bookingId: id };
   } catch (err) {
     console.error("createBookingAction error:", err);
+    if (err instanceof BookingRuleError) {
+      return { success: false, error: err.message };
+    }
     return {
       success: false,
       error: "Gagal membuat pemesanan. Silakan coba lagi.",
@@ -75,7 +92,9 @@ export async function completeBookingAction(
 ): Promise<void> {
   await completeBooking(bookingId, actor);
   revalidatePath("/booking-list");
+  revalidatePath("/tutor-dashboard");
   revalidatePath("/tutor-dashboard/bookings");
+  revalidatePath("/tutors");
 }
 
 export async function cancelBookingAction(bookingId: string): Promise<void> {

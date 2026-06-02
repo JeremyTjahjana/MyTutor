@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { normalizePortfolioImageUrl } from "@/features/tutor/utils/portfolio-url";
 
 interface PortfolioSectionProps {
   portfolioUrls: string[];
@@ -13,8 +14,19 @@ export function PortfolioSection({
   tutorName,
 }: PortfolioSectionProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const totalItems = portfolioUrls.length;
-  const activeUrl = portfolioUrls[activeIndex];
+  const imageUrls = useMemo(
+    () =>
+      portfolioUrls.flatMap((url) => {
+        try {
+          return [normalizePortfolioImageUrl(url)];
+        } catch {
+          return [];
+        }
+      }),
+    [portfolioUrls],
+  );
+  const totalItems = imageUrls.length;
+  const activeUrl = imageUrls[activeIndex];
   const hasMultipleItems = totalItems > 1;
 
   const goToPrevious = () => {
@@ -35,14 +47,14 @@ export function PortfolioSection({
         <h2 className="text-lg font-semibold text-[var(--biru)] sm:text-xl">
           Portofolio
         </h2>
-        {portfolioUrls.length > 0 ? (
+        {totalItems > 0 ? (
           <span className="rounded-full bg-[var(--biru)]/10 px-3 py-1 text-xs font-semibold text-[var(--biru)]">
-            {portfolioUrls.length} item
+            {totalItems} item
           </span>
         ) : null}
       </div>
 
-      {portfolioUrls.length === 0 ? (
+      {totalItems === 0 ? (
         <p className="mt-3 text-sm text-[var(--gelap)]/45 italic">
           Belum ada portofolio yang ditambahkan.
         </p>
@@ -94,7 +106,7 @@ export function PortfolioSection({
 
           {hasMultipleItems ? (
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              {portfolioUrls.map((url, index) => (
+              {imageUrls.map((url, index) => (
                 <button
                   key={`${url}-${index}`}
                   type="button"

@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase/client";
 
 interface AuthContextType {
   user: User | null;
+  isAuthenticated: boolean;
   isLoading: boolean;
   isApprovedTutor: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
@@ -50,6 +51,7 @@ async function loadUserProfile(authId: string): Promise<User | null> {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const syncVersionRef = useRef(0);
 
@@ -58,35 +60,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const syncUserFromAuthId = async (authId: string | null) => {
       const syncVersion = ++syncVersionRef.current;
+      if (isMounted) {
+        setIsAuthenticated(Boolean(authId));
+        setIsLoading(true);
+      }
 
       if (!authId) {
-        if (isMounted) setUser(null);
+        if (isMounted) {
+          setUser(null);
+          setIsLoading(false);
+        }
         return;
       }
 
       const profile = await loadUserProfile(authId);
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const isCurrentSession = session?.user?.id === authId;
 
       if (isMounted && syncVersion === syncVersionRef.current) {
-        setUser(isCurrentSession ? profile : null);
+        setUser(profile);
+        setIsLoading(false);
       }
     };
 
     // Check existing session on mount
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      await syncUserFromAuthId(session?.user?.id ?? null);
-      if (isMounted) setIsLoading(false);
-    });
+    void supabase.auth
+      .getSession()
+      .then(({ data: { session } }) =>
+        syncUserFromAuthId(session?.user?.id ?? null),
+      )
+      .catch(() => syncUserFromAuthId(null));
 
     // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      await syncUserFromAuthId(session?.user?.id ?? null);
-      if (isMounted) setIsLoading(false);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return;
+
+      setTimeout(() => {
+        void syncUserFromAuthId(session?.user?.id ?? null);
+      }, 0);
     });
 
     return () => {
@@ -118,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     syncVersionRef.current += 1;
+    setIsAuthenticated(false);
     setUser(null);
     await supabase.auth.signOut();
     setUser(null);
@@ -128,9 +140,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { session },
     } = await supabase.auth.getSession();
     if (session?.user) {
+      setIsAuthenticated(true);
       const profile = await loadUserProfile(session.user.id);
       setUser(profile);
     } else {
+      setIsAuthenticated(false);
       setUser(null);
     }
   }, []);
@@ -142,6 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        isAuthenticated,
         isLoading,
         isApprovedTutor,
         login,

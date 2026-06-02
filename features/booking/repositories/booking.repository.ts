@@ -17,6 +17,7 @@ export async function fetchBookingsByStudentId(
     .select(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, student_completed_at, tutor_completed_at, notes, created_at,
+       student_count, session_count,
        subjects(name),
        tutor_profiles(users!tutor_profiles_user_id_fkey(full_name, avatar_url, phone)),
        testimonies(id, rating, message, created_at)`,
@@ -53,6 +54,8 @@ export async function fetchBookingsByStudentId(
       tutorPhone: tutorUser?.phone ?? null,
       startTime: row.start_time as string,
       endTime: row.end_time as string,
+      studentCount: Number(row.student_count ?? 1),
+      sessionCount: Number(row.session_count ?? 1),
       status: row.status as Booking["status"],
       studentCompletedAt: (row.student_completed_at as string | null) ?? null,
       tutorCompletedAt: (row.tutor_completed_at as string | null) ?? null,
@@ -75,6 +78,7 @@ export async function fetchBookingsByTutorProfileId(
     .select(
       `id, student_id, tutor_profile_id, subject_id, start_time, end_time,
        status, student_completed_at, tutor_completed_at, notes, created_at,
+       student_count, session_count,
        subjects(name),
        users!bookings_student_id_fkey(full_name, avatar_url, phone),
        testimonies(id, rating, message, created_at)`,
@@ -112,6 +116,8 @@ export async function fetchBookingsByTutorProfileId(
       tutorPhone: studentUser?.phone ?? null,
       startTime: row.start_time as string,
       endTime: row.end_time as string,
+      studentCount: Number(row.student_count ?? 1),
+      sessionCount: Number(row.session_count ?? 1),
       status: row.status as Booking["status"],
       studentCompletedAt: (row.student_completed_at as string | null) ?? null,
       tutorCompletedAt: (row.tutor_completed_at as string | null) ?? null,
@@ -138,9 +144,41 @@ export type CreateBookingInput = {
   sessionCount?: number;
 };
 
+export class BookingRuleError extends Error {
+  constructor(
+    public readonly code: "SELF_BOOKING",
+    message: string,
+  ) {
+    super(message);
+    this.name = "BookingRuleError";
+  }
+}
+
 export async function insertBooking(
   input: CreateBookingInput,
 ): Promise<{ id: string }> {
+  const { data: tutorProfile, error: tutorProfileError } = await supabase
+    .from("tutor_profiles")
+    .select("user_id, cost_per_hour")
+    .eq("id", input.tutorProfileId)
+    .maybeSingle();
+
+  if (tutorProfileError) throw tutorProfileError;
+  if (!tutorProfile) {
+    throw new Error("Profil tutor tidak ditemukan.");
+  }
+  if (tutorProfile.user_id === input.studentId) {
+    throw new BookingRuleError(
+      "SELF_BOOKING",
+      "Anda tidak dapat memesan jadwal tutor milik sendiri.",
+    );
+  }
+
+  const studentCount = input.studentCount ?? 1;
+  const sessionCount = input.sessionCount ?? 1;
+  const paymentAmount =
+    Number(tutorProfile.cost_per_hour ?? 0) * studentCount * sessionCount;
+
   const { data, error } = await supabase
     .from("bookings")
     .insert({
@@ -152,13 +190,25 @@ export async function insertBooking(
       end_time: input.endTime,
       notes: input.notes ?? null,
       status: "pending",
-      student_count: input.studentCount ?? 1,
-      session_count: input.sessionCount ?? 1,
+      student_count: studentCount,
+      session_count: sessionCount,
     })
     .select("id")
     .single();
 
   if (error) throw error;
+
+  const { error: paymentError } = await supabase.from("payments").insert({
+    booking_id: data.id,
+    amount: paymentAmount,
+    status: "completed",
+  });
+
+  if (paymentError) {
+    await supabase.from("bookings").delete().eq("id", data.id);
+    throw paymentError;
+  }
+
   return { id: data.id };
 }
 
@@ -216,9 +266,17 @@ export async function updateBookingStatus(
       ? { status, student_completed_at: null, tutor_completed_at: null }
       : { status };
 
-  const { error } = await supabase.from("bookings").update(update).eq("id", bookingId);
+  const { data, error } = await supabase
+    .from("bookings")
+    .update(update)
+    .eq("id", bookingId)
+    .select("tutor_profile_id")
+    .maybeSingle();
 
   if (error) throw error;
+  if (status === "completed" && data?.tutor_profile_id) {
+    await synchronizeTutorProfileStats(data.tutor_profile_id);
+  }
 }
 
 export async function confirmBookingCompletion(
@@ -254,16 +312,88 @@ export async function confirmBookingCompletion(
     return;
   }
 
-  const { error } = await supabase
+  const { data: completedBooking, error } = await supabase
     .from("bookings")
     .update({ status: "completed" })
     .eq("id", bookingId)
-    .eq("status", "accepted");
+    .eq("status", "accepted")
+    .select("tutor_profile_id")
+    .maybeSingle();
 
   if (error) throw error;
+  if (completedBooking?.tutor_profile_id) {
+    await synchronizeTutorProfileStats(completedBooking.tutor_profile_id);
+  }
 }
 
 // ─── Slot Status for Schedule Page
+
+export type TutorProfileStats = {
+  totalSessions: number;
+  totalEarnings: number;
+};
+
+export async function calculateTutorProfileStats(
+  tutorProfileId: string,
+  fallbackCostPerHour: number,
+): Promise<TutorProfileStats> {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("student_count, session_count, payments(amount, status)")
+    .eq("tutor_profile_id", tutorProfileId)
+    .eq("status", "completed");
+
+  if (error) throw error;
+
+  return (data ?? []).reduce<TutorProfileStats>(
+    (stats, booking) => {
+      const studentCount = Number(booking.student_count ?? 1);
+      const sessionCount = Number(booking.session_count ?? 1);
+      const payment = one(
+        booking.payments as unknown as
+          | { amount: number | string; status: string }[]
+          | { amount: number | string; status: string }
+          | null,
+      );
+      const completedPaymentAmount =
+        payment?.status === "completed" ? Number(payment.amount) : null;
+
+      stats.totalSessions += sessionCount;
+      stats.totalEarnings += Number.isFinite(completedPaymentAmount)
+        ? (completedPaymentAmount ?? 0)
+        : fallbackCostPerHour * studentCount * sessionCount;
+      return stats;
+    },
+    { totalSessions: 0, totalEarnings: 0 },
+  );
+}
+
+export async function synchronizeTutorProfileStats(
+  tutorProfileId: string,
+): Promise<TutorProfileStats> {
+  const { data: profile, error: profileError } = await supabase
+    .from("tutor_profiles")
+    .select("cost_per_hour")
+    .eq("id", tutorProfileId)
+    .single();
+
+  if (profileError) throw profileError;
+
+  const stats = await calculateTutorProfileStats(
+    tutorProfileId,
+    Number(profile.cost_per_hour ?? 0),
+  );
+  const { error } = await supabase
+    .from("tutor_profiles")
+    .update({
+      total_sessions: stats.totalSessions,
+      total_earnings: stats.totalEarnings,
+    })
+    .eq("id", tutorProfileId);
+
+  if (error) throw error;
+  return stats;
+}
 
 export type SlotStatus = {
   pendingCount: number;

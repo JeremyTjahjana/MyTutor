@@ -34,6 +34,8 @@ export interface Booking {
   tutorPhone: string | null;
   startTime: string; // ISO timestamp
   endTime: string;
+  studentCount: number;
+  sessionCount: number;
   status: BookingStatus;
   studentCompletedAt: string | null;
   tutorCompletedAt: string | null;

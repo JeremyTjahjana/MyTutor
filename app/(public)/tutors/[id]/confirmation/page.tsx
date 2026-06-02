@@ -50,7 +50,9 @@ export default function ConfirmationPage() {
 
   const [note, setNote] = useState("");
   const [costPerHour, setCostPerHour] = useState<number | null>(null);
+  const [tutorUserId, setTutorUserId] = useState<string | null>(null);
   const [loadingPrice, setLoadingPrice] = useState(true);
+  const isOwnTutorProfile = Boolean(user && tutorUserId === user.id);
 
   // Fetch tutor's cost_per_hour
   useEffect(() => {
@@ -61,10 +63,11 @@ export default function ConfirmationPage() {
     (async () => {
       const { data } = await supabase
         .from("tutor_profiles")
-        .select("cost_per_hour")
+        .select("cost_per_hour, user_id")
         .eq("id", tutorProfileId)
         .single();
       setCostPerHour(data?.cost_per_hour ?? 0);
+      setTutorUserId(data?.user_id ?? null);
       setLoadingPrice(false);
     })();
   }, [tutorProfileId]);
@@ -224,9 +227,14 @@ export default function ConfirmationPage() {
           </p>
         )}
 
+        {isOwnTutorProfile && (
+          <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+            Anda tidak dapat memesan jadwal tutor milik sendiri.
+          </p>
+        )}
+
         {/* Actions */}
         <form action={formAction} className="flex flex-col gap-3">
-          <input type="hidden" name="studentId" value={user?.id ?? ""} />
           <input type="hidden" name="tutorProfileId" value={tutorProfileId} />
           <input type="hidden" name="subjectId" value={subjectId} />
           <input type="hidden" name="startTime" value={startTime} />
@@ -237,7 +245,7 @@ export default function ConfirmationPage() {
 
           <button
             type="submit"
-            disabled={isPending || !user}
+            disabled={isPending || !user || loadingPrice || isOwnTutorProfile}
             className="btn-primary w-full"
           >
             {isPending ? (
@@ -245,6 +253,8 @@ export default function ConfirmationPage() {
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Memproses...
               </>
+            ) : isOwnTutorProfile ? (
+              "Tidak Dapat Memesan Jadwal Sendiri"
             ) : (
               "Pesan Sekarang"
             )}

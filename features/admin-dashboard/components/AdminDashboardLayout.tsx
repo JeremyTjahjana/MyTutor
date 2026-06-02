@@ -38,7 +38,7 @@ export default function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,12 +47,12 @@ export default function AdminDashboardLayout({
 
   useEffect(() => {
     if (isLoading) return;
-    if (!user) {
+    if (!isAuthenticated) {
       router.replace("/login");
     } else if (!canAccessDashboard) {
       router.replace("/");
     }
-  }, [canAccessDashboard, isLoading, router, user]);
+  }, [canAccessDashboard, isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     const onResize = () => {

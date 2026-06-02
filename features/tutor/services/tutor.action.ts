@@ -6,12 +6,16 @@ import {
   getTutorProfileByUserId,
   getSchedulesByTutorProfileId,
 } from "@/features/tutor/services/tutor.service";
-import { listTutorBookings } from "@/features/booking/services/booking.service";
+import {
+  getTutorProfileStats,
+  listTutorBookings,
+} from "@/features/booking/services/booking.service";
 import {
   linkTutorSubject,
   unlinkTutorSubject,
   resolveOrCreateSubjectIdByName,
 } from "@/features/tutor/repositories/tutor.repository";
+import { normalizePortfolioImageUrl } from "@/features/tutor/utils/portfolio-url";
 
 // ─── Get Dashboard Data ───────────────────────────────────────────────────────
 
@@ -28,11 +32,19 @@ export async function getDashboardDataAction(userId: string) {
 
     // Get bookings
     const bookings = await listTutorBookings(profile.id);
+    const stats = await getTutorProfileStats(
+      profile.id,
+      Number(profile.cost_per_hour ?? 0),
+    );
 
     return {
       success: true,
       data: {
-        profile,
+        profile: {
+          ...profile,
+          total_sessions: stats.totalSessions,
+          total_earnings: stats.totalEarnings,
+        },
         schedules,
         bookings,
       },
@@ -65,20 +77,14 @@ function parsePortfolioUrls(raw: FormDataEntryValue | null): string[] {
     .map((value) => value.trim())
     .filter(Boolean);
 
-  const uniqueUrls = Array.from(new Set(urls)).slice(0, 12);
-
-  for (const url of uniqueUrls) {
-    try {
-      const parsed = new URL(url);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        throw new Error("Unsupported protocol");
-      }
-    } catch {
-      throw new Error("Portfolio harus berisi URL gambar yang valid.");
-    }
+  try {
+    return Array.from(new Set(urls.map(normalizePortfolioImageUrl))).slice(
+      0,
+      12,
+    );
+  } catch {
+    throw new Error("Portfolio harus berisi URL gambar yang valid.");
   }
-
-  return uniqueUrls;
 }
 
 async function requireMatchingUser(userId: string) {

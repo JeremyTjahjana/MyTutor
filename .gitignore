@@ -43,9 +43,11 @@ next-env.d.ts
 .env.local
 
 # database migrations and SQL files
-/supabase/migrations/
+/supabase/migrations/*
 /supabase/*.sql
 *.sql
+!/supabase/migrations/20260603_prevent_self_booking.sql
+!/supabase/migrations/20260603_sync_tutor_profile_stats.sql
 
 /database
 /database/subjects_and_tutors_subjects.pgsql
