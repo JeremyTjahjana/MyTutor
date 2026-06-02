@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -10,19 +11,30 @@ export function NavbarFooterWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [clientPathname, setClientPathname] = useState("");
+
+  useEffect(() => {
+    setClientPathname(pathname);
+  }, [pathname]);
+
   const isTutorDashboard =
-    pathname === "/tutor-dashboard" || pathname.startsWith("/tutor-dashboard/");
+    clientPathname === "/tutor-dashboard" ||
+    clientPathname.startsWith("/tutor-dashboard/");
   const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname.startsWith("/auth/callback");
-  const isAuthCallback = pathname.startsWith("/auth/callback");
+    clientPathname === "/login" ||
+    clientPathname === "/signup" ||
+    clientPathname.startsWith("/auth/callback");
+  const isAuthCallback = clientPathname.startsWith("/auth/callback");
 
   return (
     <>
-      {!isTutorDashboard && !isAuthCallback && <Navbar />}
+      {!isTutorDashboard && !isAuthCallback && (
+        <Navbar pathname={clientPathname} />
+      )}
       {children}
-      {!isTutorDashboard && !isAuthPage && <Footer />}
+      {!isTutorDashboard && !isAuthPage && (
+        <Footer pathname={clientPathname} />
+      )}
     </>
   );
 }

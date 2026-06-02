@@ -1,4 +1,4 @@
-import AdminTutorReview from "../_components/AdminTutorReview";
+import AdminTutorReview from "@/features/admin-dashboard/components/AdminTutorReview";
 
 export default function PendaftaranPage() {
   return <AdminTutorReview mode="pendaftaran" />;

@@ -1,4 +1,4 @@
-import AdminTutorReview from "../_components/AdminTutorReview";
+import AdminTutorReview from "@/features/admin-dashboard/components/AdminTutorReview";
 
 export default function ListTutorsPage() {
   return <AdminTutorReview mode="list-tutors" />;

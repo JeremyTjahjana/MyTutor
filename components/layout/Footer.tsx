@@ -2,12 +2,9 @@
 
 import React from "react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { assets, social } from "@/assets/assets";
 
-const Footer = () => {
-  const pathname = usePathname();
-
+const Footer = ({ pathname }: { pathname: string }) => {
   if (
     pathname === "/tutor-dashboard" ||
     pathname.startsWith("/tutor-dashboard/")

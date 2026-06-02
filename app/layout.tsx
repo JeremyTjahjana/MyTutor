@@ -1,12 +1,7 @@
-"use client";
-
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { NavbarFooterWrapper } from "@/components/layout/NavbarFooterWrapper";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,28 +18,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isTutorDashboard =
-    pathname === "/tutor-dashboard" || pathname.startsWith("/tutor-dashboard/");
-  const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname.startsWith("/auth/callback");
-  const isAuthCallback = pathname.startsWith("/auth/callback");
-  const showNavbar = !isTutorDashboard && !isAuthCallback;
-  const showFooter = !isTutorDashboard && !isAuthPage;
-
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body suppressHydrationWarning className="min-h-full flex flex-col">
         <AuthProvider>
-          {showNavbar && <Navbar />}
-          {children}
-          {showFooter && <Footer />}
+          <NavbarFooterWrapper>{children}</NavbarFooterWrapper>
         </AuthProvider>
       </body>
     </html>

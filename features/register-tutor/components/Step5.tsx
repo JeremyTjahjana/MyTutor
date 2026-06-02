@@ -1,6 +1,5 @@
 "use client";
 
-import { FormEvent } from "react";
 import { FormData } from "../types";
 
 interface Step5Props {
@@ -23,8 +22,8 @@ export default function Step5({ formData, onUploadContract, isUploading }: Step5
 
       <div className="flex flex-col sm:flex-row gap-3 items-start">
         <a
-          href="/contract-template.pdf"
-          download
+          href="/api/register-tutor/contract-template"
+          download="template-kontrak-tutor-mytutor-draft.pdf"
           className={`btn-secondary px-4 py-2 rounded-lg ${isUploading ? "pointer-events-none opacity-50" : ""}`}
           aria-disabled={isUploading}
         >
