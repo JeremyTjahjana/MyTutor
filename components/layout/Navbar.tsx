@@ -235,7 +235,7 @@ const Navbar = ({ pathname }: { pathname: string }) => {
               </MobileNavLink>
             )}
 
-            {user?.role !== "tutor" && (
+            {user?.role !== "tutor" && user?.role !== "admin" && (
               <MobileNavLink
                 href="/register-tutor"
                 active={isActiveRoute("/register-tutor")}
