@@ -1,6 +1,7 @@
 import { TimeSlotButton } from "./TimeSlotButton";
 import type { Schedule } from "@/types/tutor";
-import { DAY_NAMES, nextOccurrence } from "@/types/tutor";
+import { DAY_NAMES } from "@/features/tutor/constants";
+import { nextOccurrence } from "@/features/tutor/utils/schedule";
 
 interface TimeSlotsSection {
   schedules: Schedule[];

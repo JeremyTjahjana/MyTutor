@@ -4,7 +4,8 @@ import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import type { TutorDetail, Schedule } from "@/types/tutor";
-import { DAY_NAMES, nextOccurrence } from "@/types/tutor";
+import { DAY_NAMES } from "@/features/tutor/constants";
+import { nextOccurrence } from "@/features/tutor/utils/schedule";
 import type { SlotStatus } from "@/features/booking/repositories/booking.repository";
 import {
   ScheduleHeader,

@@ -70,6 +70,47 @@ export async function fetchBookingsByStudentId(
 
 // ─── Tutor Bookings
 
+export async function cancelConflictingPendingBookingsForStudent(
+  studentId: string,
+): Promise<void> {
+  const { data: pending, error: pendingError } = await supabase
+    .from("bookings")
+    .select("id, tutor_profile_id, schedule_id, start_time")
+    .eq("student_id", studentId)
+    .eq("status", "pending");
+
+  if (pendingError) throw pendingError;
+  if (!pending?.length) return;
+
+  const conflictingIds: string[] = [];
+
+  for (const booking of pending) {
+    let query = supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("tutor_profile_id", booking.tutor_profile_id)
+      .eq("status", "accepted")
+      .neq("id", booking.id);
+
+    query = booking.schedule_id
+      ? query.eq("schedule_id", booking.schedule_id)
+      : query.eq("start_time", booking.start_time);
+
+    const { count, error } = await query;
+    if (error) throw error;
+    if ((count ?? 0) > 0) conflictingIds.push(booking.id);
+  }
+
+  if (conflictingIds.length === 0) return;
+
+  const { error } = await supabase
+    .from("bookings")
+    .update({ status: "cancelled" })
+    .in("id", conflictingIds);
+
+  if (error) throw error;
+}
+
 export async function fetchBookingsByTutorProfileId(
   tutorProfileId: string,
 ): Promise<Booking[]> {

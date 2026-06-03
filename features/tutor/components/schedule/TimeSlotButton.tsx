@@ -1,5 +1,5 @@
 import type { Schedule } from "@/types/tutor";
-import { DAY_NAMES } from "@/types/tutor";
+import { DAY_NAMES } from "@/features/tutor/constants";
 
 interface TimeSlotButtonProps {
   schedule: Schedule;

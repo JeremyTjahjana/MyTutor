@@ -2,7 +2,7 @@
 
 import { supabase } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
-import { DAY_NUMBERS } from "@/types/tutor";
+import { DAY_NUMBERS } from "@/features/tutor/constants";
 
 /** The client-facing anon key client — used here to call auth.signUp */
 const authClient = createClient(

@@ -1,4 +1,5 @@
 import {
+  cancelConflictingPendingBookingsForStudent,
   fetchBookingsByStudentId,
   fetchBookingsByTutorProfileId,
   insertBooking,
@@ -10,6 +11,7 @@ import {
   type CreateBookingInput,
   type CreateTestimonyInput,
 } from "../repositories/booking.repository";
+import { fetchTutorProfileByUserId } from "@/features/tutor/repositories/tutor.repository";
 import type { Booking } from "@/types/user";
 
 export { BookingRuleError };
@@ -20,10 +22,37 @@ export async function listStudentBookings(
   return fetchBookingsByStudentId(studentId);
 }
 
+export async function listStudentBookingsWithConflictSync(
+  studentId: string,
+): Promise<Booking[]> {
+  await cancelConflictingPendingBookingsForStudent(studentId);
+  return listStudentBookings(studentId);
+}
+
 export async function listTutorBookings(
   tutorProfileId: string,
 ): Promise<Booking[]> {
   return fetchBookingsByTutorProfileId(tutorProfileId);
+}
+
+export async function listBookingsForDashboardRequest({
+  studentId,
+  tutorUserId,
+}: {
+  studentId?: string | null;
+  tutorUserId?: string | null;
+}): Promise<Booking[]> {
+  if (studentId) {
+    return listStudentBookingsWithConflictSync(studentId);
+  }
+
+  if (tutorUserId) {
+    const profile = await fetchTutorProfileByUserId(tutorUserId);
+    if (!profile) return [];
+    return listTutorBookings(profile.id);
+  }
+
+  throw new Error("BOOKING_FILTER_REQUIRED");
 }
 
 export async function createBooking(
