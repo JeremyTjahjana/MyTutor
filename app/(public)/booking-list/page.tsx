@@ -7,6 +7,8 @@ import type { Booking } from "@/types/user";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
+const ITEMS_PER_PAGE = 9;
+
 async function fetchStudentBookings(studentId: string): Promise<Booking[]> {
   // Import here to avoid bundling server code in client
   const res = await fetch(`/api/bookings?studentId=${studentId}`);
@@ -18,6 +20,12 @@ const BookingListPage = () => {
   const { user, isLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetching, setFetching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(bookings.length / ITEMS_PER_PAGE);
+  const paginatedBookings = bookings.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -26,6 +34,12 @@ const BookingListPage = () => {
       .then(setBookings)
       .finally(() => setFetching(false));
   }, [user]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   if (isLoading || fetching) {
     return (
@@ -64,19 +78,67 @@ const BookingListPage = () => {
           </Link>
         </div>
       ) : (
-        <div className="mt-6 grid w-full grid-cols-1 justify-items-center gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {bookings.map((booking) => (
-            <BookingListCard
-              key={booking.id}
-              booking={booking}
-              onBookingUpdated={() => {
-                if (user) {
-                  fetchStudentBookings(user.id).then(setBookings);
+        <>
+          <div className="mt-6 grid w-full grid-cols-1 justify-items-center gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedBookings.map((booking) => (
+              <BookingListCard
+                key={booking.id}
+                booking={booking}
+                onBookingUpdated={() => {
+                  if (user) {
+                    fetchStudentBookings(user.id).then(setBookings);
+                  }
+                }}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-[var(--gelap)] shadow-sm transition hover:border-[var(--biru)] hover:text-[var(--biru)] disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() =>
+                  setCurrentPage((page) => Math.max(1, page - 1))
                 }
-              }}
-            />
-          ))}
-        </div>
+                disabled={currentPage === 1}
+                aria-label="Halaman sebelumnya"
+              >
+                ‹
+              </button>
+
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold shadow-sm transition ${
+                      currentPage === page
+                        ? "bg-[var(--biru)] text-white"
+                        : "border border-slate-200 bg-white text-[var(--gelap)] hover:border-[var(--biru)] hover:text-[var(--biru)]"
+                    }`}
+                    onClick={() => setCurrentPage(page)}
+                    aria-current={currentPage === page ? "page" : undefined}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              <button
+                type="button"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-[var(--gelap)] shadow-sm transition hover:border-[var(--biru)] hover:text-[var(--biru)] disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+                disabled={currentPage === totalPages}
+                aria-label="Halaman berikutnya"
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </>
       )}
     </main>
   );
