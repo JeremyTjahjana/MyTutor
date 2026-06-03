@@ -15,7 +15,6 @@ import {
   unlinkTutorSubject,
   resolveOrCreateSubjectIdByName,
 } from "@/features/tutor/repositories/tutor.repository";
-import { normalizePortfolioImageUrl } from "@/features/tutor/utils/portfolio-url";
 
 // ─── Get Dashboard Data ───────────────────────────────────────────────────────
 
@@ -60,32 +59,19 @@ export async function getDashboardDataAction(userId: string) {
 export type UpdateProfileState = {
   success: boolean;
   error?: string;
+  portfolioUrls?: string[];
 };
 
 const AVATAR_BUCKET = "avatars";
+const PORTFOLIO_BUCKET = "tutor-portfolios";
+const PORTFOLIO_MAX_BYTES = 5 * 1024 * 1024;
+const PORTFOLIO_MAX_IMAGES = 6;
+const PORTFOLIO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export type UploadAvatarState = {
   success: boolean;
   error?: string;
 };
-
-function parsePortfolioUrls(raw: FormDataEntryValue | null): string[] {
-  if (typeof raw !== "string") return [];
-
-  const urls = raw
-    .split(/\r?\n|,/)
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-  try {
-    return Array.from(new Set(urls.map(normalizePortfolioImageUrl))).slice(
-      0,
-      12,
-    );
-  } catch {
-    throw new Error("Portfolio harus berisi URL gambar yang valid.");
-  }
-}
 
 async function requireMatchingUser(userId: string) {
   const authClient = await createSupabaseServerClient();
@@ -284,6 +270,106 @@ async function updateTutorAvatar(userId: string, file: File): Promise<void> {
   if (dbError) throw dbError;
 }
 
+function parseCurrentPortfolioUrls(raw: FormDataEntryValue | null): string[] {
+  if (typeof raw !== "string") return [];
+  return raw
+    .split(/\r?\n/)
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
+async function ensurePortfolioImageBucket(): Promise<void> {
+  const config = {
+    public: true,
+    allowedMimeTypes: PORTFOLIO_ALLOWED_TYPES,
+    fileSizeLimit: PORTFOLIO_MAX_BYTES,
+  };
+
+  const { error: updateError } = await supabase.storage.updateBucket(
+    PORTFOLIO_BUCKET,
+    config,
+  );
+
+  if (!updateError) return;
+
+  const bucketMayBeMissing =
+    updateError.message?.toLowerCase().includes("bucket") ||
+    updateError.message?.toLowerCase().includes("not found");
+
+  if (!bucketMayBeMissing) throw updateError;
+
+  const { error: createError } = await supabase.storage.createBucket(
+    PORTFOLIO_BUCKET,
+    config,
+  );
+
+  if (
+    createError &&
+    !createError.message?.toLowerCase().includes("already exists")
+  ) {
+    throw createError;
+  }
+}
+
+async function uploadTutorPortfolioImages(
+  userId: string,
+  files: File[],
+): Promise<string[]> {
+  const validFiles = files.filter((file) => file.size > 0);
+
+  if (validFiles.length === 0) return [];
+  if (validFiles.length > PORTFOLIO_MAX_IMAGES) {
+    throw new Error(
+      `Portfolio maksimal ${PORTFOLIO_MAX_IMAGES} gambar. Pilih gambar terbaik agar halaman tetap ringan.`,
+    );
+  }
+
+  const totalSize = validFiles.reduce((sum, file) => sum + file.size, 0);
+  if (totalSize > PORTFOLIO_MAX_BYTES) {
+    throw new Error(
+      "Total ukuran gambar portfolio maksimal 5 MB. Coba kompres gambar atau pilih lebih sedikit gambar.",
+    );
+  }
+
+  const invalidFile = validFiles.find(
+    (file) => !PORTFOLIO_ALLOWED_TYPES.includes(file.type),
+  );
+  if (invalidFile) {
+    throw new Error("Portfolio hanya menerima gambar JPG, PNG, atau WebP.");
+  }
+
+  const urls: string[] = [];
+  await ensurePortfolioImageBucket();
+
+  for (const [index, file] of validFiles.entries()) {
+    const uniqueId = `${Date.now()}-${index + 1}`;
+    const ext =
+      file.type === "image/png"
+        ? "png"
+        : file.type === "image/webp"
+          ? "webp"
+          : "jpg";
+    const objectPath = `${userId}/portfolio-${uniqueId}.${ext}`;
+    const bytes = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await supabase.storage
+      .from(PORTFOLIO_BUCKET)
+      .upload(objectPath, bytes, {
+        contentType: file.type,
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(PORTFOLIO_BUCKET).getPublicUrl(objectPath);
+
+    urls.push(`${publicUrl}?v=${Date.now()}`);
+  }
+
+  return urls;
+}
 export async function updateTutorProfileAction(
   _prevState: UpdateProfileState,
   formData: FormData,
@@ -295,6 +381,12 @@ export async function updateTutorProfileAction(
   const experience = formData.get("experience") as string;
   const costPerHour = Number(formData.get("costPerHour"));
   const avatar = formData.get("avatar");
+  const portfolioImages = formData
+    .getAll("portfolioImages")
+    .filter((file): file is File => file instanceof File);
+  const currentPortfolioUrls = parseCurrentPortfolioUrls(
+    formData.get("currentPortfolioUrls"),
+  );
 
   if (!userId) return { success: false, error: "User tidak ditemukan." };
   const authUser = await requireMatchingUser(userId);
@@ -310,7 +402,21 @@ export async function updateTutorProfileAction(
     : 0;
 
   try {
-    const portfolioUrls = parsePortfolioUrls(formData.get("portfolioUrls"));
+    let portfolioUrls = currentPortfolioUrls;
+    if (portfolioImages.some((file) => file.size > 0)) {
+      const newImageCount = portfolioImages.filter((file) => file.size > 0).length;
+      if (currentPortfolioUrls.length + newImageCount > PORTFOLIO_MAX_IMAGES) {
+        throw new Error(
+          `Portfolio maksimal ${PORTFOLIO_MAX_IMAGES} gambar. Hapus atau kurangi pilihan gambar terlebih dahulu.`,
+        );
+      }
+
+      const newPortfolioUrls = await uploadTutorPortfolioImages(
+        userId,
+        portfolioImages,
+      );
+      portfolioUrls = [...currentPortfolioUrls, ...newPortfolioUrls];
+    }
 
     // Update users table
     const { error: userError } = await supabase
@@ -346,7 +452,7 @@ export async function updateTutorProfileAction(
     revalidatePath("/tutor-dashboard");
     revalidatePath("/tutors");
     revalidatePath(`/tutors/${updatedProfile.id}`);
-    return { success: true };
+    return { success: true, portfolioUrls };
   } catch (err) {
     console.error("updateTutorProfileAction error:", err);
     return {

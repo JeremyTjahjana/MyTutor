@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useRef, useActionState } from "react";
-import { Loader2, User, ImageIcon } from "lucide-react";
+import { Loader2, User, ImageIcon, X } from "lucide-react";
 import {
   updateTutorProfileAction,
   type UpdateProfileState,
@@ -10,6 +10,17 @@ import {
 import Image from "next/image";
 
 const initialProfileState: UpdateProfileState = { success: false };
+const PORTFOLIO_MAX_BYTES = 5 * 1024 * 1024;
+const PORTFOLIO_MAX_IMAGES = 6;
+const PORTFOLIO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function isImageUrl(url: string) {
+  try {
+    return /\.(jpe?g|png|webp)$/i.test(new URL(url).pathname);
+  } catch {
+    return false;
+  }
+}
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -17,7 +28,12 @@ export default function ProfilePage() {
   const [imageError, setImageError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hasSelectedAvatar, setHasSelectedAvatar] = useState(false);
+  const [selectedPortfolioSummary, setSelectedPortfolioSummary] = useState("");
+  const [portfolioFileError, setPortfolioFileError] = useState<string | null>(
+    null,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const portfolioInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -26,7 +42,7 @@ export default function ProfilePage() {
     experience: "",
     costPerHour: "",
     bio: "",
-    portfolioUrls: "",
+    portfolioUrls: [] as string[],
   });
 
   const [profileState, profileFormAction, profilePending] = useActionState(
@@ -56,8 +72,8 @@ export default function ProfilePage() {
               : "",
             bio: data.profile.bio ?? "",
             portfolioUrls: Array.isArray(data.profile.portfolio_urls)
-              ? data.profile.portfolio_urls.join("\n")
-              : "",
+              ? data.profile.portfolio_urls.filter(isImageUrl)
+              : [],
           }));
         }
         setProfileLoaded(true);
@@ -67,15 +83,22 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profileState.success) {
+      setFormData((prev) => ({
+        ...prev,
+        portfolioUrls: profileState.portfolioUrls ?? prev.portfolioUrls,
+      }));
       setPreviewUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return null;
       });
       setHasSelectedAvatar(false);
+      setSelectedPortfolioSummary("");
+      setPortfolioFileError(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (portfolioInputRef.current) portfolioInputRef.current.value = "";
       void refreshUser();
     }
-  }, [profileState.success, refreshUser]);
+  }, [profileState.portfolioUrls, profileState.success, refreshUser]);
 
   useEffect(() => {
     setImageError(false);
@@ -107,6 +130,55 @@ export default function ProfilePage() {
       if (prev) URL.revokeObjectURL(prev);
       return url;
     });
+  };
+
+  const onPortfolioImagesPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    setPortfolioFileError(null);
+    setSelectedPortfolioSummary("");
+
+    if (files.length === 0) return;
+
+    const totalImageCount = formData.portfolioUrls.length + files.length;
+    if (totalImageCount > PORTFOLIO_MAX_IMAGES) {
+      setPortfolioFileError(
+        `Portfolio maksimal ${PORTFOLIO_MAX_IMAGES} gambar. Saat ini sudah ada ${formData.portfolioUrls.length} gambar, jadi Anda hanya bisa menambahkan ${Math.max(0, PORTFOLIO_MAX_IMAGES - formData.portfolioUrls.length)} gambar lagi.`,
+      );
+      e.target.value = "";
+      return;
+    }
+
+    const invalidFile = files.find(
+      (file) => !PORTFOLIO_ALLOWED_TYPES.includes(file.type),
+    );
+    if (invalidFile) {
+      setPortfolioFileError("Portfolio hanya menerima gambar JPG, PNG, atau WebP.");
+      e.target.value = "";
+      return;
+    }
+
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > PORTFOLIO_MAX_BYTES) {
+      setPortfolioFileError(
+        "Total ukuran gambar portfolio maksimal 5 MB. Coba kompres gambar atau pilih lebih sedikit gambar.",
+      );
+      e.target.value = "";
+      return;
+    }
+
+    setSelectedPortfolioSummary(
+      `${files.length} gambar baru dipilih (${(totalSize / (1024 * 1024)).toFixed(2)} MB)`,
+    );
+  };
+
+  const removePortfolioImage = (indexToRemove: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      portfolioUrls: prev.portfolioUrls.filter(
+        (_, index) => index !== indexToRemove,
+      ),
+    }));
+    setPortfolioFileError(null);
   };
 
   useEffect(() => {
@@ -157,6 +229,11 @@ export default function ProfilePage() {
       {/* Profile form */}
       <form action={profileFormAction}>
         <input type="hidden" name="userId" value={user?.id ?? ""} />
+        <input
+          type="hidden"
+          name="currentPortfolioUrls"
+          value={formData.portfolioUrls.join("\n")}
+        />
 
         <section className="rounded-2xl border border-[var(--gelap)]/10 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-lg font-semibold text-[var(--gelap)]">
@@ -312,37 +389,90 @@ export default function ProfilePage() {
           </div>
 
           <div className="mt-8 border-t border-[var(--gelap)]/10 pt-8">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <label className="block text-sm font-medium text-[var(--gelap)]">
-                  Portfolio
-                </label>
-                <p className="mt-1 text-sm text-[var(--gelap)]/55">
-                  Tambahkan URL gambar publik atau link share Google Drive, satu
-                  URL per baris. Maksimal 12 item.
-                </p>
-              </div>
-            </div>
-            <textarea
-              name="portfolioUrls"
-              value={formData.portfolioUrls}
-              onChange={handleChange}
-              rows={4}
-              placeholder={`https://drive.google.com/file/d/FILE_ID/view?usp=sharing\nhttps://example.com/portfolio-2.webp`}
-              className="mt-3 w-full rounded-xl border border-[var(--gelap)]/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--biru)]/25"
-            />
-            <p className="mt-2 text-xs text-[var(--gelap)]/45">
-              Untuk Google Drive, ubah akses setiap gambar menjadi
-              &quot;Anyone with the link&quot; sebagai Viewer. PDF sebaiknya
-              diubah menjadi beberapa gambar agar tampil bagus di carousel
-              publik.
+            <label className="block text-sm font-medium text-[var(--gelap)]">
+              Portfolio Images
+            </label>
+            <p className="mt-1 text-sm text-[var(--gelap)]/55">
+              Upload beberapa gambar portfolio. JPG, PNG, atau WebP. Total
+              maksimal 5 MB.
             </p>
+
+            <div className="mt-4 rounded-2xl border border-dashed border-[var(--gelap)]/20 bg-[var(--putih)] p-4">
+              <input
+                ref={portfolioInputRef}
+                type="file"
+                name="portfolioImages"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="sr-only"
+                id="portfolio-images-input"
+                onChange={onPortfolioImagesPicked}
+              />
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--biru)]/10 text-[var(--biru)]">
+                    <ImageIcon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[var(--gelap)]">
+                      {selectedPortfolioSummary ||
+                        (formData.portfolioUrls.length > 0
+                          ? `${formData.portfolioUrls.length} gambar portfolio tersimpan`
+                          : "Belum ada gambar portfolio")}
+                    </p>
+                    <p className="text-xs text-[var(--gelap)]/50">
+                      Gambar baru akan ditambahkan ke portfolio lama.
+                    </p>
+                  </div>
+                </div>
+
+                <label
+                  htmlFor="portfolio-images-input"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-[var(--gelap)]/15 bg-white px-4 py-2.5 text-sm font-medium text-[var(--gelap)] hover:bg-[var(--gelap)]/[0.04]"
+                >
+                  Tambah Gambar
+                </label>
+              </div>
+
+              {formData.portfolioUrls.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {formData.portfolioUrls.map((url, index) => (
+                    <div
+                      key={`${url}-${index}`}
+                      className="relative overflow-hidden rounded-xl border border-[var(--gelap)]/10 bg-white"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => removePortfolioImage(index)}
+                        className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white shadow-sm transition hover:bg-red-600"
+                        aria-label={`Hapus portfolio ${index + 1}`}
+                        title="Hapus gambar"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={url}
+                        alt={`Portfolio tersimpan ${index + 1}`}
+                        className="aspect-[4/3] w-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {portfolioFileError && (
+                <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {portfolioFileError}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <button
               type="submit"
-              disabled={profilePending}
+              disabled={profilePending || Boolean(portfolioFileError)}
               className="btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold disabled:opacity-60"
             >
               {profilePending ? (

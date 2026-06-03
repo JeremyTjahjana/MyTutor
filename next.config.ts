@@ -15,7 +15,7 @@ const supabaseHost = supabaseStorageHost();
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: "5mb",
+      bodySizeLimit: "6mb",
     },
   },
   images: {

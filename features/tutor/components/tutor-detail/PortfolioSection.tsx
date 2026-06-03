@@ -1,43 +1,39 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
-import { normalizePortfolioImageUrl } from "@/features/tutor/utils/portfolio-url";
+import { useState } from "react";
 
 interface PortfolioSectionProps {
   portfolioUrls: string[];
   tutorName: string;
 }
 
+function isImagePortfolioUrl(url: string) {
+  try {
+    return /\.(jpe?g|png|webp)$/i.test(new URL(url).pathname);
+  } catch {
+    return false;
+  }
+}
+
 export function PortfolioSection({
   portfolioUrls,
   tutorName,
 }: PortfolioSectionProps) {
+  const imageUrls = portfolioUrls.filter(isImagePortfolioUrl);
   const [activeIndex, setActiveIndex] = useState(0);
-  const imageUrls = useMemo(
-    () =>
-      portfolioUrls.flatMap((url) => {
-        try {
-          return [normalizePortfolioImageUrl(url)];
-        } catch {
-          return [];
-        }
-      }),
-    [portfolioUrls],
-  );
-  const totalItems = imageUrls.length;
   const activeUrl = imageUrls[activeIndex];
-  const hasMultipleItems = totalItems > 1;
+  const hasMultipleItems = imageUrls.length > 1;
 
   const goToPrevious = () => {
     setActiveIndex((current) =>
-      current === 0 ? totalItems - 1 : current - 1,
+      current === 0 ? imageUrls.length - 1 : current - 1,
     );
   };
 
   const goToNext = () => {
     setActiveIndex((current) =>
-      current >= totalItems - 1 ? 0 : current + 1,
+      current >= imageUrls.length - 1 ? 0 : current + 1,
     );
   };
 
@@ -47,20 +43,20 @@ export function PortfolioSection({
         <h2 className="text-lg font-semibold text-[var(--biru)] sm:text-xl">
           Portofolio
         </h2>
-        {totalItems > 0 ? (
+        {imageUrls.length > 0 ? (
           <span className="rounded-full bg-[var(--biru)]/10 px-3 py-1 text-xs font-semibold text-[var(--biru)]">
-            {totalItems} item
+            {imageUrls.length} gambar
           </span>
         ) : null}
       </div>
 
-      {totalItems === 0 ? (
+      {imageUrls.length === 0 ? (
         <p className="mt-3 text-sm text-[var(--gelap)]/45 italic">
           Belum ada portofolio yang ditambahkan.
         </p>
       ) : (
         <>
-          <div className="relative mx-auto mt-4 max-w-3xl overflow-hidden rounded-2xl border border-[var(--gelap)]/10 bg-[#F0ECFF]">
+          <div className="relative mx-auto mt-4 max-w-3xl overflow-hidden rounded-2xl border border-[var(--gelap)]/10 bg-[var(--putih)]">
             <a
               href={activeUrl}
               target="_blank"
@@ -71,11 +67,8 @@ export function PortfolioSection({
               <img
                 src={activeUrl}
                 alt={`Portfolio ${activeIndex + 1} ${tutorName}`}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.01]"
               />
-              <span className="absolute bottom-4 left-4 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
-                Buka gambar
-              </span>
             </a>
 
             {hasMultipleItems ? (
@@ -100,7 +93,7 @@ export function PortfolioSection({
             ) : null}
 
             <span className="absolute right-4 top-4 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white">
-              {activeIndex + 1} / {totalItems}
+              {activeIndex + 1} / {imageUrls.length}
             </span>
           </div>
 
